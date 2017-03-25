@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 24 21:29:39 JST 2017
+;; Last-Updated: Sat Mar 25 19:37:46 JST 2017
 ;;           By: calancha
-;;     Update #: 521
+;;     Update #: 522
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -497,7 +497,8 @@ BRANCH must be the name of an existing branch.
 The value returned is the value of the last form in BODY."
   (declare (indent 1) (debug t))
   (let ((cur-branch (make-symbol "cur-branch")))
-    `(let ((,cur-branch gited-current-branch))
+    `(let ((,cur-branch gited-current-branch)
+           (gited-current-branch ,branch))
        (unwind-protect
            (progn
              (vc-git-checkout nil ,branch)
