@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sat Mar 25 19:37:46 JST 2017
+;; Last-Updated: Sat Mar 25 19:38:14 JST 2017
 ;;           By: calancha
-;;     Update #: 522
+;;     Update #: 523
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1329,13 +1329,9 @@ after checkout."
   "Call git-add on FILES.
 If INTERACTIVE is non-nil, then call `git-add -p' and
 display the output buffer in other window."
-  (let ((command
-         (format "%s add %s"
-                 vc-git-program
-                 (if interactive
-                     "-p "
-                   (mapconcat 'identity files " ")))))
-    (gited-async-operation command)))
+  (if interactive
+      (gited-async-operation (format "%s add -p" vc-git-program))
+    (gited-git-command (nconc '("add") files))))
 
 (defun gited-apply-add-and-commit-patch (buf-patch buf-commit)
   "Apply patch at BUF-PATCH, stage it and commit it with message BUF-COMMIT."
