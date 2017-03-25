@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sat Mar 25 20:07:34 JST 2017
+;; Last-Updated: Sat Mar 25 20:52:56 JST 2017
 ;;           By: calancha
-;;     Update #: 525
+;;     Update #: 527
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1326,13 +1326,23 @@ after checkout."
       (and update (gited-update))
       (message "Patch applied successfully!"))))
 
-(defun gited-add-patched-files (&optional files interactive)
+(defun gited-add-patched-files (files &optional async)
   "Call git-add on FILES.
-If INTERACTIVE is non-nil, then call `git-add -p' and
+If ASYNC is non-nil, then call `git-add -p' and
 display the output buffer in other window."
-  (if interactive
-      (gited-async-operation (format "%s add -p" vc-git-program))
-    (gited-git-command (nconc '("add") files))))
+  (interactive
+   (list (git-modified-files) current-prefix-arg))
+  (unless files (error "No modified files"))
+  (let ((buf (gited--output-buffer)))
+    (cond (async
+           (gited-async-operation (format "%s add -p" vc-git-program)
+                                  nil buf)
+           (display-buffer buf))
+          (t
+           (if (not (zerop (gited-git-command (nconc '("add") files))))
+               (error "Cannot add files.  Please check")
+             (message "Successfully added files %s"
+                      (mapconcat #'shell-quote-argument files " ")))))))
 
 (defun gited-commit (comment &optional author)
   "Commit latest changes using COMMENT as the message.
@@ -2480,6 +2490,7 @@ in the active region."
     (define-key map (kbd "M-{") 'gited-prev-marked-branch)
     ;; immediate operations
     (define-key map (kbd "a") 'gited-apply-patch)
+    (define-key map (kbd "A") 'gited-add-patched-files)
     (define-key map (kbd "B") 'gited-bisect)
     (define-key map (kbd "C-c c") 'gited-commit)
     (define-key map (kbd "w") 'gited-copy-branchname-as-kill)
