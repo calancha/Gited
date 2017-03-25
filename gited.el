@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sat Mar 25 19:38:14 JST 2017
+;; Last-Updated: Sat Mar 25 20:07:34 JST 2017
 ;;           By: calancha
-;;     Update #: 523
+;;     Update #: 525
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -83,15 +83,16 @@
 ;;   `gited--mark-merged-branches-spec', `gited--mark-unmerged-branches-spec',
 ;;   `gited-apply-add-and-commit-patch', `gited-apply-patch',
 ;;   `gited-async-operation', `gited-bisect',
-;;   `gited-checkout-branch', `gited-copy-branch',
-;;   `gited-copy-branchname-as-kill', `gited-delete-branch',
-;;   `gited-diff-with-branch', `gited-do-delete',
-;;   `gited-do-flagged-delete', `gited-do-kill-lines',
-;;   `gited-flag-branch-deletion', `gited-goto-branch',
-;;   `gited-goto-first-branch', `gited-goto-last-branch',
-;;   `gited-kill-line', `gited-list-branches',
-;;   `gited-log', `gited-log-last-n-commits',
-;;   `gited-mark', `gited-mark-branches-containing-commit',
+;;   `gited-checkout-branch', `gited-commit',
+;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
+;;   `gited-delete-branch', `gited-diff-with-branch',
+;;   `gited-do-delete', `gited-do-flagged-delete',
+;;   `gited-do-kill-lines', `gited-flag-branch-deletion',
+;;   `gited-goto-branch', `gited-goto-first-branch',
+;;   `gited-goto-last-branch', `gited-kill-line',
+;;   `gited-list-branches', `gited-log',
+;;   `gited-log-last-n-commits', `gited-mark',
+;;   `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-merged-branches', `gited-mark-unmerged-branches',
 ;;   `gited-merge-branch', `gited-move-to-author',
@@ -1333,6 +1334,27 @@ display the output buffer in other window."
       (gited-async-operation (format "%s add -p" vc-git-program))
     (gited-git-command (nconc '("add") files))))
 
+(defun gited-commit (comment &optional author)
+  "Commit latest changes using COMMENT as the message.
+Optional argument AUTHOR is the author of the commit.
+A prefix argument prompts for AUTHOR."
+  (interactive
+   (let ((_files (or (gited-modified-files) (error "No changes to commit")))
+         (name (and current-prefix-arg (read-string "Author: ")))
+         (msg (read-string "Message: ")))
+     (list msg name)))
+  (or (gited-modified-files) (error "No changes to commit"))
+  (let* ((buf (generate-new-buffer "*git-commit*"))
+         (args `("commit" ,(if author (format "--author=\"%s\"" author) "")
+                 "-m"
+                 ,comment)))
+    (unless (zerop (gited-git-command args buf))
+      (error "Commit failt: please check"))
+    (with-current-buffer buf
+      (insert (format "\nCommit successfully with message:\n\n\"%s\"" comment)))
+    (gited--set-output-buffer-mode buf)
+    (display-buffer buf)))
+
 (defun gited-apply-add-and-commit-patch (buf-patch buf-commit)
   "Apply patch at BUF-PATCH, stage it and commit it with message BUF-COMMIT."
   (interactive
@@ -2459,6 +2481,7 @@ in the active region."
     ;; immediate operations
     (define-key map (kbd "a") 'gited-apply-patch)
     (define-key map (kbd "B") 'gited-bisect)
+    (define-key map (kbd "C-c c") 'gited-commit)
     (define-key map (kbd "w") 'gited-copy-branchname-as-kill)
     (define-key map (kbd "M") 'gited-merge-branch)
     (define-key map (kbd "c") 'gited-checkout-branch)
