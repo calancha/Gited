@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:28:55 JST 2017
+;; Last-Updated: Sun Mar 26 20:31:53 JST 2017
 ;;           By: calancha
-;;     Update #: 533
+;;     Update #: 534
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -118,28 +118,27 @@
 ;;   `gited--case-ref-kind', `gited--check-unmerged-marked-branches',
 ;;   `gited--clean-previous-patches', `gited--extract-commit-msg',
 ;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
-;;   `gited--get-unmerged-branches', `gited--goto-column',
-;;   `gited--goto-first-branch', `gited--list-format-init',
-;;   `gited--mark-branches-in-region',
+;;   `gited--get-branches-from-command', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-merged-branches',
+;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
+;;   `gited--goto-column', `gited--goto-first-branch',
+;;   `gited--list-format-init', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
 ;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
-;;   `gited--trunk-branch', `gited--update-padding',
-;;   `gited--valid-ref-p', `gited-all-branches',
-;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
-;;   `gited-bisecting-p', `gited-branch-exists-p',
-;;   `gited-buffer-p', `gited-current-branch',
-;;   `gited-current-branches-with-marks', `gited-current-state-list',
-;;   `gited-dir-under-Git-control-p', `gited-fontify-current-branch',
-;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
-;;   `gited-get-branchname', `gited-get-commit',
-;;   `gited-get-date', `gited-get-element-in-row',
-;;   `gited-get-last-commit-time', `gited-get-mark',
-;;   `gited-get-marked-branches', `gited-git-command',
-;;   `gited-git-command-on-region',
+;;   `gited--update-padding', `gited--valid-ref-p',
+;;   `gited-all-branches', `gited-async-operation-sentinel',
+;;   `gited-at-header-line-p', `gited-bisecting-p',
+;;   `gited-branch-exists-p', `gited-buffer-p',
+;;   `gited-current-branch', `gited-current-branches-with-marks',
+;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
+;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
+;;   `gited-format-columns-of-files', `gited-get-branchname',
+;;   `gited-get-commit', `gited-get-date',
+;;   `gited-get-element-in-row', `gited-get-last-commit-time',
+;;   `gited-get-mark', `gited-get-marked-branches',
+;;   `gited-git-command', `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -807,13 +806,13 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (replace-match ""))
     (split-string (buffer-string) "\n" 'omit-nulls)))
 
-(defun gited--trunk-branch ()
-  (catch '--gited-found
-    (let ((branches (gited-listed-branches)))
-      (dolist (b branches)
-        (let ((res (member b gited-protected-branches)))
-          (when res
-            (throw '--gited-found (car res))))))))
+(defun gited--get-branches-from-command (cmd)
+  (with-temp-buffer
+    (gited-git-command cmd (current-buffer) nil 'unquote)
+    (goto-char (point-min))
+    (while (re-search-forward "^\\(  \\|\\* \\)" nil t)
+      (replace-match ""))
+    (split-string (buffer-string) "\n" 'omit-nulls)))
 
 (defun gited--get-unmerged-branches ()
   (let ((args `("branch" "--no-merged" ,(gited--trunk-branch))))
