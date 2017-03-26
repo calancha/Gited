@@ -435,10 +435,10 @@ and sizes."
   "Face for tag labels shown in log buffer."
   :group 'gited)
 
-(defcustom gited-protected-branches '("master" "emacs-25")
+(defcustom gited-protected-branches nil
   "Name of protected branches.
 These branches cannot be deleted or renamed."
-  :type 'string
+  :type '(repeat (string :tag "Branch name"))
   :group 'gited)
 
 (defcustom gited-short-log-cmd
