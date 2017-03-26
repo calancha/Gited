@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:15:26 JST 2017
+;; Last-Updated: Sun Mar 26 20:21:41 JST 2017
 ;;           By: calancha
-;;     Update #: 530
+;;     Update #: 531
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -81,13 +81,14 @@
 ;;  Commands defined here:
 ;;
 ;;   `gited--mark-merged-branches-spec', `gited--mark-unmerged-branches-spec',
-;;   `gited-apply-add-and-commit-patch', `gited-apply-patch',
-;;   `gited-async-operation', `gited-bisect',
-;;   `gited-checkout-branch', `gited-commit',
-;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
-;;   `gited-delete-branch', `gited-diff-with-branch',
-;;   `gited-do-delete', `gited-do-flagged-delete',
-;;   `gited-do-kill-lines', `gited-flag-branch-deletion',
+;;   `gited-add-patched-files', `gited-apply-add-and-commit-patch',
+;;   `gited-apply-patch', `gited-async-operation',
+;;   `gited-bisect', `gited-checkout-branch',
+;;   `gited-commit', `gited-copy-branch',
+;;   `gited-copy-branchname-as-kill', `gited-delete-branch',
+;;   `gited-diff-with-branch', `gited-do-delete',
+;;   `gited-do-flagged-delete', `gited-do-kill-lines',
+;;   `gited-extract-patches', `gited-flag-branch-deletion',
 ;;   `gited-goto-branch', `gited-goto-first-branch',
 ;;   `gited-goto-last-branch', `gited-kill-line',
 ;;   `gited-list-branches', `gited-log',
@@ -105,48 +106,50 @@
 ;;   `gited-push', `gited-rename-branch',
 ;;   `gited-reset-branch', `gited-set-branch-upstream',
 ;;   `gited-show-commit', `gited-status',
-;;   `gited-summary', `gited-toggle-marks',
-;;   `gited-unmark', `gited-unmark-all-branches',
-;;   `gited-unmark-all-marks', `gited-unmark-backward',
-;;   `gited-update', `gited-visit-branch-sources',
-;;   `gited-why'.
+;;   `gited-summary', `gited-sync-with-trunk',
+;;   `gited-toggle-marks', `gited-unmark',
+;;   `gited-unmark-all-branches', `gited-unmark-all-marks',
+;;   `gited-unmark-backward', `gited-update',
+;;   `gited-visit-branch-sources', `gited-why'.
 ;;
 ;;  Non-interactive functions defined here:
 ;;
 ;;   `gited--bisect-after-run', `gited--bisect-executable-p',
 ;;   `gited--case-ref-kind', `gited--check-unmerged-marked-branches',
+;;   `gited--clean-previous-patches', `gited--extract-commit-msg',
 ;;   `gited--fill-branch-alist', `gited--fontify-current-row',
 ;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-unmerged-branches',
-;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--list-format-init', `gited--mark-branches-in-region',
+;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
+;;   `gited--get-unmerged-branches', `gited--goto-column',
+;;   `gited--goto-first-branch', `gited--list-format-init',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
 ;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
 ;;   `gited--trunk-branch', `gited--update-padding',
-;;   `gited--valid-ref-p', `gited-add-patched-files',
-;;   `gited-all-branches', `gited-async-operation-sentinel',
-;;   `gited-at-header-line-p', `gited-bisecting-p',
-;;   `gited-branch-exists-p', `gited-buffer-p',
-;;   `gited-current-branch', `gited-current-branches-with-marks',
-;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
-;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
-;;   `gited-format-columns-of-files', `gited-get-branchname',
-;;   `gited-get-commit', `gited-get-date',
-;;   `gited-get-element-in-row', `gited-get-last-commit-time',
-;;   `gited-get-mark', `gited-get-marked-branches',
-;;   `gited-git-command', `gited-hide-details-update-invisibility-spec',
+;;   `gited--valid-ref-p', `gited-all-branches',
+;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
+;;   `gited-bisecting-p', `gited-branch-exists-p',
+;;   `gited-buffer-p', `gited-current-branch',
+;;   `gited-current-branches-with-marks', `gited-current-state-list',
+;;   `gited-dir-under-Git-control-p', `gited-fontify-current-branch',
+;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
+;;   `gited-get-branchname', `gited-get-commit',
+;;   `gited-get-date', `gited-get-element-in-row',
+;;   `gited-get-last-commit-time', `gited-get-mark',
+;;   `gited-get-marked-branches', `gited-git-command',
+;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
 ;;   `gited-log-msg', `gited-log-summary',
 ;;   `gited-map-lines', `gited-mark-pop-up',
 ;;   `gited-mark-remembered', `gited-modified-files',
 ;;   `gited-modified-files-p', `gited-next-branch',
-;;   `gited-prev-branch', `gited-print-entry',
-;;   `gited-remember-marks', `gited-repeat-over-lines',
-;;   `gited-stashes', `gited-tabulated-list-entries',
-;;   `gited-untracked-files'.
+;;   `gited-number-of-commits', `gited-prev-branch',
+;;   `gited-print-entry', `gited-remember-marks',
+;;   `gited-repeat-over-lines', `gited-stashes',
+;;   `gited-tabulated-list-entries', `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -1390,6 +1393,18 @@ A prefix argument prompts for AUTHOR."
 
 ;;; Common operations on Git repositiores: pull, diff, log, etc.
 
+(defun gited-number-of-commits ()
+  "Return number of Git commits in current buffer."
+  (let ((regexp "commit[:]? \\([[:xdigit:]]+\\)"))
+    (save-excursion
+      (goto-char (point-min))
+      (let ((count 0))
+        (while (re-search-forward regexp nil t)
+          (cl-incf count))
+        (if (called-interactively-p 'interactive)
+            (message "%d commits in current buffer" count)
+          count)))))
+
 (defun gited--case-ref-kind ()
   (pcase gited-ref-kind
     ("remote" "remotes/")
@@ -1677,6 +1692,124 @@ If optional arg SHORT is non-nil use a short format."
         (gited-git-command args buf))
       (display-buffer buf))
     (gited--set-output-buffer-mode buf 'outline)))
+
+;;; Extract patches
+
+(defun gited--clean-previous-patches ()
+  (mapc (lambda (x)
+          (when (buffer-live-p x)
+            (kill-buffer x)))
+        (nconc
+         (gited--get-patch-or-commit-buffers)
+         (gited--get-patch-or-commit-buffers 'commit))))
+
+(defun gited--extract-commit-msg (buffer)
+  (let ((regexp "^Subject: \\[PATCH\\s-?[^]]*\\] ")
+        beg end)
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char 1)
+        (when (re-search-forward regexp nil t)
+          (setq beg (point))
+          (re-search-forward "^---" nil t)
+          (goto-char (1- (point-at-bol)))
+          (and (looking-at "^$") (backward-char 1))
+          (setq end (point))
+          (buffer-substring-no-properties beg end))))))
+
+(defun gited-extract-patches (n &optional origin write-file)
+  (interactive
+   (let* ((prefix current-prefix-arg)
+          (num (unless prefix (read-string "Extract N newest patches: " nil nil "1")))
+          (from-origin (and prefix (equal prefix '(4))))
+          (write (and prefix (equal prefix '(16)))))
+     (list num from-origin write)))
+  (let* ((branch (gited-get-branchname))
+         (buffer (if origin
+                     (gited-origin branch 'no-display)
+                   (gited-log-last-n-commits branch n)
+                   gited-output-buffer))
+         num-commits count)
+    (with-current-buffer buffer
+      (if (zerop (buffer-size))
+          (error "No new patches")
+        ;; Previous patch buffers must be deleted.
+        (gited--clean-previous-patches)
+        (save-excursion
+          (goto-char (point-min))
+          (setq num-commits (gited-number-of-commits)
+                count num-commits))))
+    (dotimes (i num-commits)
+      (let ((buf-patch (get-buffer-create (format "*gited-patch-%d*" count)))
+            (buf-commit (get-buffer-create (format "*gited-commit-%d*" count))))
+        (with-current-buffer buf-patch
+          (gited-git-command `("format-patch" "-1" ,(format "HEAD~%d" i) "--stdout")
+                             (current-buffer))
+          (gited--set-output-buffer-mode (current-buffer) 'diff 'editable))
+        (with-current-buffer buf-commit
+          (insert (gited--extract-commit-msg buf-patch)))
+        (when write-file
+          (with-temp-file (expand-file-name
+                           (substring (buffer-name buf-patch) 1 -1)
+                           temporary-file-directory)
+            (insert
+             (with-current-buffer buf-patch
+               (buffer-string)))))
+        (cl-decf count)))
+    (if write-file
+        (message "Extracted %d patches and saved in %s"
+                 num-commits temporary-file-directory)
+      (message "Extracted %d patches" num-commits))) t)
+
+(defun gited--get-patch-or-commit-buffers (&optional commit)
+  (let ((regexp
+         (if commit
+             "\\`\\*gited-commit-\\([0-9]+\\)\\*\\'"
+           "\\`\\*gited-patch-\\([0-9]+\\)\\*\\'")))
+    (sort
+     (cl-delete-if-not
+      (lambda (x)
+        (string-match regexp (buffer-name x)))
+      (buffer-list))
+     (lambda (x y)
+       (string< (buffer-name x) (buffer-name y)))
+     )))
+
+(defun gited-sync-with-trunk (branch-target)
+  "Extract latest patches in branch at point and apply then into BRANCH-TARGET.
+BRANCH-TARGET is a new branch copied from (car (gited-trunk-branches)).
+The effect is similar than merge the branch at point with the trunk;
+one difference is that we don't modify the trunk, instead we copy it;
+another difference that we don't get a 'Merge branch...' commit in the log."
+  (interactive
+   (list
+    (completing-read
+     "Apply patches into branch: "
+     (gited-listed-branches))))
+  ;; Previous patch buffers must be deleted.
+  (gited--clean-previous-patches)
+  (if (null (ignore-errors (gited-extract-patches nil t)))
+      (error "No new patches to apply")
+    ;; If branch-target doesn't exists create it as copy of master.
+    (unless (member branch-target (gited-listed-branches))
+      (cond ((gited-trunk-branches)
+             (gited-copy-branch (car (gited-trunk-branches)) branch-target))
+            (t (error "I don't know what is your master branch"))))
+    (let (num-commits)
+      (gited-with-current-branch branch-target
+        (let* ((buf-patches
+                (gited--get-patch-or-commit-buffers))
+               (buf-commits
+                (gited--get-patch-or-commit-buffers 'commit)))
+          (setq num-commits (length buf-patches))
+          (while buf-patches
+            (gited-apply-add-and-commit-patch (car buf-patches)
+                                              (car buf-commits))
+            (setq buf-patches (cdr buf-patches)
+                  buf-commits (cdr buf-commits)))))
+      (gited-update)
+      (message "Successfully applied and committed %d commits!"
+               num-commits))))
 
 (defun gited-bisecting-p ()
   (zerop (gited-git-command '("bisect" "log"))))
@@ -2497,6 +2630,8 @@ in the active region."
     (define-key map (kbd "B") 'gited-bisect)
     (define-key map (kbd "C-c c") 'gited-commit)
     (define-key map (kbd "w") 'gited-copy-branchname-as-kill)
+    (define-key map (kbd "e") 'gited-extract-patches)
+    (define-key map (kbd "T") 'gited-sync-with-trunk)
     (define-key map (kbd "M") 'gited-merge-branch)
     (define-key map (kbd "c") 'gited-checkout-branch)
     (define-key map (kbd "v") 'gited-visit-branch-sources)
