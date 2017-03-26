@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:09:52 JST 2017
+;; Last-Updated: Sun Mar 26 20:10:33 JST 2017
 ;;           By: calancha
-;;     Update #: 528
+;;     Update #: 529
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1355,9 +1355,11 @@ A prefix argument prompts for AUTHOR."
      (list msg name)))
   (or (gited-modified-files) (error "No changes to commit"))
   (let* ((buf (generate-new-buffer "*git-commit*"))
-         (args `("commit" ,(if author (format "--author=\"%s\"" author) "")
-                 "-m"
-                 ,comment)))
+         (args
+          (delete ""
+                  `("commit" ,(if author (format "--author=\"%s\"" author) "")
+                    "-m"
+                    ,comment))))
     (unless (zerop (gited-git-command args buf))
       (error "Commit failt: please check"))
     (with-current-buffer buf
