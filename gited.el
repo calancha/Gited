@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:10:33 JST 2017
+;; Last-Updated: Sun Mar 26 20:15:26 JST 2017
 ;;           By: calancha
-;;     Update #: 529
+;;     Update #: 530
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1556,11 +1556,12 @@ show similar info as that command."
                                  gited-current-branch))))
       (message "OK, push canceled")
     (let ((buf (gited--output-buffer))
-          (cmd (format "%s push" vc-git-program))
-          (inhibit-read-only t))
+          (cmd (format "%s push" vc-git-program)))
       (setq gited-output-buffer buf
             gited-op-string cmd)
-      (with-current-buffer buf (erase-buffer))
+      (with-current-buffer buf
+        (read-only-mode 1) ; Editable, they can ask username.
+        (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
 (defun gited-set-branch-upstream (branch)
