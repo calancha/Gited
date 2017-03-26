@@ -817,11 +817,11 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (nreverse res))))
 
 (defun gited--get-unmerged-branches ()
-  (let ((args `("branch" "--no-merged" ,(gited--trunk-branch))))
+  (let ((args `("branch" "--no-merged" ,(car (gited-trunk-branches)))))
     (gited--get-branches-from-command args)))
 
 (defun gited--get-merged-branches ()
-  (let ((args `("branch" "--merged" ,(gited--trunk-branch))))
+  (let ((args `("branch" "--merged" ,(car (gited-trunk-branches)))))
     (gited--get-branches-from-command args)))
 
 (defun gited--check-unmerged-marked-branches ()
