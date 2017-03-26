@@ -1582,7 +1582,7 @@ show similar info as that command."
       (setq gited-output-buffer buf
             gited-op-string cmd)
       (with-current-buffer buf
-        (read-only-mode 1) ; Editable, they can ask username.
+        (read-only-mode 0) ; Editable, they can ask username.
         (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
