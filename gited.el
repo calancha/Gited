@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:21:41 JST 2017
+;; Last-Updated: Sun Mar 26 20:28:55 JST 2017
 ;;           By: calancha
-;;     Update #: 531
+;;     Update #: 533
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -139,6 +139,7 @@
 ;;   `gited-get-date', `gited-get-element-in-row',
 ;;   `gited-get-last-commit-time', `gited-get-mark',
 ;;   `gited-get-marked-branches', `gited-git-command',
+;;   `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -148,8 +149,9 @@
 ;;   `gited-modified-files-p', `gited-next-branch',
 ;;   `gited-number-of-commits', `gited-prev-branch',
 ;;   `gited-print-entry', `gited-remember-marks',
-;;   `gited-repeat-over-lines', `gited-stashes',
-;;   `gited-tabulated-list-entries', `gited-untracked-files'.
+;;   `gited-remote-repository-p', `gited-repeat-over-lines',
+;;   `gited-stashes', `gited-tabulated-list-entries',
+;;   `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -785,6 +787,14 @@ You can then feed the file name(s) to other commands with \\[yank]."
   "Return non-nil if point is at header line."
   (and (not gited-use-header-line)
        (= 1 (line-number-at-pos (point)))))
+
+(defun gited-remote-repository-p ()
+  "Return non-nil if current repository is remote."
+  (let ((regexp "^remote.origin"))
+    (with-temp-buffer
+      (gited-git-command  '("config" "--local" "--list") (current-buffer))
+      (goto-char 1)
+      (and (re-search-forward regexp nil t) t))))
 
 
 ;;; Operations on branches (copy, merge, ...).
@@ -1607,11 +1617,14 @@ see the newest N commits then use `\\[gited-log-last-n-commits\]'."
   (interactive
    (list (gited-get-branchname) current-prefix-arg))
   (unless (string= gited-ref-kind "local")
-    (error "Not a local repository"))
+    (error "Not listing local branches"))
+  (unless (gited-remote-repository-p)
+    (error "Not a remote repository.  Try '%s' or '%s'"
+           (substitute-command-keys "\\[gited-log\]")
+           (substitute-command-keys "\\[gited-log-last-n-commits\]")))
   (let ((buf (gited--output-buffer))
         (args (list "log" (concat "origin.." (gited--case-ref-kind) branch)))
-        (count 0)
-        (gited-buf gited-buffer))
+        (gited-buf gited-buffer) count)
     (setq gited-output-buffer buf)
     (with-current-buffer buf
       (let ((inhibit-read-only t) res)
@@ -1623,8 +1636,7 @@ see the newest N commits then use `\\[gited-log-last-n-commits\]'."
                    (substitute-command-keys "\\[gited-log\]")
                    (substitute-command-keys "\\[gited-log-last-n-commits\]"))))
         (goto-char (point-min)))
-      (while (re-search-forward "commit \\([[:xdigit:]]+\\)" nil t)
-        (cl-incf count))
+      (setq count (gited-number-of-commits))
       (or no-display (display-buffer buf)))
     (gited--set-output-buffer-mode buf 'diff)
     (message "%d commit%s in '%s'"
