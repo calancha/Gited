@@ -702,6 +702,12 @@ Optional arg DISPLAY means redisplay buffer as output is inserted."
           (while (re-search-forward "^'\\(.*\\)'$" nil t)
             (replace-match "\\1")))))))
 
+(defun gited-git-command-on-region (args &optional buffer display)
+  "Execute a Git command with arguments ARGS and region as input.
+Optional arg BUFFER is the output buffer.
+Optional arg DISPLAY means redisplay buffer as output is inserted."
+  (apply #'call-process-region nil nil vc-git-program nil buffer display args))
+
 (defun gited-all-branches ()
   "Return a list with all (local and remotes) branches and tags in the repository."
   (let ((args '("for-each-ref" "--format='%(refname:short)'" "refs/heads"
@@ -1312,20 +1318,10 @@ after checkout."
   (interactive
    (list (gited--patch-or-commit-buffer)
          current-prefix-arg))
-  (let* ((patch-file
-          (make-temp-file
-           (substring
-            (buffer-name buf-patch) 1 -1)))
-         (cmd (format "%s %s -p1 < %s"
-                      gited-patch-program
-                      gited-patch-options
-                      patch-file)))
-    (with-temp-file patch-file
-      (insert
-       (with-current-buffer buf-patch
-         (buffer-string))))
-    (if (not (zerop (call-process-shell-command cmd)))
-        (error "Cannot apply patch at %s" (buffer-name buf-patch))
+  (with-current-buffer buf-patch
+    (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
+        (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
+      (gited-git-command-on-region '("apply"))
       (and update (gited-update))
       (message "Patch applied successfully!"))))
 
