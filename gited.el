@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sat Mar 25 20:52:56 JST 2017
+;; Last-Updated: Sun Mar 26 20:09:52 JST 2017
 ;;           By: calancha
-;;     Update #: 527
+;;     Update #: 528
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1331,7 +1331,7 @@ after checkout."
 If ASYNC is non-nil, then call `git-add -p' and
 display the output buffer in other window."
   (interactive
-   (list (git-modified-files) current-prefix-arg))
+   (list (gited-modified-files) current-prefix-arg))
   (unless files (error "No modified files"))
   (let ((buf (gited--output-buffer)))
     (cond (async
