@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sun Mar 26 20:31:53 JST 2017
+;; Last-Updated: Sun Mar 26 20:33:55 JST 2017
 ;;           By: calancha
-;;     Update #: 534
+;;     Update #: 535
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -118,11 +118,11 @@
 ;;   `gited--case-ref-kind', `gited--check-unmerged-marked-branches',
 ;;   `gited--clean-previous-patches', `gited--extract-commit-msg',
 ;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--get-branches-from-command', `gited--get-branches-from-command',
-;;   `gited--get-column', `gited--get-merged-branches',
-;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
-;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--list-format-init', `gited--mark-branches-in-region',
+;;   `gited--get-branches-from-command', `gited--get-column',
+;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
+;;   `gited--get-unmerged-branches', `gited--goto-column',
+;;   `gited--goto-first-branch', `gited--list-format-init',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -150,7 +150,7 @@
 ;;   `gited-print-entry', `gited-remember-marks',
 ;;   `gited-remote-repository-p', `gited-repeat-over-lines',
 ;;   `gited-stashes', `gited-tabulated-list-entries',
-;;   `gited-untracked-files'.
+;;   `gited-trunk-branches', `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -806,13 +806,15 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (replace-match ""))
     (split-string (buffer-string) "\n" 'omit-nulls)))
 
-(defun gited--get-branches-from-command (cmd)
-  (with-temp-buffer
-    (gited-git-command cmd (current-buffer) nil 'unquote)
-    (goto-char (point-min))
-    (while (re-search-forward "^\\(  \\|\\* \\)" nil t)
-      (replace-match ""))
-    (split-string (buffer-string) "\n" 'omit-nulls)))
+(defun gited-trunk-branches ()
+  (let ((regexp "^branch\.\\([^.]+\\)\.merge=")
+        res)
+    (with-temp-buffer
+      (gited-git-command  '("config" "--local" "--list") (current-buffer))
+      (goto-char 1)
+      (while (re-search-forward regexp nil t)
+        (push (match-string 1) res))
+      (nreverse res))))
 
 (defun gited--get-unmerged-branches ()
   (let ((args `("branch" "--no-merged" ,(gited--trunk-branch))))
