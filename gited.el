@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 16:54:50 JST 2017
+;; Last-Updated: Mon Mar 27 17:32:10 JST 2017
 ;;           By: calancha
-;;     Update #: 544
+;;     Update #: 546
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -122,13 +122,12 @@
 ;;
 ;;   `gited--bisect-after-run', `gited--bisect-executable-p',
 ;;   `gited--case-ref-kind', `gited--check-unmerged-marked-branches',
-;;   `gited--clean-previous-patches', `gited--extract-commit-msg',
-;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
-;;   `gited--get-unmerged-branches', `gited--goto-column',
-;;   `gited--goto-first-branch', `gited--list-format-init',
-;;   `gited--mark-branches-in-region',
+;;   `gited--clean-previous-patches', `gited--fill-branch-alist',
+;;   `gited--fontify-current-row', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-merged-branches',
+;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
+;;   `gited--goto-column', `gited--goto-first-branch',
+;;   `gited--list-format-init', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -1727,20 +1726,6 @@ If optional arg SHORT is non-nil use a short format."
          (gited--get-patch-or-commit-buffers)
          (gited--get-patch-or-commit-buffers 'commit))))
 
-(defun gited--extract-commit-msg (buffer)
-  (let ((regexp "^Subject: \\[PATCH\\s-?[^]]*\\] ")
-        beg end)
-    (with-current-buffer buffer
-      (save-excursion
-        (goto-char 1)
-        (when (re-search-forward regexp nil t)
-          (setq beg (point))
-          (re-search-forward "^---" nil t)
-          (goto-char (1- (point-at-bol)))
-          (and (looking-at "^$") (backward-char 1))
-          (setq end (point))
-          (buffer-substring-no-properties beg end))))))
-
 (defun gited-extract-patches (n &optional origin write-file)
   (interactive
    (let* ((prefix current-prefix-arg)
@@ -1771,7 +1756,10 @@ If optional arg SHORT is non-nil use a short format."
                              (current-buffer))
           (gited--set-output-buffer-mode (current-buffer) 'diff 'editable))
         (with-current-buffer buf-commit
-          (insert (gited--extract-commit-msg buf-patch)))
+          (gited-git-command `("show" "-s" "--format=%B" ,(format "HEAD~%d" i))
+                             (current-buffer))
+          (while (looking-at "^$") ; Delete empty lines.
+            (delete-char -1)))
         (when write-file
           (with-temp-file (expand-file-name
                            (substring (buffer-name buf-patch) 1 -1)
