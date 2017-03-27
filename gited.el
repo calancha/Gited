@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 16:36:25 JST 2017
+;; Last-Updated: Mon Mar 27 16:47:54 JST 2017
 ;;           By: calancha
-;;     Update #: 540
+;;     Update #: 543
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -201,6 +201,10 @@
 (defvar-local gited-current-branch nil
   "The branch currently checked out.")
 (put 'gited-current-branch 'permanent-local t)
+
+(defvar-local gited-toplevel-dir nil
+  "Absolute path of the top-level directory for the current repository.")
+(put 'gited-toplevel-dir 'permanent-local t)
 
 ;; Stolen from ediff-ptch.el
 (defcustom gited-patch-program "patch"
@@ -1330,13 +1334,16 @@ after checkout."
   (interactive
    (list (gited--patch-or-commit-buffer)
          current-prefix-arg))
-  (with-temp-buffer
-    (insert-buffer-substring-no-properties buf-patch)
-    (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
-        (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
-      (gited-git-command-on-region '("apply"))
-      (and update (gited-update))
-      (message "Patch applied successfully!"))))
+  (let ((toplevel gited-toplevel-dir))
+    (with-temp-buffer
+      ;; Apply patches from top-level dir.
+      (setq default-directory toplevel)
+      (insert-buffer-substring-no-properties buf-patch)
+      (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
+          (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
+        (gited-git-command-on-region '("apply"))
+        (and update (gited-update))
+        (message "Patch applied successfully!")))))
 
 (defun gited-add-patched-files (files &optional async)
   "Call git-add on FILES.
@@ -2709,6 +2716,13 @@ in the active region."
           (switch-to-buffer-other-window buf)
         (switch-to-buffer buf))
       (or gited-mode (gited-mode))
+      ;; Set `gited-toplevel-dir' if not set yet.
+      (unless gited-toplevel-dir
+        (setq gited-toplevel-dir
+              (with-temp-buffer
+                (gited-git-command '("rev-parse" "--show-toplevel")
+                                   (current-buffer))
+                (buffer-substring 1 (1- (point-max))))))
       (setq tabulated-list-use-header-line gited-use-header-line
             gited-buffer buf
             gited-ref-kind pattern
