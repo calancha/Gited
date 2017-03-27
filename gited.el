@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 20:07:17 JST 2017
+;; Last-Updated: Mon Mar 27 20:21:52 JST 2017
 ;;           By: calancha
-;;     Update #: 549
+;;     Update #: 550
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -764,6 +764,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
 ;;; Predicates.
 
 (defun gited-modified-files ()
+  "Return a list with all unstaged files."
   (let ((regexp "^[[:blank:]]*M+[[:blank:]]*\\(.+\\)")
         (case-fold-search)
         res)
@@ -775,9 +776,11 @@ You can then feed the file name(s) to other commands with \\[yank]."
     (nreverse res)))
 
 (defun gited-modified-files-p ()
+  "Return non-nil if there are unstaged changes."
   (and (gited-modified-files) t))
 
 (defun gited-dir-under-Git-control-p ()
+  "Return non-nil if current directory is under Git version control."
   (zerop (gited-git-command '("status"))))
 
 (defun gited-branch-exists-p (branch)
@@ -814,6 +817,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
     (split-string (buffer-string) "\n" 'omit-nulls)))
 
 (defun gited-trunk-branches ()
+  "Return a list with branch names tracked from a remote repository."
   (let ((regexp "^branch\.\\([^.]+\\)\.merge=")
         res)
     (with-temp-buffer
@@ -846,6 +850,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
        t))
 
 (defun gited-untracked-files ()
+"Return a list with all untracked files."
   (let ((args '("status" "--porcelain"))
         (regexp "^[?]\\{2\\}[[:blank:]]+\\(.+\\)")
         res)
@@ -857,6 +862,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
     (nreverse res)))
 
 (defun gited-stashes ()
+"Return a list with all the stashes."
   (let ((args '("stash" "list"))
         res)
     (with-temp-buffer
@@ -868,6 +874,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
     (nreverse res)))
 
 (defun gited-last-commit-title ()
+"Return title of the last commit."
   (let ((args '("log" "--pretty=format:'%s'" "-n1")))
     (with-temp-buffer
       (gited-git-command args (current-buffer) nil 'unquote)
@@ -1732,6 +1739,10 @@ If optional arg SHORT is non-nil use a short format."
          (gited--get-patch-or-commit-buffers 'commit))))
 
 (defun gited-extract-patches (n &optional origin write-file)
+"Extract the patches from the N newest commits.
+Optional arg ORIGIN, means extract the patches from all commits accesible
+from the trunk, and not being in the trunk.
+Optional arg WRITE-FILE if non-nil, then write the patches to disk."
   (interactive
    (let* ((prefix current-prefix-arg)
           (num (unless prefix (read-string "Extract N newest patches: " nil nil "1")))
@@ -1831,6 +1842,7 @@ another difference that we don't get a 'Merge branch...' commit in the log."
                num-commits))))
 
 (defun gited-bisecting-p ()
+"Return non-nil if a Git bisect is on process."
   (zerop (gited-git-command '("bisect" "log"))))
 
 (defun gited--bisect-executable-p (command)
@@ -1854,6 +1866,12 @@ another difference that we don't get a 'Merge branch...' commit in the log."
     (when pos (set-window-point window pos))))
 
 (defun gited-bisect (&optional script reset)
+"Execute a Git bisect.
+Optional arg SCRIPT if non-nil, then is a script to pass to
+git bisect run.
+Optional arg RESET if non-nil, then means abort the current bisect.
+Interactively, a prefix 'C-u' prompts for SCRIPT; a prefix 'C-u C-u'
+set RESET non-nil."
   (interactive
    (let ((prefix current-prefix-arg))
      (list (equal prefix '(4))
