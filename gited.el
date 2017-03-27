@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 17:32:10 JST 2017
+;; Last-Updated: Mon Mar 27 18:56:29 JST 2017
 ;;           By: calancha
-;;     Update #: 546
+;;     Update #: 547
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1342,7 +1342,7 @@ after checkout."
   (let ((toplevel gited-toplevel-dir))
     (with-temp-buffer
       ;; Apply patches from top-level dir.
-      (setq default-directory toplevel)
+      (setq default-directory (file-name-as-directory toplevel))
       (insert-buffer-substring-no-properties buf-patch)
       (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
           (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
@@ -1363,10 +1363,14 @@ display the output buffer in other window."
                                   nil buf)
            (display-buffer buf))
           (t
-           (if (not (zerop (gited-git-command (nconc '("add") files))))
-               (error "Cannot add files.  Please check")
-             (message "Successfully added files %s"
-                      (mapconcat #'shell-quote-argument files " ")))))))
+           (let ((toplevel gited-toplevel-dir))
+             (with-temp-buffer
+               ;; Add files from top-level dir.
+               (setq default-directory (file-name-as-directory toplevel))
+               (if (not (zerop (gited-git-command (nconc '("add") files))))
+                   (error "Cannot add files.  Please check")
+                 (message "Successfully added files %s"
+                          (mapconcat #'shell-quote-argument files " ")))))))))
 
 (defun gited-commit (comment &optional author)
   "Commit latest changes using COMMENT as the message.
