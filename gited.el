@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 18:56:29 JST 2017
+;; Last-Updated: Mon Mar 27 19:16:57 JST 2017
 ;;           By: calancha
-;;     Update #: 547
+;;     Update #: 548
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2720,7 +2720,8 @@ in the active region."
               (with-temp-buffer
                 (gited-git-command '("rev-parse" "--show-toplevel")
                                    (current-buffer))
-                (buffer-substring 1 (1- (point-max))))))
+                (file-name-as-directory
+                 (buffer-substring 1 (1- (point-max)))))))
       (setq tabulated-list-use-header-line gited-use-header-line
             gited-buffer buf
             gited-ref-kind pattern
