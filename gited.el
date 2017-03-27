@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 16:47:54 JST 2017
+;; Last-Updated: Mon Mar 27 16:54:50 JST 2017
 ;;           By: calancha
-;;     Update #: 543
+;;     Update #: 544
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -47,23 +47,29 @@
 ;;
 ;;  Internal variables defined here:
 ;;
-;;   `gited--op', `gited-after-change-hook',
-;;   `gited-author-face', `gited-author-idx',
-;;   `gited-bisect-buf-name', `gited-bisect-output-name',
-;;   `gited-branch-after-op', `gited-branch-idx',
-;;   `gited-branch-name-face', `gited-buffer-name',
-;;   `gited-commit-idx', `gited-commit-msg-face',
+;;   `gited--hide-details-set', `gited--op',
+;;   `gited--running-async-op', `gited-actual-switches',
+;;   `gited-after-change-hook', `gited-author-face',
+;;   `gited-author-idx', `gited-bisect-buf-name',
+;;   `gited-bisect-buffer', `gited-bisect-buffer',
+;;   `gited-bisect-output-name', `gited-branch-after-op',
+;;   `gited-branch-alist', `gited-branch-idx',
+;;   `gited-branch-name-face', `gited-buffer',
+;;   `gited-buffer-name', `gited-commit-idx',
+;;   `gited-commit-msg-face', `gited-current-branch',
 ;;   `gited-date-format', `gited-date-idx',
 ;;   `gited-date-regexp', `gited-date-time-face',
 ;;   `gited-del-char', `gited-deletion-branch-face',
 ;;   `gited-deletion-face', `gited-flag-mark-face',
 ;;   `gited-flag-mark-line-face', `gited-header',
-;;   `gited-list-refs-format-command', `gited-log-buffer',
-;;   `gited-mark-face', `gited-mark-idx',
-;;   `gited-marker-char', `gited-mode-map',
+;;   `gited-list-format', `gited-list-refs-format-command',
+;;   `gited-log-buffer', `gited-mark-face',
+;;   `gited-mark-idx', `gited-marker-char',
+;;   `gited-mode', `gited-mode-map',
 ;;   `gited-modified-branch', `gited-op-string',
-;;   `gited-output-buffer-name', `gited-re-mark',
-;;   `gited-section-highlight-face'.
+;;   `gited-output-buffer', `gited-output-buffer-name',
+;;   `gited-re-mark', `gited-ref-kind',
+;;   `gited-section-highlight-face', `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
