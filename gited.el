@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 20:23:37 JST 2017
+;; Last-Updated: Mon Mar 27 20:47:09 JST 2017
 ;;           By: calancha
-;;     Update #: 551
+;;     Update #: 552
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -199,16 +199,19 @@
   :version "26.1"
   :group 'vc)
 
-(defvar-local gited-mode nil
+(defvar gited-mode nil
   "Variable saving the status of `gited-mode'.")
+(make-variable-buffer-local 'gited-mode)
 (put 'gited-mode 'permanent-local t)
 
-(defvar-local gited-current-branch nil
+(defvar gited-current-branch nil
   "The branch currently checked out.")
+(make-variable-buffer-local 'gited-current-branch)
 (put 'gited-current-branch 'permanent-local t)
 
-(defvar-local gited-toplevel-dir nil
+(defvar gited-toplevel-dir nil
   "Absolute path of the top-level directory for the current repository.")
+(make-variable-buffer-local 'gited-toplevel-dir)
 (put 'gited-toplevel-dir 'permanent-local t)
 
 ;; Stolen from ediff-ptch.el
@@ -238,11 +241,13 @@ case the default value for this variable should be changed."
   :type 'boolean
   :group 'gited)
 
-(defvar-local gited--hide-details-set nil)
+(defvar gited--hide-details-set nil)
+(make-variable-buffer-local 'gited--hide-details-set)
 
-(defvar-local gited-ref-kind nil
+(defvar gited-ref-kind nil
   "The kind of Git reference displayed in `gited-buffer'.
 It must be `local', `remote' or `tags'.")
+(make-variable-buffer-local 'gited-ref-kind)
 (put 'gited-ref-kind 'permanent-local t)
 
 (defvar gited-mark-idx 0
@@ -279,7 +284,7 @@ This is what the do-commands look for, and what the mark-commands store.")
 ;; "Regexp matching a marked line.
 (defvar gited-re-mark "^[^ \n]")
 
-(defvar-local gited-branch-alist nil
+(defvar gited-branch-alist nil
   "Alist with elements (INDEX MARK TIME BRANCH-NAME AUTHOR-NAME TITLE).
 INDEX identify each row in the table.
 MARK is the mark character shown in the table for that row.
@@ -287,33 +292,38 @@ TIME is the time of the last commit in that branch.
 BRANCH-NAME is the name of the branch.
 AUTHOR-NAME is the author of the last commit in that branch.
 TITLE is the title of the last commit.")
+(make-variable-buffer-local 'gited-branch-alist)
 
 (defvar gited-buffer-name "*gited*"
   "Name of the buffer where to list the repository branches.")
 
-(defvar-local gited-buffer nil
+(defvar gited-buffer nil
   "Buffer where to list the repository branches.")
+(make-variable-buffer-local 'gited-buffer)
 (put 'gited-buffer 'permanent-local t)
 
 (defvar gited-output-buffer-name "*gited-output*"
   "Name of the buffer where to show output from Git commands.")
 
-(defvar-local gited-output-buffer nil
+(defvar gited-output-buffer nil
   "Output buffer for Git commands.")
+(make-variable-buffer-local 'gited-output-buffer)
 (put 'gited-output-buffer 'permanent-local t)
 
 (defvar gited-bisect-buf-name "*gited-bisect*"
   "Name of the buffer where to show bisect output.")
 
-(defvar-local gited-bisect-buffer nil
+(defvar gited-bisect-buffer nil
   "Output buffer for Git bisects.")
+(make-variable-buffer-local 'gited-bisect-buffer)
 (put 'gited-bisect-buffer 'permanent-local t)
 
 (defvar gited-bisect-output-name "*gited-bisect*"
   "Name of the output buffer for Git bisects.")
 
-(defvar-local gited-bisect-buffer nil
+(defvar gited-bisect-buffer nil
   "Output buffer for Git bisects.")
+(make-variable-buffer-local 'gited-bisect-buffer)
 (put 'gited-bisect-buffer 'permanent-local t)
 
 ;; (defvar gited-list-refs-format-command
@@ -339,12 +349,14 @@ Option -g do not show the author name."
           (const :tag "Unset" nil) string)
   :group 'gited)
 
-(defvar-local gited-actual-switches gited-switches
+(defvar gited-actual-switches gited-switches
   "Switches used on this buffer.")
+(make-variable-buffer-local 'gited-actual-switches)
 (put 'gited-actual-switches 'permanent-local t)
 
-(defvar-local gited-list-format nil
+(defvar gited-list-format nil
   "Format of the columns in the branch list.")
+(make-variable-buffer-local 'gited-list-format)
 
 (defun gited--list-format-init (&optional col-names col-sizes)
   "Initialize `gited-list-format'.
@@ -881,7 +893,8 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (buffer-string))))
 
 ;; Non-nil while running an asynchronous Gited subprocess.
-(defvar-local gited--running-async-op nil)
+(defvar gited--running-async-op nil)
+(make-variable-buffer-local 'gited--running-async-op)
 (defun gited-async-operation (command &optional remote-op-p buffer)
   "Run COMMAND asynchronously.
 COMMAND perform a branch operation, i.e., rename or delete a branch.
@@ -1451,7 +1464,7 @@ A prefix argument prompts for AUTHOR."
   (with-current-buffer buffer
     (goto-char (point-min))
     (set-buffer-modified-p nil)
-    (or editable (read-only-mode 1))
+    (or editable (setq buffer-read-only t))
     (pcase mode
       (`diff (diff-mode))
       (`outline (outline-mode))
@@ -1608,7 +1621,7 @@ show similar info as that command."
       (setq gited-output-buffer buf
             gited-op-string cmd)
       (with-current-buffer buf
-        (read-only-mode 0) ; Editable, they can ask username.
+        (setq buffer-read-only nil) ; Editable, they can ask username.
         (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
@@ -1880,7 +1893,7 @@ set RESET non-nil."
         (obuf (gited--output-buffer gited-bisect-buf-name))
         (branch (gited-get-branchname)))
     ;; Ensure output buffer is editable.
-    (with-current-buffer obuf (read-only-mode 0))
+    (with-current-buffer obuf (setq buffer-read-only nil))
     (cond (reset
            (if (not bisectingp)
                (message "Not bisecting.  Nothing to do")
