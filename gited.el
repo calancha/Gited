@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 19:16:57 JST 2017
+;; Last-Updated: Mon Mar 27 20:07:17 JST 2017
 ;;           By: calancha
-;;     Update #: 548
+;;     Update #: 549
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -698,7 +698,8 @@ Thus, use \\[backward-page] to find the beginning of a group of errors."
 (defun gited-git-command (args &optional buffer display unquote)
   "Execute a Git command with arguments ARGS.
 Optional arg BUFFER is the output buffer.
-Optional arg DISPLAY means redisplay buffer as output is inserted."
+Optional arg DISPLAY means redisplay buffer as output is inserted.
+Optional arg UNQUOTE removes single quotes from the output."
   (prog1
       (apply #'call-process vc-git-program nil buffer display args)
     (when (and unquote buffer (buffer-live-p buffer))
