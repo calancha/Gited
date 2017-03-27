@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 12:08:50 JST 2017
+;; Last-Updated: Mon Mar 27 16:36:25 JST 2017
 ;;           By: calancha
-;;     Update #: 539
+;;     Update #: 540
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -201,9 +201,6 @@
 (defvar-local gited-current-branch nil
   "The branch currently checked out.")
 (put 'gited-current-branch 'permanent-local t)
-
-(defvar-local gited-align-spaces nil)
-(put 'gited-align-spaces 'permanent-local t)
 
 ;; Stolen from ediff-ptch.el
 (defcustom gited-patch-program "patch"
