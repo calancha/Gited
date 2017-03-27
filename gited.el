@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 11:37:26 JST 2017
+;; Last-Updated: Mon Mar 27 11:51:10 JST 2017
 ;;           By: calancha
-;;     Update #: 536
+;;     Update #: 537
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1333,7 +1333,8 @@ after checkout."
   (interactive
    (list (gited--patch-or-commit-buffer)
          current-prefix-arg))
-  (with-current-buffer buf-patch
+  (with-temp-buffer
+    (insert-buffer-substring-no-properties buf-patch)
     (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
         (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
       (gited-git-command-on-region '("apply"))
