@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 11:51:10 JST 2017
+;; Last-Updated: Mon Mar 27 12:01:36 JST 2017
 ;;           By: calancha
-;;     Update #: 537
+;;     Update #: 538
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1798,7 +1798,7 @@ another difference that we don't get a 'Merge branch...' commit in the log."
   (interactive
    (list
     (completing-read
-     "Apply patches into branch: "
+     "Name of new syncronized branch: "
      (gited-listed-branches))))
   ;; Previous patch buffers must be deleted.
   (gited--clean-previous-patches)
