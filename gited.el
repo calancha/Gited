@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 27 20:47:09 JST 2017
+;; Last-Updated: Tue Mar 28 10:00:39 JST 2017
 ;;           By: calancha
-;;     Update #: 552
+;;     Update #: 553
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -777,7 +777,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
 
 (defun gited-modified-files ()
   "Return a list with all unstaged files."
-  (let ((regexp "^[[:blank:]]*M+[[:blank:]]*\\(.+\\)")
+  (let ((regexp "^[[:blank:]]*[MAU]+[[:blank:]]*\\(.+\\)")
         (case-fold-search)
         res)
     (with-temp-buffer
