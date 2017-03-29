@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 13:14:43 JST 2017
+;; Last-Updated: Wed Mar 29 13:18:47 JST 2017
 ;;           By: calancha
-;;     Update #: 557
+;;     Update #: 558
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -66,10 +66,11 @@
 ;;   `gited-log-buffer', `gited-mark-face',
 ;;   `gited-mark-idx', `gited-marker-char',
 ;;   `gited-mode', `gited-mode-map',
-;;   `gited-modified-branch', `gited-op-string',
-;;   `gited-output-buffer', `gited-output-buffer-name',
-;;   `gited-re-mark', `gited-ref-kind',
-;;   `gited-section-highlight-face', `gited-toplevel-dir'.
+;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
+;;   `gited-op-string', `gited-output-buffer',
+;;   `gited-output-buffer-name', `gited-re-mark',
+;;   `gited-ref-kind', `gited-section-highlight-face',
+;;   `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -127,7 +128,8 @@
 ;;   `gited--get-column', `gited--get-merged-branches',
 ;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
 ;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--list-format-init', `gited--mark-branches-in-region',
+;;   `gited--handle-new-or-delete-files', `gited--list-format-init',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -1355,6 +1357,37 @@ Optional arg DONT-ASK if non-nil, then ask confirmation."
       nil
       t))))
 
+(defconst gited-new-or-deleted-files-re
+  (format "^\\(%s\\|%s\\|%s\\|%s\\|%s\\|%s\\)"
+          "deleted file mode"
+          "new file mode"
+          "copy from"
+          "copy to"
+          "rename from"
+          "rename to")
+  "Regexp to match new or deleted files in a Git diff.")
+
+;; Currently just handle new files.
+(defun gited--handle-new-or-delete-files (patch-buf)
+  (let ((new-files))
+    (goto-char 1)
+    (with-current-buffer patch-buf
+      (while (re-search-forward gited-new-or-deleted-files-re nil t)
+        (unless (string= "new file mode" (match-string-no-properties 0))
+          (error "Only creation of files is implementing: %s"
+                 (match-string-no-properties 0)))
+        (let* ((str (buffer-substring-no-properties
+                     (point-at-bol 0) (point-at-eol 0)))
+               (file
+                (progn
+                  (string-match "diff --git a/\\(.*\\) b/.*" str)
+                  (match-string-no-properties 1 str))))
+          (push file new-files))))
+    (if (zerop (gited-git-command (nconc '("add") new-files)))
+        (message "Sucessfully staged new files: %s"
+                 (mapconcat #'shell-quote-argument new-files " "))
+      (error "Cannot stage some new files.  Please check"))))
+ 
 (defun gited-apply-patch (buf-patch &optional update)
   "Apply patch at BUF-PATCH into current branch.
 If optional arg UPDATE is non-nil, then call `gited-update'
@@ -1362,14 +1395,20 @@ after checkout."
   (interactive
    (list (gited--patch-or-commit-buffer)
          current-prefix-arg))
-  (let ((toplevel gited-toplevel-dir))
+  (let ((toplevel gited-toplevel-dir)
+        create-or-del-files-p)
     (with-temp-buffer
       ;; Apply patches from top-level dir.
       (setq default-directory (file-name-as-directory toplevel))
       (insert-buffer-substring-no-properties buf-patch)
+      (goto-char 1)
+      (setq create-or-del-files-p
+            (re-search-forward gited-new-or-deleted-files-re nil t))
       (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
           (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
         (gited-git-command-on-region '("apply"))
+        (when create-or-del-files-p
+          (gited--handle-new-or-delete-files (current-buffer)))
         (and update (gited-update))
         (message "Patch applied successfully!")))))
 
