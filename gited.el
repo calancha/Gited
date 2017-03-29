@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 13:18:47 JST 2017
+;; Last-Updated: Wed Mar 29 13:27:36 JST 2017
 ;;           By: calancha
-;;     Update #: 558
+;;     Update #: 559
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1387,7 +1387,7 @@ Optional arg DONT-ASK if non-nil, then ask confirmation."
         (message "Sucessfully staged new files: %s"
                  (mapconcat #'shell-quote-argument new-files " "))
       (error "Cannot stage some new files.  Please check"))))
- 
+
 (defun gited-apply-patch (buf-patch &optional update)
   "Apply patch at BUF-PATCH into current branch.
 If optional arg UPDATE is non-nil, then call `gited-update'
