@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 13:27:36 JST 2017
+;; Last-Updated: Wed Mar 29 13:43:50 JST 2017
 ;;           By: calancha
-;;     Update #: 559
+;;     Update #: 560
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1327,13 +1327,9 @@ Optional arg DONT-ASK if non-nil, then ask confirmation."
       (gited-goto-branch cur-br)
       (gited--fontify-current-row)
       (vc-git-checkout nil branch)
-      (setq gited-current-branch branch)
-      (gited-goto-branch branch)
-      (put-text-property (point) (point-at-eol)
-                         'face gited-current-branch-face)
-      (put-text-property (point-at-bol) (point-at-eol)
-                         'face gited-section-highlight-face)
-      (message "Current branch is %s" gited-current-branch))))
+      (setq gited-current-branch branch))
+    (gited-fontify-current-branch))
+  (message "Current branch is %s" gited-current-branch))
 
 
 
