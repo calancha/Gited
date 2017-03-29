@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 12:57:39 JST 2017
+;; Last-Updated: Wed Mar 29 13:14:43 JST 2017
 ;;           By: calancha
-;;     Update #: 556
+;;     Update #: 557
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1306,17 +1306,18 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
       (put-text-property
        pos (point-at-eol) 'face gited-commit-msg-face))))
 
-(defun gited-checkout-branch (branch &optional _all)
+(defun gited-checkout-branch (branch &optional dont-ask)
   "Checkout BRANCH.
-Optional arg _ALL is currently ignored."
+Optional arg DONT-ASK if non-nil, then ask confirmation."
   (interactive
    (list (gited-get-branchname)))
   (when (and (gited-modified-files-p)
              (not (equal gited-current-branch (gited-get-branchname))))
     (error "Cannot checkout a new branch: there are modified files"))
   (unless (or gited-expert
-              (y-or-n-p (format "Checkout '%s' branch? "
-                                branch)))
+              (or dont-ask
+                  (y-or-n-p (format "Checkout '%s' branch? "
+                                    branch))))
     (error "OK, checkout canceled"))
   (let ((cur-br gited-current-branch)
         (inhibit-read-only t))
@@ -1824,7 +1825,8 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
 BRANCH-TARGET is a new branch copied from (car (gited-trunk-branches)).
 The effect is similar than merge the branch at point with the trunk;
 one difference is that we don't modify the trunk, instead we copy it;
-another difference that we don't get a 'Merge branch...' commit in the log."
+another difference that we don't get a 'Merge branch...' commit in the log.
+this command set BRANCH-TARGET current."
   (interactive
    (let* ((br (gited-get-branchname))
           (prompt
@@ -1860,6 +1862,7 @@ another difference that we don't get a 'Merge branch...' commit in the log."
                                               (car buf-commits))
             (setq buf-patches (cdr buf-patches)
                   buf-commits (cdr buf-commits)))))
+      (gited-checkout-branch branch-target 'dont-ask)
       (gited-update)
       (message "Successfully applied and committed %d commits!"
                num-commits))))
