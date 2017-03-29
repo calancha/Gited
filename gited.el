@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 19:29:55 JST 2017
+;; Last-Updated: Wed Mar 29 19:57:33 JST 2017
 ;;           By: calancha
-;;     Update #: 562
+;;     Update #: 563
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1421,8 +1421,9 @@ display the output buffer in other window."
            (with-current-buffer buf
              (setq buffer-read-only nil)
              (erase-buffer))
-           (gited-async-operation (format "%s add -p" vc-git-program)
+           (gited-async-operation (format "%s add --patch" vc-git-program)
                                   nil buf)
+           (setq gited-op-string "add --patch")
            (display-buffer buf))
           (t
            (let ((toplevel gited-toplevel-dir))
