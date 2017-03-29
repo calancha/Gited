@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Tue Mar 28 10:00:39 JST 2017
+;; Last-Updated: Wed Mar 29 10:59:32 JST 2017
 ;;           By: calancha
-;;     Update #: 553
+;;     Update #: 554
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1777,26 +1777,28 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
           (goto-char (point-min))
           (setq num-commits (gited-number-of-commits)
                 count num-commits))))
-    (dotimes (i num-commits)
-      (let ((buf-patch (get-buffer-create (format "*gited-patch-%d*" count)))
-            (buf-commit (get-buffer-create (format "*gited-commit-%d*" count))))
-        (with-current-buffer buf-patch
-          (gited-git-command `("format-patch" "-1" ,(format "HEAD~%d" i) "--stdout")
-                             (current-buffer))
-          (gited--set-output-buffer-mode (current-buffer) 'diff 'editable))
-        (with-current-buffer buf-commit
-          (gited-git-command `("show" "-s" "--format=%B" ,(format "HEAD~%d" i))
-                             (current-buffer))
-          (while (looking-at "^$") ; Delete empty lines.
-            (delete-char -1)))
-        (when write-file
-          (with-temp-file (expand-file-name
-                           (substring (buffer-name buf-patch) 1 -1)
-                           temporary-file-directory)
-            (insert
-             (with-current-buffer buf-patch
-               (buffer-string)))))
-        (cl-decf count)))
+    ;; Following form must be evalled with branch temporary current.
+    (gited-with-current-branch branch
+      (dotimes (i num-commits)
+        (let ((buf-patch (get-buffer-create (format "*gited-patch-%d*" count)))
+              (buf-commit (get-buffer-create (format "*gited-commit-%d*" count))))
+          (with-current-buffer buf-patch
+            (gited-git-command `("format-patch" "-1" ,(format "HEAD~%d" i) "--stdout")
+                               (current-buffer))
+            (gited--set-output-buffer-mode (current-buffer) 'diff 'editable))
+          (with-current-buffer buf-commit
+            (gited-git-command `("show" "-s" "--format=%B" ,(format "HEAD~%d" i))
+                               (current-buffer))
+            (while (looking-at "^$") ; Delete empty lines.
+              (delete-char -1)))
+          (when write-file
+            (with-temp-file (expand-file-name
+                             (substring (buffer-name buf-patch) 1 -1)
+                             temporary-file-directory)
+              (insert
+               (with-current-buffer buf-patch
+                 (buffer-string)))))
+          (cl-decf count))))
     (if write-file
         (message "Extracted %d patches and saved in %s"
                  num-commits temporary-file-directory)
