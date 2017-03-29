@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 10:59:32 JST 2017
+;; Last-Updated: Wed Mar 29 11:04:09 JST 2017
 ;;           By: calancha
-;;     Update #: 554
+;;     Update #: 555
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1825,10 +1825,17 @@ The effect is similar than merge the branch at point with the trunk;
 one difference is that we don't modify the trunk, instead we copy it;
 another difference that we don't get a 'Merge branch...' commit in the log."
   (interactive
-   (list
-    (completing-read
-     "Name of new syncronized branch: "
-     (gited-listed-branches))))
+   (let* ((br (gited-get-branchname))
+          (prompt
+           (format "Syncronized '%s' into new branch: " br))
+          (def (if (string-match "-new\\([0-9]*\\)\\'" br)
+                   (format "%s%d" (substring br 0 (match-beginning 1))
+                           (1+ (string-to-number (match-string 1 br))))
+                 (concat br "-new1"))))
+     (list
+      (completing-read prompt
+                       (gited-listed-branches)
+                       nil nil def))))
   ;; Previous patch buffers must be deleted.
   (gited--clean-previous-patches)
   (unless (gited-remote-repository-p)
