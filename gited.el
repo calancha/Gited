@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 11:04:09 JST 2017
+;; Last-Updated: Wed Mar 29 12:57:39 JST 2017
 ;;           By: calancha
-;;     Update #: 555
+;;     Update #: 556
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -520,14 +520,15 @@ BRANCH must be the name of an existing branch.
 The value returned is the value of the last form in BODY."
   (declare (indent 1) (debug t))
   (let ((cur-branch (make-symbol "cur-branch")))
-    `(let ((,cur-branch gited-current-branch)
-           (gited-current-branch ,branch))
+    `(let ((,cur-branch gited-current-branch))
        (unwind-protect
            (progn
              (vc-git-checkout nil ,branch)
+             (setq gited-current-branch ,branch)
              ,@body)
          ;; Restore original current branch.
-         (vc-git-checkout nil ,cur-branch)))))
+         (vc-git-checkout nil ,cur-branch)
+         (setq gited-current-branch ,cur-branch)))))
 
 ;;; Map over marks.
 (defmacro gited-map-over-marks (body arg)
