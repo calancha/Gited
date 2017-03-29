@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 19:22:58 JST 2017
+;; Last-Updated: Wed Mar 29 19:29:55 JST 2017
 ;;           By: calancha
-;;     Update #: 561
+;;     Update #: 562
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1418,7 +1418,9 @@ display the output buffer in other window."
   (let ((buf (gited--output-buffer)))
     (cond (async
            ;; Output buffer must be editable.
-           (with-current-buffer buf (setq buffer-read-only nil))
+           (with-current-buffer buf
+             (setq buffer-read-only nil)
+             (erase-buffer))
            (gited-async-operation (format "%s add -p" vc-git-program)
                                   nil buf)
            (display-buffer buf))
