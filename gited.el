@@ -10,7 +10,7 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Thu Mar 30 11:59:17 JST 2017
+;; Last-Updated: Thu Mar 30 12:09:12 JST 2017
 ;;           By: calancha
 ;;     Update #: 565
 ;;
@@ -1034,27 +1034,44 @@ That means, changes from another branch are added into BRANCH."
           (message "Merged %s into %s!" branch-new branch)
         (error "Cannot merge '%s' into '%s'" branch-new branch)))))
 
-(defun gited-reset-branch (commit)
+(defun gited-reset-branch (commit &optional mode)
   "Reset current branch to an earlier state.
 
 COMMIT is a SHA1 string or HEAD~N, to reset BRANCH to that commit.
 Interactively prompt for the limit commit: 0 means HEAD,
-1 means HEAD~, and so on."
+ 1 means HEAD~, and so on.
+Interactively with a prefix argument prompts for the reset mode.
+ Defaults to hard."
   (interactive
-   (let ((input
-          (read-string "Which commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): "
-                       nil nil "0")))
+   (let* ((alist
+           '(("s" . "soft") ("m" . "mixed") ("h" . "hard")
+             ("g" . "merged") ("k" . "keep")))
+          (mode
+           (if current-prefix-arg
+               (cdr (assoc 
+                     (completing-read
+                      "Reset mode (s = soft, m = mixed, h = hard, g = merged, k = keep): "
+                      '("s" "m" "h" "g" "k")
+                      nil 'mustmatch nil nil "h")
+                     alist))
+             "hard"))
+          (input
+           (read-string
+            (format "Reset --%s to commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): " mode)
+            nil nil "0")))
      (list (if (gited--valid-ref-p input)
                input
-             (concat "HEAD~" input)))))
+             (concat "HEAD~" input))
+           mode)))
+  (unless mode (setq mode "hard"))
   (let ((branch (gited-current-branch))
-        (args `("reset" "--hard" ,commit)))
+        (args `("reset" ,(concat "--" mode) ,commit)))
     (if (not (y-or-n-p
-              (format "Reset branch '%s' to '%s'? " branch commit)))
+              (format "Reset --%s '%s' to '%s'? " mode branch commit)))
         (message "OK, reset canceled")
       (if (zerop (gited-git-command args))
-          (message "Reseted branch '%s' to '%s'!" branch commit)
-        (error "Cannot reset '%s' to '%s'" branch commit)))))
+          (message "Reseted --%s '%s' to '%s'!" mode branch commit)
+        (error "Cannot reset --%s '%s' to '%s'" mode branch commit)))))
 
 (defun gited-delete-branch (branch &optional force)
   "Delete branch BRANCH.
