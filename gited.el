@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Wed Mar 29 19:57:33 JST 2017
+;; Last-Updated: Thu Mar 30 11:28:39 JST 2017
 ;;           By: calancha
-;;     Update #: 563
+;;     Update #: 564
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1232,7 +1232,7 @@ as well."
   "Copy branch OLD to branch NEW.
 OLD default to branch at current line.
 
-Optional arg COMMIT, if non-nil then is a string
+Optional arg COMMIT, if non-nil then is a SHA1 string or
 HEAD~N, to copy OLD until that commit, inclusive.
 When called with a prefix, prompt for the limit commit: 0 means HEAD,
 1 means HEAD~, and so on."
@@ -1242,14 +1242,15 @@ When called with a prefix, prompt for the limit commit: 0 means HEAD,
                    (format "Copy %s to: " old-br)
                    nil nil old-br))
           (ask current-prefix-arg)
-          (commit
+          (num-or-sha1
            (if ask
-               (format "HEAD~%s"
-                       (read-string "Which commit (0 = HEAD, 1 = HEAD~1): "
-                                    nil nil "0"))
+               (read-string "Show commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): "
+                            nil nil "0")
              "HEAD")))
-     (list old-br new-br commit)))
+     (list old-br new-br num-or-sha1)))
   (unless commit (setq commit "HEAD"))
+  (unless (gited--valid-ref-p commit)
+    (setq commit (concat old "~" commit)))
   (let ((cmd1 `("checkout" ,old))
         (cmd2 `("checkout" "-b" ,new ,commit))
         (cmd3 `("checkout" ,gited-current-branch)))
