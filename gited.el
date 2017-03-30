@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Thu Mar 30 11:28:39 JST 2017
+;; Last-Updated: Thu Mar 30 11:59:17 JST 2017
 ;;           By: calancha
-;;     Update #: 564
+;;     Update #: 565
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1034,23 +1034,21 @@ That means, changes from another branch are added into BRANCH."
           (message "Merged %s into %s!" branch-new branch)
         (error "Cannot merge '%s' into '%s'" branch-new branch)))))
 
-(defun gited-reset-branch (branch commit)
-  "Reset BRANCH to an earlier state.
+(defun gited-reset-branch (commit)
+  "Reset current branch to an earlier state.
 
 COMMIT is a SHA1 string or HEAD~N, to reset BRANCH to that commit.
 Interactively prompt for the limit commit: 0 means HEAD,
 1 means HEAD~, and so on."
   (interactive
-   (let ((br gited-current-branch)
-         (input
-          (format
-           "HEAD~%s"
-           (read-string "Which commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): "
-                        nil nil "0"))))
-     (list br (if (gited--valid-ref-p input)
-                  input
-                (concat br "~" input)))))
-  (let ((args `("reset" "--hard" ,commit)))
+   (let ((input
+          (read-string "Which commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): "
+                       nil nil "0")))
+     (list (if (gited--valid-ref-p input)
+               input
+             (concat "HEAD~" input)))))
+  (let ((branch (gited-current-branch))
+        (args `("reset" "--hard" ,commit)))
     (if (not (y-or-n-p
               (format "Reset branch '%s' to '%s'? " branch commit)))
         (message "OK, reset canceled")
