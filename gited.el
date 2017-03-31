@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 13:07:44 JST 2017
+;; Last-Updated: Fri Mar 31 17:49:45 JST 2017
 ;;           By: calancha
-;;     Update #: 567
+;;     Update #: 568
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -90,17 +90,17 @@
 ;;   `gited--mark-merged-branches-spec', `gited--mark-unmerged-branches-spec',
 ;;   `gited-add-patched-files', `gited-apply-add-and-commit-patch',
 ;;   `gited-apply-patch', `gited-async-operation',
-;;   `gited-bisect', `gited-checkout-branch',
-;;   `gited-commit', `gited-copy-branch',
-;;   `gited-copy-branchname-as-kill', `gited-delete-branch',
-;;   `gited-diff-with-branch', `gited-do-delete',
-;;   `gited-do-flagged-delete', `gited-do-kill-lines',
-;;   `gited-extract-patches', `gited-flag-branch-deletion',
-;;   `gited-goto-branch', `gited-goto-first-branch',
-;;   `gited-goto-last-branch', `gited-kill-line',
-;;   `gited-list-branches', `gited-log',
-;;   `gited-log-last-n-commits', `gited-mark',
-;;   `gited-mark-branches-containing-commit',
+;;   `gited-bisect', `gited-branch-clear',
+;;   `gited-checkout-branch', `gited-commit',
+;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
+;;   `gited-delete-branch', `gited-diff-with-branch',
+;;   `gited-do-delete', `gited-do-flagged-delete',
+;;   `gited-do-kill-lines', `gited-extract-patches',
+;;   `gited-flag-branch-deletion', `gited-goto-branch',
+;;   `gited-goto-first-branch', `gited-goto-last-branch',
+;;   `gited-kill-line', `gited-list-branches',
+;;   `gited-log', `gited-log-last-n-commits',
+;;   `gited-mark', `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-merged-branches', `gited-mark-unmerged-branches',
 ;;   `gited-merge-branch', `gited-move-to-author',
@@ -112,12 +112,15 @@
 ;;   `gited-prev-marked-branch', `gited-pull',
 ;;   `gited-push', `gited-rename-branch',
 ;;   `gited-reset-branch', `gited-set-branch-upstream',
-;;   `gited-show-commit', `gited-status',
-;;   `gited-summary', `gited-sync-with-trunk',
-;;   `gited-toggle-marks', `gited-unmark',
-;;   `gited-unmark-all-branches', `gited-unmark-all-marks',
-;;   `gited-unmark-backward', `gited-update',
-;;   `gited-visit-branch-sources', `gited-why'.
+;;   `gited-show-commit', `gited-stash',
+;;   `gited-stash-apply', `gited-stash-branch',
+;;   `gited-stash-drop', `gited-stash-pop',
+;;   `gited-status', `gited-summary',
+;;   `gited-sync-with-trunk', `gited-toggle-marks',
+;;   `gited-unmark', `gited-unmark-all-branches',
+;;   `gited-unmark-all-marks', `gited-unmark-backward',
+;;   `gited-update', `gited-visit-branch-sources',
+;;   `gited-why'.
 ;;
 ;;  Non-interactive functions defined here:
 ;;
@@ -134,18 +137,19 @@
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
 ;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
-;;   `gited--update-padding', `gited--valid-ref-p',
-;;   `gited-all-branches', `gited-async-operation-sentinel',
-;;   `gited-at-header-line-p', `gited-bisecting-p',
-;;   `gited-branch-exists-p', `gited-buffer-p',
-;;   `gited-current-branch', `gited-current-branches-with-marks',
-;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
-;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
-;;   `gited-format-columns-of-files', `gited-get-branchname',
-;;   `gited-get-commit', `gited-get-date',
-;;   `gited-get-element-in-row', `gited-get-last-commit-time',
-;;   `gited-get-mark', `gited-get-marked-branches',
-;;   `gited-git-command', `gited-git-command-on-region',
+;;   `gited--stash-branch', `gited--update-padding',
+;;   `gited--valid-ref-p', `gited-all-branches',
+;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
+;;   `gited-bisecting-p', `gited-branch-exists-p',
+;;   `gited-buffer-p', `gited-current-branch',
+;;   `gited-current-branches-with-marks', `gited-current-state-list',
+;;   `gited-dir-under-Git-control-p', `gited-fontify-current-branch',
+;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
+;;   `gited-get-branchname', `gited-get-commit',
+;;   `gited-get-date', `gited-get-element-in-row',
+;;   `gited-get-last-commit-time', `gited-get-mark',
+;;   `gited-get-marked-branches', `gited-git-command',
+;;   `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
