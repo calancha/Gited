@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 17:49:45 JST 2017
+;; Last-Updated: Fri Mar 31 17:57:58 JST 2017
 ;;           By: calancha
-;;     Update #: 568
+;;     Update #: 569
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -76,9 +76,9 @@
 ;;
 ;;   `gited-current-branch-face', `gited-expert',
 ;;   `gited-patch-options', `gited-patch-program',
-;;   `gited-protected-branches', `gited-short-log-cmd',
-;;   `gited-switches', `gited-use-header-line',
-;;   `gited-verbose'.
+;;   `gited-protected-branches', `gited-reset-mode',
+;;   `gited-short-log-cmd', `gited-switches',
+;;   `gited-use-header-line', `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -363,6 +363,16 @@ Option -g do not show the author name."
 (defvar gited-list-format nil
   "Format of the columns in the branch list.")
 (make-variable-buffer-local 'gited-list-format)
+
+(defcustom gited-reset-mode "mixed"
+  "Default mode of a Git reset."
+  :type '(choice
+          (const :tag "soft" "soft")
+          (const :tag "mixed" "mixed")
+          (const :tag "hard" "hard")
+          (const :tag "merge" "merge")
+          (const :tag "keep" "keep"))
+  :group 'gited)
 
 (defun gited--list-format-init (&optional col-names col-sizes)
   "Initialize `gited-list-format'.
@@ -1045,7 +1055,7 @@ COMMIT is a SHA1 string or HEAD~N, to reset BRANCH to that commit.
 Interactively prompt for the limit commit: 0 means HEAD,
  1 means HEAD~, and so on.
 Interactively with a prefix argument prompts for the reset mode.
- Defaults to hard."
+ Defaults to `gited-reset-mode'."
   (interactive
    (let* ((alist
            '(("s" . "soft") ("m" . "mixed") ("h" . "hard")
@@ -1058,7 +1068,7 @@ Interactively with a prefix argument prompts for the reset mode.
                       '("s" "m" "h" "g" "k")
                       nil 'mustmatch nil nil "h")
                      alist))
-             "hard"))
+             gited-reset-mode))
           (input
            (read-string
             (format "Reset --%s to commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): " mode)
@@ -1067,7 +1077,7 @@ Interactively with a prefix argument prompts for the reset mode.
                input
              (concat "HEAD~" input))
            mode)))
-  (unless mode (setq mode "hard"))
+  (unless mode (setq mode gited-reset-mode))
   (let ((branch (gited-current-branch))
         (args `("reset" ,(concat "--" mode) ,commit)))
     (if (not (y-or-n-p
