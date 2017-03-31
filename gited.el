@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Thu Mar 30 12:09:12 JST 2017
+;; Last-Updated: Fri Mar 31 12:40:35 JST 2017
 ;;           By: calancha
-;;     Update #: 565
+;;     Update #: 566
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2008,6 +2008,81 @@ set RESET non-nil."
              (display-buffer obuf))))))
 
 
+;;; Git Stash commands.
+(defun gited-stash (&optional untracked)
+  "Stash the changes in a dirty working directory away.
+If called with prefix argument, then include untracked files.  With two
+prefix arguments includes the ignored files as well."
+  (interactive
+   (let ((prefix current-prefix-arg))
+     (list (cond ((and prefix (equal prefix '(4))) "--include-untracked")
+                 ((and prefix (equal prefix '(16))) "--all")))))
+  (let* ((msg (read-string
+               "Stash message: "
+               (format "WIP on %s: " (gited-current-branch))))
+         (args (append '("stash") '("save") `(,msg) (and untracked `(,untracked)))))
+    (gited-git-command args)))
+
+(defun gited-stash-apply ()
+  "Apply a stash to the working tree."
+  (interactive)
+  (if (null (gited-stashes))
+      (message "Empty stash list")
+    (let* ((stash
+            (read-string "Apply stash: " nil nil "stash@{0}"))
+           (args `("stash" "apply" ,stash)))
+      (gited-git-command args))))
+
+(defun gited-stash-pop ()
+  "Apply a stash to the working tree and remove it from stash list."
+  (interactive)
+  (if (null (gited-stashes))
+      (message "Empty stash list")
+    (let* ((stash
+            (read-string "Apply pop: " nil nil "stash@{0}"))
+           (args `("stash" "pop" ,stash)))
+      (gited-git-command args))))
+
+(defun gited--stash-branch ()
+  (cond ((null (gited-stashes))
+         (error "Empty stash list"))
+        ((gited-modified-files)
+         (error "Commit your local changes before you switch branches"))
+        (t)))
+  
+(defun gited-stash-branch (branch stash)
+  "Create and checkout a new BRANCH from STASH."
+  (interactive
+   (let ((stash
+          (and (gited--stash-branch)
+               (read-string "Branch stash: " nil nil "stash@{0}")))
+         (br (read-string "Branch name: ")))
+     (list br stash)))
+  (when (gited--stash-branch)
+    (let ((args `("stash" "branch" ,branch ,stash)))
+      (gited-git-command args))))
+
+(defun gited-stash-drop ()
+  "Remove a stash from the stash list."
+  (interactive)
+  (if (null (gited-stashes))
+      (message "Empty stash list")
+    (let* ((stash
+            (read-string "Drop stash: " nil nil "stash@{0}"))
+           (args `("stash" "drop" ,stash)))
+      (gited-git-command args))))
+
+(defun gited-delete-all-stashes ()
+  "Remove all stashes from the stash list."
+  (interactive)
+  (if (null (gited-stashes))
+      (message "Empty stash list")
+    (if (y-or-n-p "Remove all stashes? ")
+        (gited-git-command '("stash" "clear"))
+      (error "OK, canceled"))))
+  
+
+
 ;;; Moving around.
 
 (defun gited-next-line (&optional arg)
@@ -2766,7 +2841,6 @@ in the active region."
     (define-key map (kbd "* p") 'gited-set-branch-upstream)
     (define-key map (kbd "* <") 'gited-pull)
     (define-key map (kbd "* >") 'gited-push)
-    (define-key map (kbd "* s") 'gited-status)
     (define-key map (kbd "o") 'gited-origin)
     (define-key map (kbd "l") 'gited-log)
     (define-key map (kbd "L") 'gited-log-last-n-commits)
@@ -2778,6 +2852,12 @@ in the active region."
     (define-key map (kbd "% m") 'gited-mark-merged-branches)
     (define-key map (kbd "% M") 'gited-mark-unmerged-branches)
     (define-key map (kbd "d") 'gited-flag-branch-deletion)
+    ;; Git stash
+    (define-key map (kbd "* s") 'gited-stash)
+    (define-key map (kbd "* a") 'gited-stash-apply)
+    (define-key map (kbd "* A") 'gited-stash-pop)
+    (define-key map (kbd "* b") 'gited-stash-branch)
+    (define-key map (kbd "* d") 'gited-stash-drop)
     ;; marked operations
     (define-key map (kbd "* N") 'gited-number-marked)
     (define-key map (kbd "R") 'gited-rename-branch)
