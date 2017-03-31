@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 20:29:18 JST 2017
+;; Last-Updated: Fri Mar 31 21:03:14 JST 2017
 ;;           By: calancha
-;;     Update #: 570
+;;     Update #: 571
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -990,7 +990,7 @@ date are hidden from view."
     (gited-hide-details-mode (if hide-details 1 0))
     (if (not at-headr-p)
         (gited-goto-branch target-br)
-      (gited-goto-first-branch))))
+      (gited-goto-branch gited-current-branch))))
 
 (add-hook 'gited-after-change-hook 'gited-update)
 
@@ -1338,9 +1338,8 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
       (put-text-property
        pos (point-at-eol) 'face gited-commit-msg-face))))
 
-(defun gited-checkout-branch (branch &optional dont-ask)
-  "Checkout BRANCH.
-Optional arg DONT-ASK if non-nil, then ask confirmation."
+(defun gited-checkout-branch (branch)
+  "Checkout BRANCH."
   (interactive
    (list (completing-read "Checkout branch: "
                           (gited-all-branches)
@@ -1348,19 +1347,26 @@ Optional arg DONT-ASK if non-nil, then ask confirmation."
   (when (and (gited-modified-files-p)
              (not (equal gited-current-branch (gited-get-branchname))))
     (error "Cannot checkout a new branch: there are modified files"))
-  (unless (or gited-expert
-              (or dont-ask
-                  (y-or-n-p (format "Checkout '%s' branch? "
-                                    branch))))
-    (error "OK, checkout canceled"))
-  (let ((cur-br gited-current-branch)
-        (inhibit-read-only t))
+  (let* ((cur-br gited-current-branch)
+         (new-branch-p (and (equal gited-ref-kind "local")
+                            (not (member branch (gited-get-branches)))))
+         (inhibit-read-only t)
+         (local-branch (if new-branch-p
+                           (read-string
+                            "Checkout in local branch: "
+                            nil nil (file-name-nondirectory branch))
+                         branch)))
     (save-excursion
       (gited-goto-branch cur-br)
       (gited--fontify-current-row)
-      (vc-git-checkout nil branch)
-      (setq gited-current-branch branch))
-    (gited-fontify-current-branch))
+      (if (not new-branch-p)
+          (vc-git-checkout nil branch)
+        (gited-git-command `("checkout" "-b" ,local-branch ,branch))
+        (run-hooks 'gited-after-change-hook))
+      (setq gited-current-branch local-branch))
+    (gited-fontify-current-branch)
+    (when new-branch-p
+      (gited-goto-branch gited-current-branch)))
   (message "Current branch is %s" gited-current-branch))
 
 
@@ -1934,7 +1940,7 @@ this command set BRANCH-TARGET current."
                                               (car buf-commits))
             (setq buf-patches (cdr buf-patches)
                   buf-commits (cdr buf-commits)))))
-      (gited-checkout-branch branch-target 'dont-ask)
+      (gited-checkout-branch branch-target)
       (gited-update)
       (message "Successfully applied and committed %d commits!"
                num-commits))))
