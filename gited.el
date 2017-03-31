@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 12:40:35 JST 2017
+;; Last-Updated: Fri Mar 31 13:07:44 JST 2017
 ;;           By: calancha
-;;     Update #: 566
+;;     Update #: 567
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2072,7 +2072,7 @@ prefix arguments includes the ignored files as well."
            (args `("stash" "drop" ,stash)))
       (gited-git-command args))))
 
-(defun gited-delete-all-stashes ()
+(defun gited-branch-clear ()
   "Remove all stashes from the stash list."
   (interactive)
   (if (null (gited-stashes))
@@ -2080,7 +2080,9 @@ prefix arguments includes the ignored files as well."
     (if (y-or-n-p "Remove all stashes? ")
         (gited-git-command '("stash" "clear"))
       (error "OK, canceled"))))
-  
+
+(defalias 'gited-delete-all-stashes 'gited-branch-clear)
+
 
 
 ;;; Moving around.
