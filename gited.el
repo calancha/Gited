@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 17:57:58 JST 2017
+;; Last-Updated: Fri Mar 31 20:29:18 JST 2017
 ;;           By: calancha
-;;     Update #: 569
+;;     Update #: 570
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1342,7 +1342,9 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
   "Checkout BRANCH.
 Optional arg DONT-ASK if non-nil, then ask confirmation."
   (interactive
-   (list (gited-get-branchname)))
+   (list (completing-read "Checkout branch: "
+                          (gited-all-branches)
+                          nil 'mustmatch (gited-get-branchname) nil)))
   (when (and (gited-modified-files-p)
              (not (equal gited-current-branch (gited-get-branchname))))
     (error "Cannot checkout a new branch: there are modified files"))
