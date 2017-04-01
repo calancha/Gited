@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Fri Mar 31 21:03:14 JST 2017
+;; Last-Updated: Sat Apr 01 12:26:46 JST 2017
 ;;           By: calancha
-;;     Update #: 571
+;;     Update #: 572
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1521,7 +1521,7 @@ A prefix argument prompts for AUTHOR."
 
 (defun gited-number-of-commits ()
   "Return number of Git commits in current buffer."
-  (let ((regexp "commit[:]? \\([[:xdigit:]]+\\)"))
+  (let ((regexp "^commit[:]? \\([[:xdigit:]]+\\)"))
     (save-excursion
       (goto-char (point-min))
       (let ((count 0))
