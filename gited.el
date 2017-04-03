@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Sat Apr 01 12:26:46 JST 2017
+;; Last-Updated: Mon Apr 03 15:52:37 JST 2017
 ;;           By: calancha
-;;     Update #: 572
+;;     Update #: 573
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1384,12 +1384,8 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
           "Use commit message in buffer: "
         "Apply patch from buffer: ")
       (cl-delete-if-not
-       (lambda (x) (string-match
-                    regexp
-                    x))
-       (mapcar #'buffer-name (buffer-list)))
-      nil
-      t))))
+       (lambda (x) (string-match regexp x))
+       (mapcar #'buffer-name (buffer-list)))))))
 
 (defconst gited-new-or-deleted-files-re
   (format "^\\(%s\\|%s\\|%s\\|%s\\|%s\\|%s\\)"
