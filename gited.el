@@ -9,10 +9,10 @@
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
-;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Thu Apr 20 14:08:48 JST 2017
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
+;; Last-Updated: Thu Apr 20 14:11:25 JST 2017
 ;;           By: calancha
-;;     Update #: 574
+;;     Update #: 575
 ;;
 ;; Features that might be required by this library:
 ;;
