@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
-;; Last-Updated: Mon Apr 03 15:52:37 JST 2017
+;; Last-Updated: Thu Apr 20 14:08:48 JST 2017
 ;;           By: calancha
-;;     Update #: 573
+;;     Update #: 574
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2228,7 +2228,9 @@ reach the beginning of the buffer."
   (goto-char (next-single-property-change (point) 'tabulated-list-column-name)))
 
 (defun gited--fill-branch-alist (&optional pattern)
-  (let* ((args (append (butlast gited-list-refs-format-command)
+  (let* ((gited-list-refs-format-command
+          '("for-each-ref" "--format='(%(authordate:raw) \"%(refname:short)\" \"%(authorname)\")'" "refs/%s"))
+         (args (append (butlast gited-list-refs-format-command)
                        (list (format (car (last gited-list-refs-format-command))
                                      (if pattern
                                          (pcase pattern
@@ -2242,7 +2244,10 @@ reach the beginning of the buffer."
             (unless (zerop (gited-git-command args (current-buffer) nil 'unquote))
               (error "No Git repository in current directory"))
             (insert ")")
-            (cl-remove-if (lambda (x) (not (= (length x) 3)))
+            (cl-remove-if (lambda (x)
+                            (or
+                             (not (= (length x) 4))
+                             (and (setf (cdr x) (cddr x)) nil)))
                           (car (read-from-string (buffer-string))))))
          (prep
           (make-progress-reporter
