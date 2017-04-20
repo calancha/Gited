@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Thu Apr 20 14:11:25 JST 2017
+;; Last-Updated: Thu Apr 20 14:18:59 JST 2017
 ;;           By: calancha
-;;     Update #: 575
+;;     Update #: 576
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -332,13 +332,8 @@ TITLE is the title of the last commit.")
 (make-variable-buffer-local 'gited-bisect-buffer)
 (put 'gited-bisect-buffer 'permanent-local t)
 
-;; (defvar gited-list-refs-format-command
-;;   "git for-each-ref  --format='(%%(authordate:format:%%s)\
-;;  \"%%(refname:short)\" \"%%(authorname)\")' refs/%s "
-;;   "Format string to build a Git command to list references.")
-
 (defvar gited-list-refs-format-command
-  '("for-each-ref"  "--format='(%(authordate:format:%s) \"%(refname:short)\" \"%(authorname)\")'" "refs/%s")
+  '("for-each-ref" "--format='(%(authordate:raw) \"%(refname:short)\" \"%(authorname)\")'" "refs/%s")
   "Format strings to build a Git command to list references.")
 
 (defvar gited-date-regexp (concat "\\("
@@ -2228,9 +2223,7 @@ reach the beginning of the buffer."
   (goto-char (next-single-property-change (point) 'tabulated-list-column-name)))
 
 (defun gited--fill-branch-alist (&optional pattern)
-  (let* ((gited-list-refs-format-command
-          '("for-each-ref" "--format='(%(authordate:raw) \"%(refname:short)\" \"%(authorname)\")'" "refs/%s"))
-         (args (append (butlast gited-list-refs-format-command)
+  (let* ((args (append (butlast gited-list-refs-format-command)
                        (list (format (car (last gited-list-refs-format-command))
                                      (if pattern
                                          (pcase pattern
