@@ -7,12 +7,12 @@
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
-;; Compatibility: GNU Emacs: 24.x
+;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Fri Apr 21 11:15:44 JST 2017
+;; Last-Updated: Fri Apr 21 11:21:25 JST 2017
 ;;           By: calancha
-;;     Update #: 577
+;;     Update #: 578
 ;;
 ;; Features that might be required by this library:
 ;;
