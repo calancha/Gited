@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.x
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Thu Apr 20 14:18:59 JST 2017
+;; Last-Updated: Fri Apr 21 11:15:44 JST 2017
 ;;           By: calancha
-;;     Update #: 576
+;;     Update #: 577
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2237,11 +2237,16 @@ reach the beginning of the buffer."
             (unless (zerop (gited-git-command args (current-buffer) nil 'unquote))
               (error "No Git repository in current directory"))
             (insert ")")
-            (cl-remove-if (lambda (x)
-                            (or
-                             (not (= (length x) 4))
-                             (and (setf (cdr x) (cddr x)) nil)))
-                          (car (read-from-string (buffer-string))))))
+            (mapcar (lambda (x)
+                      (when (stringp (car x)) ; No time; set it to beginning of epoch.
+                        (push 0 x))
+                      (when (= (length x) 4) ; Drop time zone.
+                        (setf (cdr x) (cddr x)))
+                      (when (and (stringp (car (last x))) ; If no Author, set it Unknown.
+                                 (string= "" (car (last x))))
+                        (setf (car (last x)) "Unknown"))
+                      x)
+                    (car (read-from-string (buffer-string))))))
          (prep
           (make-progress-reporter
            "Collecting brach info..."
