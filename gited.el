@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Fri Apr 21 11:21:25 JST 2017
+;; Last-Updated: Sat Apr 29 12:44:49 JST 2017
 ;;           By: calancha
-;;     Update #: 578
+;;     Update #: 579
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1481,7 +1481,8 @@ A prefix argument prompts for AUTHOR."
                     "-m"
                     ,comment))))
     (unless (zerop (gited-git-command args buf))
-      (error "Commit failt: please check"))
+      (display-buffer buf)
+      (error "Commit failt: please check %s" (buffer-name buf)))
     (with-current-buffer buf
       (insert (format "\nCommit successfully with message:\n\n\"%s\"" comment)))
     (gited--set-output-buffer-mode buf)
