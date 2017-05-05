@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Fri May 05 22:46:55 JST 2017
+;; Last-Updated: Fri May 05 23:13:09 JST 2017
 ;;           By: calancha
-;;     Update #: 581
+;;     Update #: 582
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1089,7 +1089,8 @@ Optional arg FORCE, if non-nil then delete non-fully merged branches
 as well."
   (interactive
    (list (gited-get-branchname) current-prefix-arg))
-  (let ((br-after (gited-next-branch))
+  (let ((br-after (or (gited-next-branch)
+                      (gited-prev-branch)))
         (buf (gited--output-buffer))
         (inhibit-read-only t))
     (setq gited-output-buffer buf)
