@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Fri May 05 22:43:27 JST 2017
+;; Last-Updated: Fri May 05 22:46:55 JST 2017
 ;;           By: calancha
-;;     Update #: 580
+;;     Update #: 581
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1105,9 +1105,10 @@ as well."
         ("tags" (error "Delete tags not implemented!"))
         ("local"
          (if (zerop (gited-git-command
-                     `("branch" "--delete"
-                       (delete "" ,(if force "--force" ""))
-                       ,branch) buf))
+                     (delete "" `("branch" "--delete"
+                                  ,(if force "--force" "")
+                                  ,branch))
+                     buf))
              (progn
                (gited-goto-branch br-after)
                (message "Delete branch '%s'!" branch))
