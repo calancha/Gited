@@ -33,7 +33,6 @@
   (when (executable-find vc-git-program)
     (let* ((dir (make-temp-file "gited" 'dir))
            (file (expand-file-name "foo" dir))
-           (default-directory dir)
            (gited-expert t))
       (unwind-protect
           (let ((str "Initialize repository."))
