@@ -38,7 +38,10 @@
       (unwind-protect
           (let ((str "Initialize repository."))
             (write-region "Test file" nil file)
+	        (dired dir)
             (gited-git-command '("init"))
+	        (gited-git-command '("config" "user.email" "john.doe@example.com"))
+	        (gited-git-command '("config" "user.name" "John Doe"))
             (gited-git-command '("add" "foo"))
             (gited-git-command `("commit" "-m" ,str))
             (gited-list-branches "local")
