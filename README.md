@@ -1,4 +1,7 @@
 # Gited: Operate on Git branches like dired
+
+[![Build Status](https://api.travis-ci.org/calancha/Gited.svg?branch=master)](https://travis-ci.org/calancha/Gited)
+
 This library lists the branches in a Git repository.  Then you can
 operate on them with a dired-like interface.
 
