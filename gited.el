@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Fri May 05 23:25:23 JST 2017
+;; Last-Updated: Sun May 07 01:57:27 JST 2017
 ;;           By: calancha
-;;     Update #: 583
+;;     Update #: 584
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -333,7 +333,8 @@ TITLE is the title of the last commit.")
 (put 'gited-bisect-buffer 'permanent-local t)
 
 (defvar gited-list-refs-format-command
-  '("for-each-ref" "--format='(%(authordate:raw) \"%(refname:short)\" \"%(authorname)\")'" "refs/%s")
+  '("for-each-ref" "--format='(%(authordate:raw) \
+\"%(refname:short)\" \"%(authorname)\")'" "refs/%s")
   "Format strings to build a Git command to list references.")
 
 (defvar gited-date-regexp (concat "\\("
@@ -741,13 +742,12 @@ Optional arg DISPLAY means redisplay buffer as output is inserted."
   (apply #'call-process-region nil nil vc-git-program nil buffer display args))
 
 (defun gited-all-branches ()
-  "Return a list with all (local and remotes) branches and tags in the repository."
+  "Return a list with all (local and remote) branches and tags."
   (let ((args '("for-each-ref" "--format='%(refname:short)'" "refs/heads"
                 "refs/remotes" "refs/tags")))
     (with-temp-buffer
       (gited-git-command args (current-buffer) nil 'unquote)
-      (split-string (buffer-string) "\n" 'omit-nulls)
-      )))
+      (split-string (buffer-string) "\n" 'omit-nulls))))
 
 (defun gited-copy-branchname-as-kill ()
   "Copy names of marked branches into the kill ring.
@@ -772,12 +772,14 @@ You can then feed the file name(s) to other commands with \\[yank]."
 (defun gited--output-buffer (&optional buf-name)
   (unless buf-name
     (setq buf-name gited-output-buffer-name))
-  (let* ((buf (cond ((equal buf-name gited-bisect-buf-name)
-                     (and (buffer-live-p gited-bisect-buffer) gited-bisect-buffer))
-                    (t
-                     (and (buffer-live-p gited-output-buffer) gited-output-buffer))))
+  (let* ((buf
+          (cond ((equal buf-name gited-bisect-buf-name)
+                 (and (buffer-live-p gited-bisect-buffer) gited-bisect-buffer))
+                (t
+                 (and (buffer-live-p gited-output-buffer) gited-output-buffer))))
          (res (or (and (buffer-live-p buf)
-                       (equal default-directory (buffer-local-value 'default-directory buf))
+                       (equal default-directory
+                              (buffer-local-value 'default-directory buf))
                        buf)
                   (generate-new-buffer buf-name))))
     (if (equal buf-name gited-bisect-buf-name)
@@ -927,7 +929,8 @@ use `gited-output-buffer'."
         (when remote-op-p
           (display-buffer out-buf '(nil (allow-no-window . t))))
         (setq default-directory directory
-              proc (start-process-shell-command "*gited-async-operation*" out-buf command)
+              proc (start-process-shell-command
+                    "*gited-async-operation*" out-buf command)
               mode-line-process '(":%s"))
         (with-current-buffer gited-buf
           (setq gited--running-async-op t))
@@ -1018,9 +1021,11 @@ date are hidden from view."
                 (setq remote-op-p t)
                 (format "%s push origin origin/%s:refs/heads/%s :%s"
                         vc-git-program old new old)))
-             ("local" (format "%s branch --move %s %s" vc-git-program old-name new-name))
+             ("local" (format "%s branch --move %s %s"
+                              vc-git-program old-name new-name))
              ("tags" (error "Rename tags not implemented!"))
-             (_ (error "Unsupported gited-ref-kind: must be local, remote or tags")))
+             (_ (error "Unsupported gited-ref-kind: must be \
+local, remote or tags")))
            remote-op-p)
           (progn
             (setq gited-branch-after-op new-name
@@ -1059,14 +1064,16 @@ Interactively with a prefix argument prompts for the reset mode.
            (if current-prefix-arg
                (cdr (assoc 
                      (completing-read
-                      "Reset mode (s = soft, m = mixed, h = hard, g = merged, k = keep): "
+                      "Reset mode (s = soft, m = mixed, h = hard, \
+g = merged, k = keep): "
                       '("s" "m" "h" "g" "k")
                       nil 'mustmatch nil nil "h")
                      alist))
              gited-reset-mode))
           (input
            (read-string
-            (format "Reset --%s to commit (0 = HEAD, 1 = HEAD~1, ... or SHA1): " mode)
+            (format "Reset --%s to commit (0 = HEAD, \
+1 = HEAD~1, ... or SHA1): " mode)
             nil nil "0")))
      (list (if (gited--valid-ref-p input)
                input
@@ -1124,7 +1131,8 @@ as well."
                   (substring branch (length "origin/"))) 'remote-op-p)
          (setq gited-branch-after-op br-after
                gited-op-string (format "Delete branch '%s'" branch)))
-        (_ (error "Unsupported gited-ref-kind: must be local, remote or tags"))))))
+        (_ (error "Unsupported gited-ref-kind: must be \
+local, remote or tags"))))))
 
 (defun gited-do-delete (&optional arg force)
   "Delete all marked (or next ARG) branches.
@@ -1435,7 +1443,8 @@ after checkout."
       (setq create-or-del-files-p
             (re-search-forward gited-new-or-deleted-files-re nil t))
       (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
-          (error "Cannot apply patch at '%s'.  Please check." (buffer-name buf-patch))
+          (error "Cannot apply patch at '%s'.  Please check."
+                 (buffer-name buf-patch))
         (gited-git-command-on-region '("apply"))
         (when create-or-del-files-p
           (gited--handle-new-or-delete-files (current-buffer)))
@@ -1503,7 +1512,7 @@ A prefix argument prompts for AUTHOR."
       (error "Cannot apply patch at %s" (buffer-name buf-patch))
     (let ((cur-buf (current-buffer)))
       ;; Stage changes.
-      (gited-add-patched-files (gited-modified-files)) ; This switch to another buffer.
+      (gited-add-patched-files (gited-modified-files)) ; Switch to another buf.
       (switch-to-buffer cur-buf)
       (let* ((commit-msg
               (with-current-buffer buf-commit
@@ -1589,7 +1598,8 @@ Interactively prompt for the limit commit: 0 means HEAD,
   (let ((buf (gited--output-buffer))
         (args (if (gited--valid-ref-p commit)
                   `("show" ,commit)
-                (list "show" (concat (gited--case-ref-kind) branch "~" commit)))))
+                (list "show" (concat (gited--case-ref-kind)
+                                     branch "~" commit)))))
     (setq gited-output-buffer buf)
     (with-current-buffer buf
       (let ((inhibit-read-only t))
@@ -1635,10 +1645,13 @@ show similar info as that command."
                 (gited-git-command '("bisect" "log") (current-buffer))
                 (goto-char (point-min))
                 (save-excursion
-                  (when (re-search-forward "# first bad commit: \\[\\([[:xdigit:]]+\\)\\]" nil t)
+                  (when (re-search-forward
+                         "# first bad commit: \\[\\([[:xdigit:]]+\\)\\]"
+                         nil t)
                     (setq bad-commit (match-string 1))))
                 (while (re-search-forward "^[^#]+$" nil t)
-                  (push (buffer-substring-no-properties (point-at-bol) (point)) res))
+                  (push (buffer-substring-no-properties (point-at-bol) (point))
+                        res))
                 (setq res (nreverse res) nentries (length res)))
               (insert (format "\n%s (%d)\n"
                               (propertize
@@ -1800,7 +1813,8 @@ git-log --skip=N1 --max-count=N2.
 If optional arg SHORT is non-nil use a short format."
   (interactive
    (list (gited-get-branchname)
-         (read-string "Show newest N commits, or those in (N1, N1 + N2]: " nil nil "1")
+         (read-string "Show newest N commits, or those in (N1, N1 + N2]: "
+                      nil nil "1")
          current-prefix-arg))
   (let ((buf (gited--output-buffer)))
     (setq gited-output-buffer buf)
@@ -1835,7 +1849,9 @@ from the trunk, and not being in the trunk.
 Optional arg WRITE-FILE if non-nil, then write the patches to disk."
   (interactive
    (let* ((prefix current-prefix-arg)
-          (num (unless prefix (read-string "Extract N newest patches: " nil nil "1")))
+          (num (unless prefix
+                 (read-string "Extract N newest patches: "
+                              nil nil "1")))
           (from-origin (and prefix (equal prefix '(4))))
           (write (and prefix (equal prefix '(16)))))
      (list num from-origin write)))
@@ -1858,9 +1874,11 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
     (gited-with-current-branch branch
       (dotimes (i num-commits)
         (let ((buf-patch (get-buffer-create (format "*gited-patch-%d*" count)))
-              (buf-commit (get-buffer-create (format "*gited-commit-%d*" count))))
+              (buf-commit (get-buffer-create
+                           (format "*gited-commit-%d*" count))))
           (with-current-buffer buf-patch
-            (gited-git-command `("format-patch" "-1" ,(format "HEAD~%d" i) "--stdout")
+            (gited-git-command
+             `("format-patch" "-1" ,(format "HEAD~%d" i) "--stdout")
                                (current-buffer))
             (gited--set-output-buffer-mode (current-buffer) 'diff 'editable))
           (with-current-buffer buf-commit
@@ -1917,7 +1935,8 @@ this command set BRANCH-TARGET current."
   ;; Previous patch buffers must be deleted.
   (gited--clean-previous-patches)
   (unless (gited-remote-repository-p)
-    (error "This command only works for repositories tracking a remote repository"))
+    (error "This command only works for repositories \
+tracking a remote repository"))
   (if (null (ignore-errors (gited-extract-patches nil t)))
       (error "No new patches to apply")
     ;; If branch-target doesn't exists create it as copy of master.
@@ -1991,10 +2010,13 @@ set RESET non-nil."
           ((not bisectingp)
            (with-current-buffer obuf
              (erase-buffer))
-           (let ((bad (read-string "Start bisect with bad/new revision: " nil nil branch))
+           (let ((bad (read-string "Start bisect with bad/new revision: "
+                                   nil nil branch))
                  (good (read-string "Good/Old revision: " nil nil branch))
-                 (cmd (and script (read-shell-command "Bisect shell command: "))))
-             (and cmd (gited--bisect-executable-p cmd)) ; File must be executable.
+                 (cmd (and script
+                           (read-shell-command "Bisect shell command: "))))
+             (and cmd
+                  (gited--bisect-executable-p cmd)) ; File must be executable.
              (gited-git-command `("bisect" "start" ,bad ,good) obuf)
              (when cmd
                ;; (when (zerop (gited-git-command `("bisect" "run" ,cmd) obuf))
@@ -2004,8 +2026,10 @@ set RESET non-nil."
                (setq gited-op-string "bisect run"))
              (display-buffer obuf)))
           ((and bisectingp script)
-           (let ((cmd (and script (read-shell-command "Bisect shell command: "))))
-             (and cmd (gited--bisect-executable-p cmd)) ; File must be executable.
+           (let ((cmd
+                  (and script (read-shell-command "Bisect shell command: "))))
+             (and cmd
+                  (gited--bisect-executable-p cmd)) ; File must be executable.
              ;; (when (zerop (gited-git-command `("bisect" "run" ,cmd) obuf))
              ;;   (gited--bisect-after-run obuf))
              (gited-async-operation
@@ -2022,7 +2046,8 @@ set RESET non-nil."
                    (cond (is-badp '("bisect" "bad"))
                          (is-goodp '("bisect" "good"))
                          (skip '("bisect" "skip"))
-                         (t (error "Commit should be either bad, good or skip")))))
+                         (t (error "Commit should be either bad, \
+good or skip")))))
              (gited-git-command args obuf)
              (display-buffer obuf))))))
 
@@ -2039,7 +2064,8 @@ prefix arguments includes the ignored files as well."
   (let* ((msg (read-string
                "Stash message: "
                (format "WIP on %s: " (gited-current-branch))))
-         (args (append '("stash") '("save") `(,msg) (and untracked `(,untracked)))))
+         (args (append '("stash") '("save") `(,msg)
+                       (and untracked `(,untracked)))))
     (gited-git-command args)))
 
 (defun gited-stash-apply ()
@@ -2240,15 +2266,18 @@ reach the beginning of the buffer."
          (alist
           (with-temp-buffer
             (insert "(\n")
-            (unless (zerop (gited-git-command args (current-buffer) nil 'unquote))
+            (unless (zerop (gited-git-command args (current-buffer)
+                                              nil 'unquote))
               (error "No Git repository in current directory"))
             (insert ")")
             (mapcar (lambda (x)
-                      (when (stringp (car x)) ; No time; set it to beginning of epoch.
+                      (when (stringp (car x)) ; No time: set it to beginning
+                                              ; of epoch.
                         (push 0 x))
                       (when (= (length x) 4) ; Drop time zone.
                         (setf (cdr x) (cddr x)))
-                      (when (and (stringp (car (last x))) ; If no Author, set it Unknown.
+                      (when (and (stringp (car (last x))) ; If no Author, set
+                                                          ; it Unknown.
                                  (string= "" (car (last x))))
                         (setf (car (last x)) "Unknown"))
                       x)
@@ -2270,7 +2299,8 @@ reach the beginning of the buffer."
                                   (save-excursion
                                     (gited--goto-first-branch)
                                     (ignore-errors (gited-get-mark)))))
-                             (if (and table (ignore-errors (gited-goto-branch (nth 1 x))))
+                             (if (and table (ignore-errors
+                                              (gited-goto-branch (nth 1 x))))
                                  (cons (gited-get-mark) nil)
                                '(" ")))))
       ;; Get title of first commit for each listed branch.
@@ -2282,11 +2312,13 @@ reach the beginning of the buffer."
                                           "--pretty=format:%h | %s"
                                           (cadr entry) "-n1" "--"))
                               (str (with-temp-buffer
-                                     (gited-git-command args (current-buffer) nil)
+                                     (gited-git-command args
+                                                        (current-buffer) nil)
                                      (buffer-string))))
                          ;; Format time in seconds as `gited-date-format'.
                          (setf (car entry) (format-time-fn (car entry)))
-                         (append `(,(1+ idx)) (get-mark-fn entry) entry `(,str)))))))
+                         (append `(,(1+ idx)) (get-mark-fn entry)
+                                 entry `(,str)))))))
     (progress-reporter-done prep)
     gited-branch-alist))
 
@@ -2822,7 +2854,10 @@ in the active region."
       (prog1 count
         (if (zerop count)
             (message "No marked branches")
-          (message "%d marked %s" count (if (> count 1) "branches" "branch")))))))
+          (message "%d marked %s"
+                   count
+                   (if (> count 1)
+                       "branches" "branch")))))))
 
 
 ;;; Mode map.
@@ -2965,11 +3000,13 @@ of column descriptors."
          ((= n gited-author-idx)
           (add-text-properties
            pos (point)
-           `(invisible gited-hide-details-author font-lock-face ,gited-author-face)))
+           `(invisible gited-hide-details-author
+                       font-lock-face ,gited-author-face)))
          ((= n gited-date-idx)
           (add-text-properties
            pos (point)
-           `(invisible gited-hide-details-date font-lock-face ,gited-date-time-face)))
+           `(invisible gited-hide-details-date
+                       font-lock-face ,gited-date-time-face)))
          ((= n gited-branch-idx)
           (put-text-property
            pos (point)
