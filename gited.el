@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 07 11:59:33 JST 2017
+;; Last-Updated: Sun May 07 18:30:33 JST 2017
 ;;           By: calancha
-;;     Update #: 585
+;;     Update #: 586
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2628,7 +2628,8 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
                  (time-max
                   (car
                    (cl-find-if
-                    (lambda (x) (string= (cadr x) fn)) gited-branch-alist)))
+                    (lambda (x)
+                      (string= (nth 3 x) fn)) gited-branch-alist)))
                  (time-min (time-subtract time-max (days-to-time (or days 30))))
                  (args (list "log"
                              (format "--after=%s"
