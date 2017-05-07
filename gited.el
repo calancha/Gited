@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 07 18:30:33 JST 2017
+;; Last-Updated: Sun May 07 19:02:46 JST 2017
 ;;           By: calancha
-;;     Update #: 586
+;;     Update #: 587
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1114,9 +1114,11 @@ as well."
         ("tags" (error "Delete tags not implemented!"))
         ("local"
          (if (zerop (gited-git-command
-                     (delete "" `("branch" "--delete"
-                                  ,(if force "--force" "")
-                                  ,branch))
+                     ;; --delete --force as shortcut of -D doesn't exist
+                     ;; in old Git versions.
+                     `("branch"
+                       ,(if force "-D" "--delete")
+                       ,branch)
                      buf))
              (progn
                (gited-goto-branch br-after)
@@ -2587,6 +2589,10 @@ object files--just `.o' will mark more than you might think."
             (and fn (string-match-p regexp fn))))
      "matching branch")))
 
+(defun gited-date-string-to-time (str)
+  (apply #'encode-time
+	 (parse-time-string str)))
+
 (defun gited-mark-branches-containing-regexp (regexp &optional marker-char days)
   "Mark all branches containing REGEXP in some commit message.
 A prefix argument means to unmark them instead.
@@ -2626,10 +2632,12 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
           (gited-get-branchname)
           (let* ((fn (gited-get-branchname))
                  (time-max
-                  (car
-                   (cl-find-if
-                    (lambda (x)
-                      (string= (nth 3 x) fn)) gited-branch-alist)))
+		  (gited-date-string-to-time
+		   (car
+		    (cddr
+		     (cl-find-if
+		      (lambda (x)
+			(string= (nth 3 x) fn)) gited-branch-alist)))))
                  (time-min (time-subtract time-max (days-to-time (or days 30))))
                  (args (list "log"
                              (format "--after=%s"
