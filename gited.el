@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 07 19:02:46 JST 2017
+;; Last-Updated: Sun May 07 19:35:18 JST 2017
 ;;           By: calancha
-;;     Update #: 587
+;;     Update #: 588
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2645,7 +2645,7 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
                              (format "--before=%s"
                                      (format-time-string "%F" time-max))
                              (format "--grep=%s" regexp)
-                             fn)))
+                             fn "--")))
             (with-temp-buffer
               (gited-git-command args (current-buffer))
               (not (string= "" (buffer-string))))))
