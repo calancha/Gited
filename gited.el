@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 07 19:35:18 JST 2017
+;; Last-Updated: Sun May 07 23:38:38 JST 2017
 ;;           By: calancha
-;;     Update #: 588
+;;     Update #: 589
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -57,28 +57,28 @@
 ;;   `gited-branch-name-face', `gited-buffer',
 ;;   `gited-buffer-name', `gited-commit-idx',
 ;;   `gited-commit-msg-face', `gited-current-branch',
-;;   `gited-date-format', `gited-date-idx',
-;;   `gited-date-regexp', `gited-date-time-face',
-;;   `gited-del-char', `gited-deletion-branch-face',
-;;   `gited-deletion-face', `gited-flag-mark-face',
-;;   `gited-flag-mark-line-face', `gited-header',
-;;   `gited-list-format', `gited-list-refs-format-command',
-;;   `gited-log-buffer', `gited-mark-face',
-;;   `gited-mark-idx', `gited-marker-char',
-;;   `gited-mode', `gited-mode-map',
-;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
-;;   `gited-op-string', `gited-output-buffer',
-;;   `gited-output-buffer-name', `gited-re-mark',
-;;   `gited-ref-kind', `gited-section-highlight-face',
-;;   `gited-toplevel-dir'.
+;;   `gited-date-idx', `gited-date-regexp',
+;;   `gited-date-time-face', `gited-del-char',
+;;   `gited-deletion-branch-face', `gited-deletion-face',
+;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
+;;   `gited-header', `gited-list-format',
+;;   `gited-list-refs-format-command', `gited-log-buffer',
+;;   `gited-mark-face', `gited-mark-idx',
+;;   `gited-marker-char', `gited-mode',
+;;   `gited-mode-map', `gited-modified-branch',
+;;   `gited-new-or-deleted-files-re', `gited-op-string',
+;;   `gited-output-buffer', `gited-output-buffer-name',
+;;   `gited-re-mark', `gited-ref-kind',
+;;   `gited-section-highlight-face', `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
-;;   `gited-current-branch-face', `gited-expert',
-;;   `gited-patch-options', `gited-patch-program',
-;;   `gited-protected-branches', `gited-reset-mode',
-;;   `gited-short-log-cmd', `gited-switches',
-;;   `gited-use-header-line', `gited-verbose'.
+;;   `gited-current-branch-face', `gited-date-format',
+;;   `gited-expert', `gited-patch-options',
+;;   `gited-patch-program', `gited-protected-branches',
+;;   `gited-reset-mode', `gited-short-log-cmd',
+;;   `gited-switches', `gited-use-header-line',
+;;   `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -143,13 +143,13 @@
 ;;   `gited-bisecting-p', `gited-branch-exists-p',
 ;;   `gited-buffer-p', `gited-current-branch',
 ;;   `gited-current-branches-with-marks', `gited-current-state-list',
-;;   `gited-dir-under-Git-control-p', `gited-fontify-current-branch',
-;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
-;;   `gited-get-branchname', `gited-get-commit',
-;;   `gited-get-date', `gited-get-element-in-row',
-;;   `gited-get-last-commit-time', `gited-get-mark',
-;;   `gited-get-marked-branches', `gited-git-command',
-;;   `gited-git-command-on-region',
+;;   `gited-date-string-to-time', `gited-dir-under-Git-control-p',
+;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
+;;   `gited-format-columns-of-files', `gited-get-branchname',
+;;   `gited-get-commit', `gited-get-date',
+;;   `gited-get-element-in-row', `gited-get-last-commit-time',
+;;   `gited-get-mark', `gited-get-marked-branches',
+;;   `gited-git-command', `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -406,7 +406,7 @@ and sizes."
   :type 'boolean
   :group 'gited)
 
-(defvar gited-date-format "%F %R"
+(defcustom gited-date-format "%F %R"
   "Format to display the date in `gited-buffer'.")
 
 (defcustom gited-current-branch-face 'font-lock-keyword-face

@@ -74,9 +74,14 @@
               (gited-mark-branches-containing-regexp "Update")
               (should (= 1 (gited-number-marked)))
               (gited-unmark-all-marks))
+            (gited-copy-branch "foo" "bar")
             (gited-delete-branch "foo" 'force)
             (gited-update)
-            (should-not (gited-branch-exists-p "foo")))
+            (should-not (gited-branch-exists-p "foo"))
+            (gited-rename-branch "bar" "foo") ; Asynchronous.
+            (while gited-branch-after-op
+              (sit-for 0.05))
+            (should (gited-branch-exists-p "foo")))
         (delete-directory dir 'recursive)))))
 
 (provide 'gited-tests)
