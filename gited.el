@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 07 23:38:38 JST 2017
+;; Last-Updated: Mon May 08 00:29:59 JST 2017
 ;;           By: calancha
-;;     Update #: 589
+;;     Update #: 590
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -407,7 +407,9 @@ and sizes."
   :group 'gited)
 
 (defcustom gited-date-format "%F %R"
-  "Format to display the date in `gited-buffer'.")
+  "Format to display the date in `gited-buffer'."
+  :type 'string
+  :group 'gited)
 
 (defcustom gited-current-branch-face 'font-lock-keyword-face
   "Face used for displaying current checkout branch."
