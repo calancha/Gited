@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sat May 20 20:58:36 JST 2017
+;; Last-Updated: Sat May 20 21:07:38 JST 2017
 ;;           By: calancha
-;;     Update #: 591
+;;     Update #: 592
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1064,7 +1064,7 @@ Interactively with a prefix argument prompts for the reset mode.
              ("g" . "merged") ("k" . "keep")))
           (mode
            (if current-prefix-arg
-               (cdr (assoc 
+               (cdr (assoc
                      (completing-read
                       "Reset mode (s = soft, m = mixed, h = hard, \
 g = merged, k = keep): "
@@ -1447,7 +1447,7 @@ after checkout."
       (setq create-or-del-files-p
             (re-search-forward gited-new-or-deleted-files-re nil t))
       (if (not (zerop (gited-git-command-on-region '("apply" "--check"))))
-          (error "Cannot apply patch at '%s'.  Please check."
+          (error "Cannot apply patch at '%s'.  Please check"
                  (buffer-name buf-patch))
         (gited-git-command-on-region '("apply"))
         (when create-or-del-files-p
