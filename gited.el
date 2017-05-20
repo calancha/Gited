@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Mon May 08 00:29:59 JST 2017
+;; Last-Updated: Sat May 20 20:58:36 JST 2017
 ;;           By: calancha
-;;     Update #: 590
+;;     Update #: 591
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -870,7 +870,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (let ((unmerged (gited--get-unmerged-branches)))
         (dolist (x unmerged)
           (when (string= b x)
-            (error "Cannot delete unmerged branches. Try C-u %s"
+            (error "Cannot delete unmerged branches.  Try C-u %s"
                    (substitute-command-keys (this-command-keys)))))))))
 
 (defun gited--merged-branch-p (branch)
@@ -1125,7 +1125,7 @@ as well."
              (progn
                (gited-goto-branch br-after)
                (message "Delete branch '%s'!" branch))
-           (error "Cannot delete unmerged branch '%s'. Try C-u %s"
+           (error "Cannot delete unmerged branch '%s'.  Try C-u %s"
                   branch
                   (substitute-command-keys "\\[gited-do-flagged-delete\]"))))
         ("remote"
