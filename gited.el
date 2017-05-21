@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 14:43:41 JST 2017
+;; Last-Updated: Sun May 21 14:59:19 JST 2017
 ;;           By: calancha
-;;     Update #: 597
+;;     Update #: 599
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -863,11 +863,11 @@ You can then feed the file name(s) to other commands with \\[yank]."
   (let ((args `("branch" "--merged" ,(car (gited-trunk-branches)))))
     (gited--get-branches-from-command args)))
 
-(defun gited--check-unmerged-marked-branches ()
-  (let ((marked-branches (or (gited-get-marked-branches)
+(defun gited--check-unmerged-marked-branches (&optional marker)
+  (let ((marked-branches (or (gited-get-marked-branches marker)
                              (list (gited-get-branchname)))))
     (dolist (b marked-branches)
-      (let ((unmerged (gited--get-unmerged-branches)))
+      (let ((unmerged (ignore-errors (gited--get-unmerged-branches))))
         (dolist (x unmerged)
           (when (string= b x)
             (error "Cannot delete unmerged branches.  Try C-u %s"
@@ -1146,7 +1146,7 @@ as well."
    (let ((prefix current-prefix-arg))
      (list prefix (equal prefix '(4)))))
   (unless force
-    (gited--check-unmerged-marked-branches))
+    (gited--check-unmerged-marked-branches gited-del-char))
   (gited-internal-do-deletions
    ;; this may move point if ARG is an integer
    (gited-map-over-marks (cons (or (gited-get-branchname)
@@ -1257,7 +1257,7 @@ as well."
          (regexp (concat "^" (regexp-quote (char-to-string gited-marker-char))))
          case-fold-search)
     (unless force
-      (gited--check-unmerged-marked-branches))
+      (gited--check-unmerged-marked-branches gited-del-char))
     (if (save-excursion (goto-char (point-min))
                         (re-search-forward regexp nil t))
         (progn
@@ -2383,12 +2383,12 @@ reach the beginning of the buffer."
         (funcall fn br-name mark)
         (forward-line)))))
 
-(defun gited-get-marked-branches ()
+(defun gited-get-marked-branches (&optional marker)
   "Return a list of branches currently marked."
   (delq nil
         (mapcar (lambda (e)
                   (when (equal (string-to-char (cdr e))
-                               gited-marker-char)
+                               (or marker gited-marker-char))
                     (car e)))
                 (gited-current-state-list))))
 
