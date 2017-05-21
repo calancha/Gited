@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 13:54:34 JST 2017
+;; Last-Updated: Sun May 21 14:26:48 JST 2017
 ;;           By: calancha
-;;     Update #: 595
+;;     Update #: 596
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1156,6 +1156,31 @@ as well."
    arg force)
   (run-hooks 'gited-after-change-hook))
 
+;; Copy `with-current-buffer-window' definition to support Emacs-24.3.
+(defmacro gited-with-current-buffer-window (buffer-or-name action
+                                            quit-function &rest body)
+  "Evaluate BODY with a buffer BUFFER-OR-NAME current and show that buffer.
+This construct is like `with-temp-buffer-window' but unlike that
+makes the buffer specified by BUFFER-OR-NAME current for running
+BODY."
+  (declare (debug t))
+  (let ((buffer (make-symbol "buffer"))
+	(window (make-symbol "window"))
+	(value (make-symbol "value")))
+    (macroexp-let2* nil ((vbuffer-or-name buffer-or-name)
+			 (vaction action)
+			 (vquit-function quit-function))
+      `(let* ((,buffer (temp-buffer-window-setup ,vbuffer-or-name))
+	      (standard-output ,buffer)
+	      ,window ,value)
+	 (with-current-buffer ,buffer
+	   (setq ,value (progn ,@body))
+	   (setq ,window (temp-buffer-window-show ,buffer ,vaction)))
+
+	 (if (functionp ,vquit-function)
+	     (funcall ,vquit-function ,window ,value)
+	   ,value)))))
+
 (defun gited-mark-pop-up (buffer-or-name op-symbol branches function &rest args)
   "Return FUNCTION's result on ARGS after showing which branches are marked.
 Displays the branch names in a window showing a buffer named
@@ -1183,7 +1208,7 @@ argument or confirmation)."
           (display-buffer-mark-dedicated 'soft))
       (ignore op-symbol) ; ignore unused symbol.
       (with-current-buffer buffer
-        (with-current-buffer-window
+        (gited-with-current-buffer-window
          buffer
          (cons 'display-buffer-below-selected
                '((window-height . fit-window-to-buffer)))
