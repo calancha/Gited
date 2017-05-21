@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 22:37:59 JST 2017
+;; Last-Updated: Sun May 21 22:53:34 JST 2017
 ;;           By: calancha
-;;     Update #: 604
+;;     Update #: 605
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -48,7 +48,7 @@
 ;;  Internal variables defined here:
 ;;
 ;;   `gited--hide-details-set', `gited--op',
-;;   `gited--revert-commit)', `gited--running-async-op',
+;;   `gited--revert-commit', `gited--running-async-op',
 ;;   `gited-actual-switches', `gited-after-change-hook',
 ;;   `gited-author-face', `gited-author-idx',
 ;;   `gited-bisect-buf-name', `gited-bisect-buffer',
@@ -68,7 +68,7 @@
 ;;   `gited-marker-char', `gited-mode',
 ;;   `gited-mode-map', `gited-modified-branch',
 ;;   `gited-new-or-deleted-files-re', `gited-op-string',
-;;   `gited-original-buffer)', `gited-output-buffer',
+;;   `gited-original-buffer', `gited-output-buffer',
 ;;   `gited-output-buffer-name', `gited-re-mark',
 ;;   `gited-ref-kind', `gited-section-highlight-face',
 ;;   `gited-toplevel-dir'.
