@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 13:51:11 JST 2017
+;; Last-Updated: Sun May 21 13:54:34 JST 2017
 ;;           By: calancha
-;;     Update #: 594
+;;     Update #: 595
 ;;
 ;; Features that might be required by this library:
 ;;
