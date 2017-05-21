@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 20:46:40 JST 2017
+;; Last-Updated: Sun May 21 22:34:02 JST 2017
 ;;           By: calancha
-;;     Update #: 602
+;;     Update #: 603
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1489,7 +1489,7 @@ and display the output buffer in other window."
                (setq default-directory (file-name-as-directory toplevel))
                (if (not (zerop (gited-git-command (nconc '("add") files))))
                    (error "Cannot add files.  Please check")
-                 (message "Successfully added files %s"
+                 (message "Successfully added files: %s"
                           (mapconcat #'shell-quote-argument files " ")))))))))
 
 (defun gited-commit (comment &optional author)
