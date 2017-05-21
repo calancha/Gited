@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 22:34:02 JST 2017
+;; Last-Updated: Sun May 21 22:37:59 JST 2017
 ;;           By: calancha
-;;     Update #: 603
+;;     Update #: 604
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -990,7 +990,7 @@ date are hidden from view."
   "Update `gited-branch-alist' and redisplay the list of branches."
   (interactive)
   (unless (derived-mode-p major-mode 'gited-mode)
-    (error "Gited mode cannot be enabled in this buffer"))
+    (error "Cannot enable Gited mode in this buffer"))
   (let ((target-br (ignore-errors (gited-get-branchname)))
         (at-headr-p (gited-at-header-line-p))
         (hide-details gited-hide-details-mode))
