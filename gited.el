@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 14:59:19 JST 2017
+;; Last-Updated: Sun May 21 18:04:33 JST 2017
 ;;           By: calancha
-;;     Update #: 599
+;;     Update #: 601
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -48,18 +48,19 @@
 ;;  Internal variables defined here:
 ;;
 ;;   `gited--hide-details-set', `gited--op',
-;;   `gited--running-async-op', `gited-actual-switches',
-;;   `gited-after-change-hook', `gited-author-face',
-;;   `gited-author-idx', `gited-bisect-buf-name',
-;;   `gited-bisect-buffer', `gited-bisect-buffer',
-;;   `gited-bisect-output-name', `gited-branch-after-op',
-;;   `gited-branch-alist', `gited-branch-idx',
-;;   `gited-branch-name-face', `gited-buffer',
-;;   `gited-buffer-name', `gited-commit-idx',
-;;   `gited-commit-msg-face', `gited-current-branch',
-;;   `gited-date-idx', `gited-date-regexp',
-;;   `gited-date-time-face', `gited-del-char',
-;;   `gited-deletion-branch-face', `gited-deletion-face',
+;;   `gited--revert-commit)', `gited--running-async-op',
+;;   `gited-actual-switches', `gited-after-change-hook',
+;;   `gited-author-face', `gited-author-idx',
+;;   `gited-bisect-buf-name', `gited-bisect-buffer',
+;;   `gited-bisect-buffer', `gited-bisect-output-name',
+;;   `gited-branch-after-op', `gited-branch-alist',
+;;   `gited-branch-idx', `gited-branch-name-face',
+;;   `gited-buffer', `gited-buffer-name',
+;;   `gited-commit-idx', `gited-commit-msg-face',
+;;   `gited-current-branch', `gited-date-idx',
+;;   `gited-date-regexp', `gited-date-time-face',
+;;   `gited-del-char', `gited-deletion-branch-face',
+;;   `gited-deletion-face', `gited-edit-commit-mode-map',
 ;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
 ;;   `gited-header', `gited-list-format',
 ;;   `gited-list-refs-format-command', `gited-log-buffer',
@@ -67,9 +68,10 @@
 ;;   `gited-marker-char', `gited-mode',
 ;;   `gited-mode-map', `gited-modified-branch',
 ;;   `gited-new-or-deleted-files-re', `gited-op-string',
-;;   `gited-output-buffer', `gited-output-buffer-name',
-;;   `gited-re-mark', `gited-ref-kind',
-;;   `gited-section-highlight-face', `gited-toplevel-dir'.
+;;   `gited-original-buffer)', `gited-output-buffer',
+;;   `gited-output-buffer-name', `gited-re-mark',
+;;   `gited-ref-kind', `gited-section-highlight-face',
+;;   `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -95,7 +97,8 @@
 ;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
 ;;   `gited-delete-branch', `gited-diff-with-branch',
 ;;   `gited-do-delete', `gited-do-flagged-delete',
-;;   `gited-do-kill-lines', `gited-extract-patches',
+;;   `gited-do-kill-lines', `gited-edit-commit-mode',
+;;   `gited-extract-patches', `gited-finish-commit-edit',
 ;;   `gited-flag-branch-deletion', `gited-goto-branch',
 ;;   `gited-goto-first-branch', `gited-goto-last-branch',
 ;;   `gited-kill-line', `gited-list-branches',
@@ -111,16 +114,16 @@
 ;;   `gited-origin', `gited-prev-line',
 ;;   `gited-prev-marked-branch', `gited-pull',
 ;;   `gited-push', `gited-rename-branch',
-;;   `gited-reset-branch', `gited-set-branch-upstream',
-;;   `gited-show-commit', `gited-stash',
-;;   `gited-stash-apply', `gited-stash-branch',
-;;   `gited-stash-drop', `gited-stash-pop',
-;;   `gited-status', `gited-summary',
-;;   `gited-sync-with-trunk', `gited-toggle-marks',
-;;   `gited-unmark', `gited-unmark-all-branches',
-;;   `gited-unmark-all-marks', `gited-unmark-backward',
-;;   `gited-update', `gited-visit-branch-sources',
-;;   `gited-why'.
+;;   `gited-reset-branch', `gited-revert-commit',
+;;   `gited-set-branch-upstream', `gited-show-commit',
+;;   `gited-stash', `gited-stash-apply',
+;;   `gited-stash-branch', `gited-stash-drop',
+;;   `gited-stash-pop', `gited-status',
+;;   `gited-summary', `gited-sync-with-trunk',
+;;   `gited-toggle-marks', `gited-unmark',
+;;   `gited-unmark-all-branches', `gited-unmark-all-marks',
+;;   `gited-unmark-backward', `gited-update',
+;;   `gited-visit-branch-sources', `gited-why'.
 ;;
 ;;  Non-interactive functions defined here:
 ;;
@@ -141,9 +144,10 @@
 ;;   `gited--valid-ref-p', `gited-all-branches',
 ;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
 ;;   `gited-bisecting-p', `gited-branch-exists-p',
-;;   `gited-buffer-p', `gited-current-branch',
-;;   `gited-current-branches-with-marks', `gited-current-state-list',
-;;   `gited-date-string-to-time', `gited-dir-under-Git-control-p',
+;;   `gited-buffer-p', `gited-commit-title',
+;;   `gited-current-branch', `gited-current-branches-with-marks',
+;;   `gited-current-state-list', `gited-date-string-to-time',
+;;   `gited-dir-under-Git-control-p', `gited-edit-commit',
 ;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
 ;;   `gited-format-columns-of-files', `gited-get-branchname',
 ;;   `gited-get-commit', `gited-get-date',
@@ -901,12 +905,16 @@ You can then feed the file name(s) to other commands with \\[yank]."
         (forward-line)))
     (nreverse res)))
 
-(defun gited-last-commit-title ()
-  "Return title of the last commit."
-  (let ((args '("log" "--pretty=format:'%s'" "-n1")))
+(defun gited-commit-title (commit)
+  "Return title of COMMIT, a string."
+  (let ((args `("log" "--pretty=format:'%s'" "-n1" ,commit)))
     (with-temp-buffer
       (gited-git-command args (current-buffer) nil 'unquote)
       (buffer-string))))
+
+(defun gited-last-commit-title ()
+  "Return title of the last commit."
+  (gited-commit-title "HEAD"))
 
 ;; Non-nil while running an asynchronous Gited subprocess.
 (defvar gited--running-async-op nil)
@@ -1527,6 +1535,69 @@ A prefix argument prompts for AUTHOR."
           (error "Cannot commit patch at %s" (buffer-name buf-patch)))))))
 
 
+
+;;; Revert a commit.
+;; Following is inspired `edit-kbd-macro'.
+(defvar gited-original-buffer)
+(defvar gited--revert-commit)
+  
+(defvar gited-edit-commit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-c\C-c" 'gited-finish-commit-edit)
+    map))
+
+(defun gited-finish-commit-edit ()
+  (interactive)
+  (unless (eq major-mode 'gited-edit-commit-mode)
+    (error
+     "This command is valid only in buffers created by `gited-edit-commit-mode'"))
+  (goto-char 1)
+  (while (re-search-forward "^#.*
+?" nil t)
+    (replace-match ""))
+  (unless (zerop (gited-git-command `("revert" "--no-commit" ,gited--revert-commit)))
+    (error "Cannot revert commit %s" gited--revert-commit))
+  (unless (zerop (gited-git-command `("commit" "-m" ,(buffer-string))))
+    (error "Reverted commit %s but cannot commit the revert" gited--revert-commit))
+  (switch-to-buffer gited-original-buffer)
+  (run-hooks 'gited-after-change-hook))
+
+(defun gited-edit-commit-mode ()
+  (interactive)
+  (error "This mode can be enabled only by `gited-edit-commit'"))
+(put 'gited-edit-commit-mode 'mode-class 'special)
+
+(defun gited-edit-commit (commit)
+  "Edit message to revert a commit."
+  (let ((string (format "Revert '%s'\n\nThis reverts commit %s\n\n%s\n%s\n%s\n"
+                        (gited-commit-title commit)
+                        commit
+"# Please enter the commit message for your changes. Lines starting"
+"# with '#' will be ignored, and an empty message aborts the commit."
+"# Press 'C-c C-c' once done to commit.  Press  C-x k RET to cancel.")))
+    (let ((oldbuf (current-buffer))
+	       (buf (get-buffer-create "*Edit Commit*")))
+	  (switch-to-buffer buf)
+	  (kill-all-local-variables)
+	  (use-local-map gited-edit-commit-mode-map)
+	  (setq buffer-read-only nil)
+      (setq major-mode 'gited-edit-commit-mode)
+	  (setq mode-name "Edit Commit")
+	  (set (make-local-variable 'gited-original-buffer) oldbuf)
+	  (set (make-local-variable 'gited--revert-commit) commit)
+	  (erase-buffer)
+      (insert string)
+	  (recenter '(4)))))
+
+(defun gited-revert-commit (commit)
+  (interactive
+   (let ((last-commit
+          (with-temp-buffer
+            (gited-git-command '("rev-parse" "HEAD") (current-buffer))
+            (buffer-substring 1 (1- (point-max))))))
+     (list (read-string "Revert commit: " last-commit))))
+  (gited-edit-commit commit))
+
 ;;; Common operations on Git repositiores: pull, diff, log, etc.
 
 (defun gited-number-of-commits ()
