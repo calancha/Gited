@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 13:44:53 JST 2017
+;; Last-Updated: Sun May 21 13:51:11 JST 2017
 ;;           By: calancha
-;;     Update #: 593
+;;     Update #: 594
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1778,8 +1778,8 @@ see the newest N commits then use `\\[gited-log-last-n-commits\]'."
     buf))
 
 (defun gited-log (branch start-date end-date &optional short)
-  "Call git-log on BRANCH between START-DATE and END-DATE.
-If optional arg SHORT is non-nil use a short format."
+  "Show Git log for BRANCH between START-DATE and END-DATE.
+If optional arg SHORT is non-nil, then use a short format."
   (interactive
    (let* ((branch (gited-get-branchname))
           (last-commit-time
