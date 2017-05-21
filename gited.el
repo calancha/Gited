@@ -1779,7 +1779,9 @@ see the newest N commits then use `\\[gited-log-last-n-commits\]'."
 
 (defun gited-log (branch start-date end-date &optional short)
   "Show Git log for BRANCH between START-DATE and END-DATE.
-If optional arg SHORT is non-nil, then use a short format."
+If optional arg SHORT is non-nil, then use a short format.
+
+Interactively, prompt for START-DATE and END-DATE."
   (interactive
    (let* ((branch (gited-get-branchname))
           (last-commit-time
