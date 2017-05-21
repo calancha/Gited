@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 18:04:33 JST 2017
+;; Last-Updated: Sun May 21 20:46:40 JST 2017
 ;;           By: calancha
-;;     Update #: 601
+;;     Update #: 602
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1359,7 +1359,9 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
        pos (point-at-eol) 'face gited-commit-msg-face))))
 
 (defun gited-checkout-branch (branch)
-  "Checkout BRANCH."
+  "Checkout BRANCH.
+If the gited buffer lists local branches and BRANCH is not
+local, then prompt for a branch name where to check out BRANCH."
   (interactive
    (list (completing-read "Checkout branch: "
                           (gited-all-branches)
