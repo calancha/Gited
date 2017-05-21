@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.3
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; Last-Updated: Sat May 20 21:07:38 JST 2017
+;; Last-Updated: Sun May 21 13:44:53 JST 2017
 ;;           By: calancha
-;;     Update #: 592
+;;     Update #: 593
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1455,15 +1455,15 @@ after checkout."
         (and update (gited-update))
         (message "Patch applied successfully!")))))
 
-(defun gited-add-patched-files (files &optional async)
-  "Call git-add on FILES.
-If ASYNC is non-nil, then call `git-add -p' and
-display the output buffer in other window."
+(defun gited-add-patched-files (files &optional ask)
+  "Stage FILES for next commit.
+If ASK is non-nil, then prompt the user before to add every hunk
+and display the output buffer in other window."
   (interactive
    (list (gited-modified-files) current-prefix-arg))
   (unless files (error "No modified files"))
   (let ((buf (gited--output-buffer)))
-    (cond (async
+    (cond (ask
            ;; Output buffer must be editable.
            (with-current-buffer buf
              (setq buffer-read-only nil)
