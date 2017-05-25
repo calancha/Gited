@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun May 21 22:53:34 JST 2017
+;; Last-Updated: Thu May 25 09:15:28 JST 2017
 ;;           By: calancha
-;;     Update #: 605
+;;     Update #: 606
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -76,11 +76,11 @@
 ;;  Coustom variables defined here:
 ;;
 ;;   `gited-current-branch-face', `gited-date-format',
-;;   `gited-expert', `gited-patch-options',
-;;   `gited-patch-program', `gited-protected-branches',
-;;   `gited-reset-mode', `gited-short-log-cmd',
-;;   `gited-switches', `gited-use-header-line',
-;;   `gited-verbose'.
+;;   `gited-delete-unmerged-branches', `gited-expert',
+;;   `gited-patch-options', `gited-patch-program',
+;;   `gited-protected-branches', `gited-reset-mode',
+;;   `gited-short-log-cmd', `gited-switches',
+;;   `gited-use-header-line', `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -407,6 +407,13 @@ and sizes."
 
 (defcustom gited-expert nil
   "If non-nil, don't ask for confirmation for some operations on branches."
+  :type 'boolean
+  :group 'gited)
+
+(defcustom gited-delete-unmerged-branches nil
+  "If non-nil, `gited-do-delete' delete non-fully merged branches.
+Otherwise, deletion of unmerged branches require call `gited-do-delete'
+with a prefix."
   :type 'boolean
   :group 'gited)
 
@@ -1110,6 +1117,7 @@ as well."
                       (gited-prev-branch)
                       (gited-current-branch)))
         (buf (gited--output-buffer))
+        (force (or gited-delete-unmerged-branches force))
         (inhibit-read-only t))
     (setq gited-output-buffer buf)
     (with-current-buffer buf (erase-buffer))
@@ -1263,6 +1271,7 @@ as well."
   (interactive "P")
   (let* ((gited-marker-char gited-del-char)
          (regexp (concat "^" (regexp-quote (char-to-string gited-marker-char))))
+         (force (or gited-delete-unmerged-branches force))
          case-fold-search)
     (unless force
       (gited--check-unmerged-marked-branches gited-del-char))
