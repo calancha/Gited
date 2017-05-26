@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu May 25 09:15:28 JST 2017
+;; Last-Updated: Fri May 26 21:43:04 JST 2017
 ;;           By: calancha
-;;     Update #: 606
+;;     Update #: 607
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1816,7 +1816,7 @@ show similar info as that command."
                        vc-git-program branch))
           (inhibit-read-only t))
       (setq gited-output-buffer buf
-            gited-op-string (format "Set branch '%s' upsetream" branch))
+            gited-op-string (format "Set branch '%s' upstream" branch))
       (with-current-buffer buf (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
