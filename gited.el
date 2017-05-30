@@ -253,7 +253,7 @@ case the default value for this variable should be changed."
 
 (defvar-local gited--hide-details-set nil)
 
-(defvar-local gited-ref-kinda nil
+(defvar-local gited-ref-kind nil
   "The kind of Git reference displayed in `gited-buffer'.
 It must be `local', `remote' or `tags'.")
 (put 'gited-ref-kind 'permanent-local t)
