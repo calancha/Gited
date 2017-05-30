@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri May 26 21:43:04 JST 2017
+;; Last-Updated: Tue May 30 11:46:53 JST 2017
 ;;           By: calancha
-;;     Update #: 607
+;;     Update #: 608
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -417,10 +417,9 @@ with a prefix."
   :type 'boolean
   :group 'gited)
 
-(defcustom gited-date-format "%F %R"
-  "Format to display the date in `gited-buffer'."
-  :type 'string
-  :group 'gited)
+;; Must be parseable by `date-to-time'.
+(defvar gited-date-format "%F %R"
+  "Format to display the date in `gited-buffer'.")
 
 (defcustom gited-current-branch-face 'font-lock-keyword-face
   "Face used for displaying current checkout branch."
