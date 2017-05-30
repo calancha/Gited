@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 30 20:32:35 JST 2017
+;; Last-Updated: Tue May 30 20:54:16 JST 2017
 ;;           By: calancha
-;;     Update #: 610
+;;     Update #: 611
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2401,9 +2401,7 @@ reach the beginning of the buffer."
                                gited-date-format
                                (apply #'encode-time
                                       (decode-time
-                                       (if (< emacs-major-version 25)
-                                           (seconds-to-time time-secs)
-                                         time-secs)))))
+                                       (seconds-to-time time-secs)))))
               (get-mark-fn (x)
                            (let ((table
                                   (save-excursion
