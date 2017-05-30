@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 30 22:42:11 JST 2017
+;; Last-Updated: Wed May 31 08:54:18 JST 2017
 ;;           By: calancha
-;;     Update #: 613
+;;     Update #: 614
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -397,7 +397,7 @@ If you change this option, then you might want to change
 `gited-date-col-size' as well."
   :type '(choice
           (string :tag "Short" "%F %R")
-          (string :tag "Full" "%FT%T%Z"))
+          (string :tag "Full" "%FT%T%z"))
   :group 'gited)
 
 (defun gited--list-format-init (&optional col-names col-sizes)
@@ -2394,12 +2394,37 @@ reach the beginning of the buffer."
            "Collecting brach info..."
            0 (length alist))))
     (cl-flet ((format-time-fn (time-secs &optional zone)
-                              (format-time-string
-                               gited-date-format
-                               (apply #'encode-time
-                                      (decode-time
-                                       (seconds-to-time time-secs) zone))
-                               (and zone (* 3600 zone))))
+                              (let ((zone-ok (>= emacs-major-version 25)))
+                                (cond (zone-ok
+                                       (format-time-string
+                                        gited-date-format
+                                        (apply #'encode-time
+                                               (decode-time
+                                                (seconds-to-time time-secs) zone))
+                                        (and zone (* 3600 zone))))
+                                      (t
+                                       (let ((time (decode-time
+                                                    (seconds-to-time time-secs)))
+                                             (gited-date-format
+                                              (if (string= gited-date-format "%F %R")
+                                                  "%F %R"
+                                                "%FT%T"))
+                                             date-str)
+                                         (when zone
+                                           (setf (car (last time)) (* 3600 zone)))
+                                         (setq date-str
+                                               (format-time-string
+                                                gited-date-format
+                                                (apply #'encode-time time)))
+                                         (when (and (not (string= gited-date-format "%F %R")) zone)
+                                           (if (= 0 zone)
+                                               (setq date-str (format "%s+0000" date-str))
+                                             (setq date-str (format "%s%s%s%d"
+                                                                    date-str
+                                                                    (if (> zone 0) "+" "-")
+                                                                    (if (> (abs zone) 999) "" "0")
+                                                                    (abs zone)))))
+                                         date-str)))))
               (get-mark-fn (x)
                            (let ((table
                                   (save-excursion
