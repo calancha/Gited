@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 30 11:56:43 JST 2017
+;; Last-Updated: Tue May 30 20:32:35 JST 2017
 ;;           By: calancha
-;;     Update #: 609
+;;     Update #: 610
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -57,13 +57,14 @@
 ;;   `gited-branch-idx', `gited-branch-name-face',
 ;;   `gited-buffer', `gited-buffer-name',
 ;;   `gited-commit-idx', `gited-commit-msg-face',
-;;   `gited-current-branch', `gited-date-idx',
-;;   `gited-date-regexp', `gited-date-time-face',
-;;   `gited-del-char', `gited-deletion-branch-face',
-;;   `gited-deletion-face', `gited-edit-commit-mode-map',
-;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
-;;   `gited-header', `gited-list-format',
-;;   `gited-list-refs-format-command', `gited-log-buffer',
+;;   `gited-current-branch', `gited-date-format',
+;;   `gited-date-idx', `gited-date-regexp',
+;;   `gited-date-time-face', `gited-del-char',
+;;   `gited-deletion-branch-face', `gited-deletion-face',
+;;   `gited-edit-commit-mode-map', `gited-flag-mark-face',
+;;   `gited-flag-mark-line-face', `gited-header',
+;;   `gited-list-format', `gited-list-refs-format-command',
+;;   `gited-log-buffer', `gited-mark-col-size',
 ;;   `gited-mark-face', `gited-mark-idx',
 ;;   `gited-marker-char', `gited-mode',
 ;;   `gited-mode-map', `gited-modified-branch',
@@ -75,12 +76,14 @@
 ;;
 ;;  Coustom variables defined here:
 ;;
-;;   `gited-current-branch-face', `gited-date-format',
-;;   `gited-delete-unmerged-branches', `gited-expert',
-;;   `gited-patch-options', `gited-patch-program',
-;;   `gited-protected-branches', `gited-reset-mode',
-;;   `gited-short-log-cmd', `gited-switches',
-;;   `gited-use-header-line', `gited-verbose'.
+;;   `gited-author-col-size', `gited-branch-col-size',
+;;   `gited-commit-col-size', `gited-current-branch-face',
+;;   `gited-date-col-size', `gited-delete-unmerged-branches',
+;;   `gited-expert', `gited-patch-options',
+;;   `gited-patch-program', `gited-protected-branches',
+;;   `gited-reset-mode', `gited-short-log-cmd',
+;;   `gited-switches', `gited-use-header-line',
+;;   `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -146,14 +149,14 @@
 ;;   `gited-bisecting-p', `gited-branch-exists-p',
 ;;   `gited-buffer-p', `gited-commit-title',
 ;;   `gited-current-branch', `gited-current-branches-with-marks',
-;;   `gited-current-state-list', `gited-date-string-to-time',
-;;   `gited-dir-under-Git-control-p', `gited-edit-commit',
-;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
-;;   `gited-format-columns-of-files', `gited-get-branchname',
-;;   `gited-get-commit', `gited-get-date',
-;;   `gited-get-element-in-row', `gited-get-last-commit-time',
-;;   `gited-get-mark', `gited-get-marked-branches',
-;;   `gited-git-command', `gited-git-command-on-region',
+;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
+;;   `gited-edit-commit', `gited-fontify-current-branch',
+;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
+;;   `gited-get-branchname', `gited-get-commit',
+;;   `gited-get-date', `gited-get-element-in-row',
+;;   `gited-get-last-commit-time', `gited-get-mark',
+;;   `gited-get-marked-branches', `gited-git-command',
+;;   `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -415,9 +418,7 @@ and sizes."
                            (t1 (aref (cadr row1) gited-date-idx))
                            (t2 (aref (cadr row2) gited-date-idx))
                            (earlierp
-                            (time-less-p
-                             (apply #'encode-time (parse-time-string t1))
-                             (apply #'encode-time (parse-time-string t2)))))
+                            (time-less-p (date-to-time t1) (date-to-time t2))))
                       (if reverse-order
                           earlierp
                         (not earlierp)))))
@@ -735,14 +736,13 @@ Thus, use \\[backward-page] to find the beginning of a group of errors."
 
 (defun gited-get-last-commit-time (branch)
   "Return last commit time of BRANCH."
-  (apply #'encode-time
-         (parse-time-string
-          (cadr
-           (cdr
-            (nth
-             (cl-position-if
-              (lambda (x) (equal branch (nth 3 x))) gited-branch-alist)
-             gited-branch-alist))))))
+  (date-to-time
+   (cadr
+    (cdr
+     (nth
+      (cl-position-if
+       (lambda (x) (equal branch (nth 3 x))) gited-branch-alist)
+      gited-branch-alist)))))
 
 (defun gited--get-column (col)
   (mapcar (lambda (x)
@@ -2704,10 +2704,6 @@ object files--just `.o' will mark more than you might think."
             (and fn (string-match-p regexp fn))))
      "matching branch")))
 
-(defun gited-date-string-to-time (str)
-  (apply #'encode-time
-	 (parse-time-string str)))
-
 (defun gited-mark-branches-containing-regexp (regexp &optional marker-char days)
   "Mark all branches containing REGEXP in some commit message.
 A prefix argument means to unmark them instead.
@@ -2747,7 +2743,7 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
           (gited-get-branchname)
           (let* ((fn (gited-get-branchname))
                  (time-max
-		  (gited-date-string-to-time
+		  (date-to-time
 		   (car
 		    (cddr
 		     (cl-find-if
