@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 30 21:00:39 JST 2017
+;; Last-Updated: Tue May 30 22:42:11 JST 2017
 ;;           By: calancha
-;;     Update #: 612
+;;     Update #: 613
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -375,7 +375,9 @@ Option -g do not show the author name."
 
 (defcustom gited-date-col-size 17
   "Size of date column."
-  :type 'integer
+  :type '(choice
+          (integer :tag "Short" 17)
+          (integer :tag "Full" 24))
   :group 'gited)
 
 (defcustom gited-branch-col-size 50
@@ -386,6 +388,16 @@ Option -g do not show the author name."
 (defcustom gited-commit-col-size 65
   "Size of commit column."
   :type 'integer
+  :group 'gited)
+
+;; Must be parseable by `date-to-time'.
+(defcustom gited-date-format "%F %R"
+  "Format to display the date in `gited-buffer'.
+If you change this option, then you might want to change
+`gited-date-col-size' as well."
+  :type '(choice
+          (string :tag "Short" "%F %R")
+          (string :tag "Full" "%FT%T%Z"))
   :group 'gited)
 
 (defun gited--list-format-init (&optional col-names col-sizes)
@@ -428,10 +440,6 @@ Otherwise, deletion of unmerged branches require call `gited-do-delete'
 with a prefix."
   :type 'boolean
   :group 'gited)
-
-;; Must be parseable by `date-to-time'.
-(defvar gited-date-format "%F %R"
-  "Format to display the date in `gited-buffer'.")
 
 (defcustom gited-current-branch-face 'font-lock-keyword-face
   "Face used for displaying current checkout branch."
@@ -2372,7 +2380,8 @@ reach the beginning of the buffer."
                       (when (stringp (car x)) ; No time: set it to beginning
                                               ; of epoch.
                         (push 0 x))
-                      (when (= (length x) 4) ; Drop time zone.
+                      (when (= (length x) 4) ; Group time an time zone within alist.
+                        (setf (car x) (cons (car x) (cadr x)))
                         (setf (cdr x) (cddr x)))
                       (when (and (stringp (car (last x))) ; If no Author, set
                                                           ; it Unknown.
@@ -2384,12 +2393,13 @@ reach the beginning of the buffer."
           (make-progress-reporter
            "Collecting brach info..."
            0 (length alist))))
-    (cl-flet ((format-time-fn (time-secs)
+    (cl-flet ((format-time-fn (time-secs &optional zone)
                               (format-time-string
                                gited-date-format
                                (apply #'encode-time
                                       (decode-time
-                                       (seconds-to-time time-secs)))))
+                                       (seconds-to-time time-secs) zone))
+                               (and zone (* 3600 zone))))
               (get-mark-fn (x)
                            (let ((table
                                   (save-excursion
@@ -2412,7 +2422,7 @@ reach the beginning of the buffer."
                                                         (current-buffer) nil)
                                      (buffer-string))))
                          ;; Format time in seconds as `gited-date-format'.
-                         (setf (car entry) (format-time-fn (car entry)))
+                         (setf (car entry) (format-time-fn (caar entry) (cdar entry)))
                          (append `(,(1+ idx)) (get-mark-fn entry)
                                  entry `(,str)))))))
     (progress-reporter-done prep)
