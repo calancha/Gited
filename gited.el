@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 30 11:46:53 JST 2017
+;; Last-Updated: Tue May 30 11:56:43 JST 2017
 ;;           By: calancha
-;;     Update #: 608
+;;     Update #: 609
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -374,6 +374,29 @@ Option -g do not show the author name."
           (const :tag "keep" "keep"))
   :group 'gited)
 
+(defvar gited-mark-col-size 2
+  "Size of mark column.")
+
+(defcustom gited-author-col-size 16
+  "Size of author column."
+  :type 'integer
+  :group 'gited)
+
+(defcustom gited-date-col-size 17
+  "Size of date column."
+  :type 'integer
+  :group 'gited)
+
+(defcustom gited-branch-col-size 50
+  "Size of branch column."
+  :type 'integer
+  :group 'gited)
+
+(defcustom gited-commit-col-size 65
+  "Size of commit column."
+  :type 'integer
+  :group 'gited)
+
 (defun gited--list-format-init (&optional col-names col-sizes)
   "Initialize `gited-list-format'.
 Optional arguments COL-NAMES and COL-SIZES are the column names
@@ -381,11 +404,11 @@ and sizes."
   (setq gited-actual-switches gited-switches)
   (setq gited-list-format
         (vector `(,(if col-names (nth 0 col-names) "M")
-                  ,(if col-sizes (nth 0 col-sizes) 2) t)
+                  ,(if col-sizes (nth 0 col-sizes) gited-mark-col-size) t)
                 `(,(if col-names (nth 1 col-names) "Authors")
-                  ,(if col-sizes (nth 1 col-sizes) 16) t)
+                  ,(if col-sizes (nth 1 col-sizes) gited-author-col-size) t)
                 `(,(if col-names (nth 2 col-names) "Date")
-                  ,(if col-sizes (nth 2 col-sizes) 17)
+                  ,(if col-sizes (nth 2 col-sizes) gited-date-col-size)
                   (lambda (row1 row2)
                     (let* ((reverse-order
                             (member "-r" (split-string gited-actual-switches)))
@@ -399,9 +422,9 @@ and sizes."
                           earlierp
                         (not earlierp)))))
                 `(,(if col-names (nth 3 col-names) "Branches")
-                  ,(if col-sizes (nth 3 col-sizes) 50) t)
+                  ,(if col-sizes (nth 3 col-sizes) gited-branch-col-size) t)
                 `(,(if col-names (nth 4 col-names) "Last Commit")
-                  ,(if col-sizes (nth 4 col-sizes) 65) t))))
+                  ,(if col-sizes (nth 4 col-sizes) gited-commit-col-size) t))))
 
 (setq gited-list-format (gited--list-format-init))
 
@@ -2419,8 +2442,10 @@ reach the beginning of the buffer."
            '("M" "Authors" "Date" "Branches" "Last Commit")))
         (col-sizes
          (if gited-hide-details-mode
-             '(2 50 -1 -1 65)
-           '(2 16 17 50 65))))
+             (list gited-mark-col-size gited-branch-col-size
+                   -1 -1 gited-commit-col-size)
+           (list gited-mark-col-size gited-author-col-size gited-date-col-size
+               gited-branch-col-size gited-commit-col-size))))
     (gited--list-format-init col-names col-sizes)
     (setq tabulated-list-format gited-list-format)
     (funcall (if gited-hide-details-mode
@@ -2436,17 +2461,22 @@ reach the beginning of the buffer."
 
 (defun gited--update-padding (undo)
   "Update columns padding after `gited-hide-details-mode'."
-  (let ((inhibit-read-only t))
+  (let ((inhibit-read-only t)
+        (align-to (if undo
+                      (+ gited-mark-col-size
+                         gited-author-col-size
+                         gited-date-col-size
+                         gited-branch-col-size 4)
+                    (+ gited-mark-col-size gited-branch-col-size 2))))
     (save-excursion
       (gited-goto-first-branch)
       (while (not (eobp))
         (gited-move-to-end-of-branchname)
         (skip-chars-backward " \t")
         (forward-char 1)
-        (when (equal (get-text-property (point) 'display)
-                     `(space :align-to ,(if undo 54 89)))
+        (unless (= (current-column) align-to)
           (put-text-property (point) (1+ (point))
-                             'display `(space :align-to ,(if undo 89 54)))
+                             'display `(space :align-to ,align-to))
           (delete-region (1+ (point))
                          (gited-move-to-end-of-branchname)))
         (forward-line 1))) nil))
