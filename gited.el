@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed May 31 09:46:13 JST 2017
+;; Last-Updated: Wed May 31 09:57:42 JST 2017
 ;;           By: calancha
-;;     Update #: 615
+;;     Update #: 616
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -376,8 +376,8 @@ Option -g do not show the author name."
 (defcustom gited-date-col-size 17
   "Size of date column."
   :type '(choice
-          (integer :tag "Short" 17)
-          (integer :tag "Full" 24))
+          (const :tag "Short" 17)
+          (const :tag "Full" 24))
   :group 'gited)
 
 (defcustom gited-branch-col-size 50
@@ -396,8 +396,8 @@ Option -g do not show the author name."
 If you change this option, then you might want to change
 `gited-date-col-size' as well."
   :type '(choice
-          (string :tag "Short" "%F %R")
-          (string :tag "Full" "%FT%T%z"))
+          (const :tag "Short" "%F %R")
+          (const :tag "Full" "%FT%T%z"))
   :group 'gited)
 
 (defun gited--list-format-init (&optional col-names col-sizes)
