@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed May 31 08:54:18 JST 2017
+;; Last-Updated: Wed May 31 09:46:13 JST 2017
 ;;           By: calancha
-;;     Update #: 614
+;;     Update #: 615
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2401,8 +2401,11 @@ reach the beginning of the buffer."
                                         (apply #'encode-time
                                                (decode-time
                                                 (seconds-to-time time-secs) zone))
-                                        (and zone (* 3600 zone))))
-                                      (t
+                                        ;; FIXME: Would work for  a zone as: +0530 ?
+                                        (and zone (* 36 zone)))) 
+                                      (t ;; HACK: Workaround for Emacs versions < 25 that don't accept
+                                         ;; ZONE arg in functions like `decode-time';
+                                         ;; or `format-time-string', where ZONE has less general meaning.
                                        (let ((time (decode-time
                                                     (seconds-to-time time-secs)))
                                              (gited-date-format
