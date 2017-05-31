@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed May 31 09:57:42 JST 2017
+;; Last-Updated: Wed May 31 22:41:31 JST 2017
 ;;           By: calancha
-;;     Update #: 616
+;;     Update #: 617
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -431,6 +431,11 @@ and sizes."
 
 (defcustom gited-expert nil
   "If non-nil, don't ask for confirmation for some operations on branches."
+  :type 'boolean
+  :group 'gited)
+
+(defcustom gited-show-commit-hash t
+  "If non-nil, show the SHA1 in the 'Last Commit' column'."
   :type 'boolean
   :group 'gited)
 
@@ -2443,7 +2448,9 @@ reach the beginning of the buffer."
                      (progn
                        (progress-reporter-update prep idx)
                        (let* ((args (list "log"
-                                          "--pretty=format:%h | %s"
+                                          (if gited-show-commit-hash
+                                              "--pretty=format:%h | %s"
+                                            "--pretty=format:%s")
                                           (cadr entry) "-n1" "--"))
                               (str (with-temp-buffer
                                      (gited-git-command args
