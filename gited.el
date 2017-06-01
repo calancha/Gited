@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 20:45:23 JST 2017
+;; Last-Updated: Thu Jun 01 21:17:17 JST 2017
 ;;           By: calancha
-;;     Update #: 628
+;;     Update #: 629
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -842,7 +842,8 @@ You can then feed the file name(s) to other commands with \\[yank]."
 
 (defun gited-modified-files ()
   "Return a list with all unstaged files."
-  (gited--list-files "^[[:blank:]]*[MAUD]+[[:blank:]]*\\(.+\\)"))
+  (gited--list-files
+   "^\\(?:[[:blank:]]D\\|[[:blank:]]*[MAU]+\\)[[:blank:]]*\\(.+\\)"))
 
 (defun gited-modified-files-p ()
   "Return non-nil if there are unstaged changes."
