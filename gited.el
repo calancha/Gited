@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 14:16:32 JST 2017
+;; Last-Updated: Thu Jun 01 14:53:16 JST 2017
 ;;           By: calancha
-;;     Update #: 623
+;;     Update #: 624
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -514,7 +514,7 @@ These branches cannot be deleted or renamed."
   :group 'gited)
 
 (defcustom gited-short-log-cmd
-  '("log" "--pretty=format:'%h %ad | %s%d [%an]'" "--graph" "--date=short")
+  '("log" "--pretty=format:'%h %an %ad | %s%d'" "--graph" "--date=short")
   "Default short format for Git log."
   :type 'string
   :group 'gited)
