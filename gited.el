@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 12:52:56 JST 2017
+;; Last-Updated: Thu Jun 01 13:16:17 JST 2017
 ;;           By: calancha
-;;     Update #: 620
+;;     Update #: 621
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -57,33 +57,33 @@
 ;;   `gited-branch-idx', `gited-branch-name-face',
 ;;   `gited-buffer', `gited-buffer-name',
 ;;   `gited-commit-idx', `gited-commit-msg-face',
-;;   `gited-current-branch', `gited-date-format',
-;;   `gited-date-idx', `gited-date-regexp',
-;;   `gited-date-time-face', `gited-del-char',
-;;   `gited-deletion-branch-face', `gited-deletion-face',
-;;   `gited-edit-commit-mode-map', `gited-flag-mark-face',
-;;   `gited-flag-mark-line-face', `gited-header',
-;;   `gited-list-format', `gited-list-refs-format-command',
-;;   `gited-log-buffer', `gited-mark-col-size',
-;;   `gited-mark-face', `gited-mark-idx',
-;;   `gited-marker-char', `gited-mode',
-;;   `gited-mode-map', `gited-modified-branch',
-;;   `gited-new-or-deleted-files-re', `gited-op-string',
-;;   `gited-original-buffer', `gited-output-buffer',
-;;   `gited-output-buffer-name', `gited-re-mark',
-;;   `gited-ref-kind', `gited-section-highlight-face',
-;;   `gited-toplevel-dir'.
+;;   `gited-current-branch', `gited-date-idx',
+;;   `gited-date-regexp', `gited-date-time-face',
+;;   `gited-del-char', `gited-deletion-branch-face',
+;;   `gited-deletion-face', `gited-edit-commit-mode-map',
+;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
+;;   `gited-header', `gited-list-format',
+;;   `gited-list-refs-format-command', `gited-log-buffer',
+;;   `gited-mark-col-size', `gited-mark-face',
+;;   `gited-mark-idx', `gited-marker-char',
+;;   `gited-mode', `gited-mode-map',
+;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
+;;   `gited-op-string', `gited-original-buffer',
+;;   `gited-output-buffer', `gited-output-buffer-name',
+;;   `gited-re-mark', `gited-ref-kind',
+;;   `gited-section-highlight-face', `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
-;;   `gited-author-col-size', `gited-branch-col-size',
-;;   `gited-commit-col-size', `gited-current-branch-face',
-;;   `gited-date-col-size', `gited-delete-unmerged-branches',
+;;   `gited-add-untracked-files', `gited-author-col-size',
+;;   `gited-branch-col-size', `gited-commit-col-size',
+;;   `gited-current-branch-face', `gited-date-col-size',
+;;   `gited-date-format', `gited-delete-unmerged-branches',
 ;;   `gited-expert', `gited-patch-options',
 ;;   `gited-patch-program', `gited-protected-branches',
 ;;   `gited-reset-mode', `gited-short-log-cmd',
-;;   `gited-switches', `gited-use-header-line',
-;;   `gited-verbose'.
+;;   `gited-show-commit-hash', `gited-switches',
+;;   `gited-use-header-line', `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -1517,8 +1517,8 @@ add both, modified and untracked files, then customize the option
   (interactive
    (list (if gited-add-untracked-files
              (nconc (gited-modified-files) (gited-untracked-files))
-           (gited-modified-files)
-           current-prefix-arg)))
+           (gited-modified-files))
+         current-prefix-arg))
   (if (not files)
       (progn
         (beep)
