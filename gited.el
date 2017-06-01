@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed May 31 22:41:31 JST 2017
+;; Last-Updated: Thu Jun 01 11:58:34 JST 2017
 ;;           By: calancha
-;;     Update #: 617
+;;     Update #: 618
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -990,7 +990,6 @@ STATE is the state of process PROC."
                          (buffer-local-value 'gited-buffer buf)))
          (op-string gited-op-string)
          (inhibit-read-only t))
-    (ignore state)
     (when (memq (process-status proc) '(exit signal))
       (with-current-buffer gited-buf
         (setq gited--running-async-op nil)
@@ -1003,7 +1002,12 @@ STATE is the state of process PROC."
         (gited-goto-branch gited-branch-after-op)
         (setq gited-branch-after-op nil
               gited-op-string nil))
-      (message "%s done!" op-string))))
+      ;; State is 'finished\n' when the process exit with code 0.
+      (if (string-prefix-p "finished" state)
+          (message "%s done!" op-string)
+        (beep)
+        (message "Process exited with non-zero status.  Please check")
+        (display-buffer gited-output-buffer)))))
 
 (define-minor-mode gited-hide-details-mode
   "Toggle visibility of detailed information in current Gited buffer.
