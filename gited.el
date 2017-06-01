@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 11:58:34 JST 2017
+;; Last-Updated: Thu Jun 01 12:25:26 JST 2017
 ;;           By: calancha
-;;     Update #: 618
+;;     Update #: 619
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1812,15 +1812,19 @@ show similar info as that command."
         (with-current-buffer buf (erase-buffer))
         (gited-async-operation cmd 'remote-op-p)))))
 
-(defun gited-push ()
-  "Run git push in current branch."
-  (interactive)
+(defun gited-push (&optional force-with-lease)
+  "Run git push in current branch.
+If optional arg FORCE-WITH-LEASE is non-nil, then use Git flag
+--force-with-lease.  Otherwise, reject the pull if the remote
+ref is not ancestor of the local ref."
+  (interactive "P")
   (if (not (or gited-expert
                (y-or-n-p (format "Push '%s' branch? "
                                  gited-current-branch))))
       (message "OK, push canceled")
     (let ((buf (gited--output-buffer))
-          (cmd (format "%s push" vc-git-program)))
+          (cmd (format "%s push %s" vc-git-program
+                       (if force-with-lease "--force-with-lease" ""))))
       (setq gited-output-buffer buf
             gited-op-string cmd)
       (with-current-buffer buf
