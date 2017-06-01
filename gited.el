@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 20:32:31 JST 2017
+;; Last-Updated: Thu Jun 01 20:45:23 JST 2017
 ;;           By: calancha
-;;     Update #: 627
+;;     Update #: 628
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -830,17 +830,19 @@ You can then feed the file name(s) to other commands with \\[yank]."
 
 ;;; Predicates.
 
-(defun gited-modified-files ()
-  "Return a list with all unstaged files."
-  (let ((regexp "^[[:blank:]]*[MAUD]+[[:blank:]]*\\(.+\\)")
-        (case-fold-search)
-        res)
+(defun gited--list-files (regexp)
+  "List modified or untracked files ccording with REGEXP."
+  (let ((case-fold-search) res)
     (with-temp-buffer
       (gited-git-command '("status" "--porcelain") (current-buffer))
       (goto-char (point-min))
       (while (re-search-forward regexp nil t)
         (push (match-string 1) res)))
     (nreverse res)))
+
+(defun gited-modified-files ()
+  "Return a list with all unstaged files."
+  (gited--list-files "^[[:blank:]]*[MAUD]+[[:blank:]]*\\(.+\\)"))
 
 (defun gited-modified-files-p ()
   "Return non-nil if there are unstaged changes."
@@ -918,15 +920,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
 
 (defun gited-untracked-files ()
   "Return a list with all untracked files."
-  (let ((args '("status" "--porcelain"))
-        (regexp "^[?]\\{2\\}[[:blank:]]+\\(.+\\)")
-        res)
-    (with-temp-buffer
-      (gited-git-command args (current-buffer))
-      (goto-char (point-min))
-      (while (re-search-forward regexp nil t)
-        (push (match-string 1) res)))
-    (nreverse res)))
+  (gited--list-files "^[?]\\{2\\}[[:blank:]]+\\(.+\\)"))
 
 (defun gited-stashes ()
   "Return a list with all the stashes."
