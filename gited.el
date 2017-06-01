@@ -10,16 +10,16 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 21:17:17 JST 2017
+;; Last-Updated: Thu Jun 01 21:45:09 JST 2017
 ;;           By: calancha
-;;     Update #: 629
+;;     Update #: 630
 ;;
 ;; Features that might be required by this library:
 ;;
 ;;   `vc-git', `cl-lib', `dired', `tabulated-list',
 ;;   `find-func'.
 ;;
-;; Keywords: vc, convenience
+;; Keywords: git, vc, convenience
 ;;
 ;;
 
