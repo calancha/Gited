@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 12:25:26 JST 2017
+;; Last-Updated: Thu Jun 01 12:52:56 JST 2017
 ;;           By: calancha
-;;     Update #: 619
+;;     Update #: 620
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -431,6 +431,11 @@ and sizes."
 
 (defcustom gited-expert nil
   "If non-nil, don't ask for confirmation for some operations on branches."
+  :type 'boolean
+  :group 'gited)
+
+(defcustom gited-add-untracked-files nil
+  "If non-nil, `gited-add-patched-files' adds untracked files as well."
   :type 'boolean
   :group 'gited)
 
@@ -1504,29 +1509,39 @@ after checkout."
 (defun gited-add-patched-files (files &optional ask)
   "Stage FILES for next commit.
 If ASK is non-nil, then prompt the user before to add every hunk
-and display the output buffer in other window."
+and display the output buffer in other window.
+
+By default, this command ignores untracked files.  If you want to
+add both, modified and untracked files, then customize the option
+`gited-add-untracked-files'."
   (interactive
-   (list (gited-modified-files) current-prefix-arg))
-  (unless files (error "No modified files"))
-  (let ((buf (gited--output-buffer)))
-    (cond (ask
-           ;; Output buffer must be editable.
-           (with-current-buffer buf
-             (setq buffer-read-only nil)
-             (erase-buffer))
-           (gited-async-operation (format "%s add --patch" vc-git-program)
-                                  nil buf)
-           (setq gited-op-string "add --patch")
-           (display-buffer buf))
-          (t
-           (let ((toplevel gited-toplevel-dir))
-             (with-temp-buffer
-               ;; Add files from top-level dir.
-               (setq default-directory (file-name-as-directory toplevel))
-               (if (not (zerop (gited-git-command (nconc '("add") files))))
-                   (error "Cannot add files.  Please check")
-                 (message "Successfully added files: %s"
-                          (mapconcat #'shell-quote-argument files " ")))))))))
+   (list (if gited-add-untracked-files
+             (nconc (gited-modified-files) (gited-untracked-files))
+           (gited-modified-files)
+           current-prefix-arg)))
+  (if (not files)
+      (progn
+        (beep)
+        (message "No modified files"))
+    (let ((buf (gited--output-buffer)))
+      (cond (ask
+             ;; Output buffer must be editable.
+             (with-current-buffer buf
+               (setq buffer-read-only nil)
+               (erase-buffer))
+             (gited-async-operation (format "%s add --patch" vc-git-program)
+                                    nil buf)
+             (setq gited-op-string "add --patch")
+             (display-buffer buf))
+            (t
+             (let ((toplevel gited-toplevel-dir))
+               (with-temp-buffer
+                 ;; Add files from top-level dir.
+                 (setq default-directory (file-name-as-directory toplevel))
+                 (if (not (zerop (gited-git-command (nconc '("add") files))))
+                     (error "Cannot add files.  Please check")
+                   (message "Successfully added files: %s"
+                            (mapconcat #'shell-quote-argument files " "))))))))))
 
 (defun gited-commit (comment &optional author)
   "Commit latest changes using COMMENT as the message.
