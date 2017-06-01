@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 13:16:17 JST 2017
+;; Last-Updated: Thu Jun 01 14:16:32 JST 2017
 ;;           By: calancha
-;;     Update #: 621
+;;     Update #: 623
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -98,7 +98,7 @@
 ;;   `gited-bisect', `gited-branch-clear',
 ;;   `gited-checkout-branch', `gited-commit',
 ;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
-;;   `gited-delete-branch', `gited-diff-with-branch',
+;;   `gited-delete-branch', `gited-diff',
 ;;   `gited-do-delete', `gited-do-flagged-delete',
 ;;   `gited-do-kill-lines', `gited-edit-commit-mode',
 ;;   `gited-extract-patches', `gited-finish-commit-edit',
@@ -1684,23 +1684,26 @@ A prefix argument prompts for AUTHOR."
       (`outline (outline-mode))
       (_ (fundamental-mode)))))
 
-(defun gited-diff-with-branch (branch)
-  "Show diff of BRANCH with a second branch.
-BRANCH default to the branch at current line.
+(defun gited-diff (ref)
+  "Show diff of REF with another ref.
+REF defaults to the branch at current line.
 
 The actual diff run is:
-diff BRANCH SECOND-BRANCH."
+diff OLD-REF REF."
   (interactive
    (list (gited-get-branchname)))
-  (let ((branch-new
-         (completing-read (format "Diff %s with: " branch)
-                          (gited-listed-branches)))
+  (let ((old-ref
+         (completing-read (format "Diff %s with: " ref)
+                          (gited-listed-branches)
+                          nil nil (if (equal ref gited-current-branch)
+                                      (concat gited-current-branch "^")
+                                    gited-current-branch)))
         (buf (gited--output-buffer)))
     (setq gited-output-buffer buf)
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
-        (gited-git-command `("diff" ,branch ,branch-new)
+        (gited-git-command `("diff" ,old-ref ,ref)
                            (current-buffer)))
       (display-buffer buf))
     (gited--set-output-buffer-mode buf 'diff)))
@@ -2368,7 +2371,7 @@ reach the beginning of the buffer."
   (let ((row (tabulated-list-get-entry)))
     (if row
         (aref row idx)
-      (error "No row at point"))))
+      (error "No branch at point"))))
 
 (defun gited-get-branchname ()
   (gited-get-element-in-row gited-branch-idx))
@@ -3040,7 +3043,7 @@ in the active region."
     (define-key map (kbd "t") 'gited-toggle-marks)
     (define-key map (kbd "(") 'gited-hide-details-mode)
     (define-key map (kbd "u") 'gited-unmark)
-    (define-key map (kbd "=") 'gited-diff-with-branch)
+    (define-key map (kbd "=") 'gited-diff)
     (define-key map (kbd "j") 'gited-goto-branch)
     (define-key map (kbd "DEL") 'gited-unmark-backward)
     (define-key map (kbd "U") 'gited-unmark-all-marks)
