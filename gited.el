@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 20:27:27 JST 2017
+;; Last-Updated: Thu Jun 01 20:32:31 JST 2017
 ;;           By: calancha
-;;     Update #: 626
+;;     Update #: 627
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1466,8 +1466,9 @@ local, then prompt for a branch name where to check out BRANCH."
     (goto-char 1)
     (with-current-buffer patch-buf
       (while (re-search-forward gited-new-or-deleted-files-re nil t)
-        (unless (string= "new file mode" (match-string-no-properties 0))
-          (error "Only creation of files is implemented: %s"
+        (unless (or (string= "new file mode" (match-string-no-properties 0))
+                    (string= "deleted file mode" (match-string-no-properties 0)))
+          (error "Only creation/deletion of files is implemented: %s"
                  (match-string-no-properties 0)))
         (let* ((str (buffer-substring-no-properties
                      (point-at-bol 0) (point-at-eol 0)))
