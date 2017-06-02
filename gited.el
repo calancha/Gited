@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 01 23:49:31 JST 2017
+;; Last-Updated: Fri Jun 02 09:17:01 JST 2017
 ;;           By: calancha
-;;     Update #: 632
+;;     Update #: 633
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1502,23 +1502,35 @@ after checkout."
         (and update (gited-update))
         (message "Patch applied successfully!")))))
 
-(defun gited-add-patched-files (files &optional ask)
+(defun gited-add-patched-files (files &optional untracked-ok ask)
   "Stage FILES for next commit.
-If ASK is non-nil, then prompt the user before to add every hunk
-and display the output buffer in other window.
 
-By default, this command ignores untracked files.  If you want to
-add both, modified and untracked files, then customize the option
-`gited-add-untracked-files'."
+If optional arg UNTRACKED-OK is non-nil, then stage untracked
+files.  Otherwise ignore them.
+To always stage untracked files, you can customize the option
+`gited-add-untracked-files'.
+
+If optional arg ASK is non-nil, then prompt the user before
+to add every hunk, and display the output buffer in other window.
+
+Interactively, with a prefix C-u stage the untracked files as well.
+Interactively, with 2 prefices C-u C-u set arg ASK non-nil."
   (interactive
-   (list (if gited-add-untracked-files
-             (nconc (gited-modified-files) (gited-untracked-files))
-           (gited-modified-files))
-         current-prefix-arg))
+   (let* ((prefix current-prefix-arg)
+          (untracked-ok (equal '(4) prefix))
+          (ask (equal '(16) prefix))
+          (files
+           (if (or untracked-ok gited-add-untracked-files)
+               (nconc (gited-modified-files) (gited-untracked-files))
+             (gited-modified-files))))
+     (list files untracked-ok ask)))
   (if (not files)
-      (progn
+      (let ((untracked (gited-untracked-files)))
         (beep)
-        (message "No modified files"))
+        (if untracked
+            (message "Only untracked files.  Call 'C-u %s' to add them."
+                     (substitute-command-keys "\\[gited-add-patched-files]"))
+          (message "No modified files")))
     (let ((buf (gited--output-buffer)))
       (cond (ask
              ;; Output buffer must be editable.
