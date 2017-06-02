@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 02 11:10:51 JST 2017
+;; Last-Updated: Fri Jun 02 15:53:47 JST 2017
 ;;           By: calancha
-;;     Update #: 635
+;;     Update #: 636
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3157,8 +3157,11 @@ in the active region."
         (setq buffer-invisibility-spec (list t)))
       (gited-tabulated-list-entries)
       (tabulated-list-print)
-      (gited-goto-branch gited-current-branch)
-      (gited-fontify-current-branch)
+      ;; Go to `gited-current-branch' when it is shown.
+      (when (assoc gited-current-branch
+                   (mapcar (lambda (x) (cdr (cddr x))) gited-branch-alist))
+        (gited-goto-branch gited-current-branch)
+        (gited-fontify-current-branch))
       (unless gited--hide-details-set
         (or gited-verbose (gited-hide-details-mode 1))
         (setq gited--hide-details-set t)))))
