@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 02 09:17:01 JST 2017
+;; Last-Updated: Fri Jun 02 09:30:00 JST 2017
 ;;           By: calancha
-;;     Update #: 633
+;;     Update #: 634
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1502,7 +1502,7 @@ after checkout."
         (and update (gited-update))
         (message "Patch applied successfully!")))))
 
-(defun gited-add-patched-files (files &optional untracked-ok ask)
+(defun gited-add-patched-files (files &optional _untracked-ok ask)
   "Stage FILES for next commit.
 
 If optional arg UNTRACKED-OK is non-nil, then stage untracked
