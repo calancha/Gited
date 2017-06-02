@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 02 09:30:00 JST 2017
+;; Last-Updated: Fri Jun 02 11:10:51 JST 2017
 ;;           By: calancha
-;;     Update #: 634
+;;     Update #: 635
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2411,14 +2411,13 @@ reach the beginning of the buffer."
               (error "No Git repository in current directory"))
             (insert ")")
             (mapcar (lambda (x)
-                      (when (stringp (car x)) ; No time: set it to beginning
-                                              ; of epoch.
-                        (push 0 x))
+                      (when (stringp (car x)) ; No time: set it to beginning of epoch.
+                        (push "1970-01-01 00:00" x))
                       (when (= (length x) 4) ; Group time an time zone within alist.
                         (setf (car x) (cons (car x) (cadr x)))
                         (setf (cdr x) (cddr x)))
                       (when (and (stringp (car (last x))) ; If no Author, set
-                                                          ; it Unknown.
+                                        ; it Unknown.
                                  (string= "" (car (last x))))
                         (setf (car (last x)) "Unknown"))
                       x)
@@ -2438,8 +2437,8 @@ reach the beginning of the buffer."
                                         ;; FIXME: Would work for  a zone as: +0530 ?
                                         (and zone (* 36 zone)))) 
                                       (t ;; HACK: Workaround for Emacs versions < 25 that don't accept
-                                         ;; ZONE arg in functions like `decode-time';
-                                         ;; or `format-time-string', where ZONE has less general meaning.
+                                       ;; ZONE arg in functions like `decode-time';
+                                       ;; or `format-time-string', where ZONE has less general meaning.
                                        (let ((time (decode-time
                                                     (seconds-to-time time-secs)))
                                              (gited-date-format
@@ -2486,7 +2485,8 @@ reach the beginning of the buffer."
                                                         (current-buffer) nil)
                                      (buffer-string))))
                          ;; Format time in seconds as `gited-date-format'.
-                         (setf (car entry) (format-time-fn (caar entry) (cdar entry)))
+                         (when (consp (car entry))
+                           (setf (car entry) (format-time-fn (caar entry) (cdar entry))))
                          (append `(,(1+ idx)) (get-mark-fn entry)
                                  entry `(,str)))))))
     (progress-reporter-done prep)
