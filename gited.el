@@ -1,11 +1,11 @@
 ;;; gited.el --- Operate on Git branches like dired  -*- lexical-binding:t -*-
 ;;
-;; Filename: gited.el
-;; Description: Operate on Git branches like dired
+;; Copyright (C) 2016-2017 Free Software Foundation, Inc.
 ;;
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
+;; Keywords: git, vc, convenience
+
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
@@ -13,14 +13,25 @@
 ;; Last-Updated: Fri Jun 02 09:30:00 JST 2017
 ;;           By: calancha
 ;;     Update #: 634
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Features that might be required by this library:
+;; This file is part of GNU Emacs.
 ;;
-;;   `vc-git', `cl-lib', `dired', `tabulated-list',
-;;   `find-func'.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 ;;
-;; Keywords: git, vc, convenience
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 ;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;
 
 ;;; Commentary:
@@ -180,23 +191,7 @@
 ;;   `gited-modified-branch', `gited-section-highlight',
 ;;   `gited-status-branch-local', `gited-status-tag'.
 ;;
-;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; This file is NOT part of GNU Emacs.
-;;
-;; GNU Emacs is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-;;
-;; GNU Emacs is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
 
