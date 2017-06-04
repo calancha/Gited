@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 02 15:53:47 JST 2017
+;; Last-Updated: Sun Jun 04 12:00:04 JST 2017
 ;;           By: calancha
-;;     Update #: 636
+;;     Update #: 637
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3236,7 +3236,7 @@ Mode to edit Git branches as Dired."
   (gited--list-format-init)
   (setq tabulated-list-format gited-list-format)
   (add-hook 'tabulated-list-revert-hook 'gited-tabulated-list-entries nil t)
-  (setq tabulated-list-sort-key '("Date")))
+  (setq tabulated-list-sort-key (or tabulated-list-sort-key '("Date"))))
 
 
 (provide 'gited)
