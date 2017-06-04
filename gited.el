@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 04 12:00:04 JST 2017
+;; Last-Updated: Sun Jun 04 12:46:33 JST 2017
 ;;           By: calancha
-;;     Update #: 637
+;;     Update #: 638
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -141,14 +141,15 @@
 ;;
 ;;  Non-interactive functions defined here:
 ;;
-;;   `gited--bisect-after-run', `gited--bisect-executable-p',
-;;   `gited--case-ref-kind', `gited--check-unmerged-marked-branches',
-;;   `gited--clean-previous-patches', `gited--fill-branch-alist',
-;;   `gited--fontify-current-row', `gited--get-branches-from-command',
-;;   `gited--get-column', `gited--get-merged-branches',
-;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
-;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--handle-new-or-delete-files', `gited--list-format-init',
+;;   `gited--advice-sort-by-column', `gited--bisect-after-run',
+;;   `gited--bisect-executable-p', `gited--case-ref-kind',
+;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
+;;   `gited--fill-branch-alist', `gited--fontify-current-row',
+;;   `gited--get-branches-from-command', `gited--get-column',
+;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
+;;   `gited--get-unmerged-branches', `gited--goto-column',
+;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
+;;   `gited--list-files', `gited--list-format-init',
 ;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
@@ -190,6 +191,7 @@
 ;;   `gited-header', `gited-mark',
 ;;   `gited-modified-branch', `gited-section-highlight',
 ;;   `gited-status-branch-local', `gited-status-tag'.
+;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -3238,6 +3240,20 @@ Mode to edit Git branches as Dired."
   (add-hook 'tabulated-list-revert-hook 'gited-tabulated-list-entries nil t)
   (setq tabulated-list-sort-key (or tabulated-list-sort-key '("Date"))))
 
+;; We need this advice to sort by one of the last columns
+;; when `gited-hide-details-mode' is enabled.
+(defun gited--advice-sort-by-column (orig-fun &rest args)
+  (if (not (derived-mode-p 'gited-mode))
+      (apply orig-fun args)
+    (cond (gited-hide-details-mode
+           (gited-hide-details-mode 0)
+           (apply orig-fun args)
+           (gited-hide-details-mode 1))
+          (t (apply orig-fun args)))
+    (when (gited-branch-exists-p gited-current-branch)
+      (gited-fontify-current-branch))))
+
+(advice-add 'tabulated-list-col-sort :around 'gited--advice-sort-by-column)
 
 (provide 'gited)
 ;;; gited.el ends here
