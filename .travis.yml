@@ -6,7 +6,7 @@ notifications:
     on_failure: always
 
 env:
-  - EVM_EMACS=emacs-24.3-travis
+# - EVM_EMACS=emacs-24.3-travis # advice-add requires >= 24.4
   - EVM_EMACS=emacs-24.4-travis
   - EVM_EMACS=emacs-24.5-travis
   - EVM_EMACS=emacs-git-snapshot-travis
