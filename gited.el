@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 04 12:20:29 JST 2017
+;; Last-Updated: Mon Jun 05 20:38:02 JST 2017
 ;;           By: calancha
-;;     Update #: 638
+;;     Update #: 639
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2753,11 +2753,8 @@ With a prefix argument, kill that many lines starting with the current line.
         count))))
 
 (defun gited-mark-branches-regexp (regexp &optional marker-char)
-  "Mark all files matching REGEXP for use in later commands.
-A prefix argument means to unmark them instead.
-
-REGEXP is an Emacs regexp, not a shell wildcard.  Thus, use `\\.o$' for
-object files--just `.o' will mark more than you might think."
+  "Mark all branches matching REGEXP for use in later commands.
+A prefix argument means to unmark them instead."
   (interactive
    (list (read-regexp (concat (if current-prefix-arg "Unmark" "Mark")
                               " branches (regexp): ")
