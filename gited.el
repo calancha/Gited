@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Mon Jun 05 20:38:02 JST 2017
+;; Last-Updated: Mon Jun 05 21:58:11 JST 2017
 ;;           By: calancha
-;;     Update #: 639
+;;     Update #: 640
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -106,7 +106,8 @@
 ;;   `gited-goto-first-branch', `gited-goto-last-branch',
 ;;   `gited-kill-line', `gited-list-branches',
 ;;   `gited-log', `gited-log-last-n-commits',
-;;   `gited-mark', `gited-mark-branches-containing-commit',
+;;   `gited-mark', `gited-mark-branches-by-date',
+;;   `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-merged-branches', `gited-mark-unmerged-branches',
 ;;   `gited-merge-branch', `gited-move-to-author',
@@ -2767,6 +2768,29 @@ A prefix argument means to unmark them instead."
             (and fn (string-match-p regexp fn))))
      "matching branch")))
 
+(defun gited-mark-branches-by-date (min-time &optional marker-char)
+  "Mark all branches whose last commit time was after MIN-TIME.
+Interactively, a prefix argument means to unmark them instead.
+MIN-TIME must be a string suitable for `date-to-time' like
+\"2017-06-05 20:32:32\"."
+  (interactive
+   (let* ((prefix current-prefix-arg)
+          ;; Default to 1 week before the last commit time in current row.
+          (default (format-time-string
+                    "%F %T"
+                    (time-subtract (date-to-time (gited-get-date)) (* 7 24 60 60))))
+          (min-time (read-string
+                     (concat (if current-prefix-arg "Unmark" "Mark")
+                             " branches with last commit after time: ")
+                     default)))
+     (list min-time (and prefix ?\s))))
+  (let ((gited-marker-char (or marker-char gited-marker-char)))
+    (gited-mark-if
+     (and (not (eolp))
+          (let ((commit-time (date-to-time (gited-get-date))))
+            (time-less-p (date-to-time min-time) commit-time)))
+     "matching branch")))
+
 (defun gited-mark-branches-containing-regexp (regexp &optional marker-char days)
   "Mark all branches containing REGEXP in some commit message.
 A prefix argument means to unmark them instead.
@@ -3094,6 +3118,7 @@ in the active region."
     ;; marking banches
     (define-key map (kbd "m") 'gited-mark)
     (define-key map (kbd "% n") 'gited-mark-branches-regexp)
+    (define-key map (kbd "% t") 'gited-mark-branches-by-date)
     (define-key map (kbd "% c") 'gited-mark-branches-containing-commit)
     (define-key map (kbd "% g") 'gited-mark-branches-containing-regexp)
     (define-key map (kbd "% m") 'gited-mark-merged-branches)
