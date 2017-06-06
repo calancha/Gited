@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Jun 06 09:41:13 JST 2017
+;; Last-Updated: Tue Jun 06 20:00:22 JST 2017
 ;;           By: calancha
-;;     Update #: 641
+;;     Update #: 642
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2776,7 +2776,7 @@ MIN-TIME must be a string suitable for `date-to-time' like
    (let* ((prefix current-prefix-arg)
           ;; Default to 1 week before the last commit time in current row.
           (default (format-time-string
-                    "%F %T"
+                    "%F"
                     (time-subtract (date-to-time (gited-get-date)) (* 7 24 60 60))))
           (min-time (read-string
                      (concat (if current-prefix-arg "Unmark" "Mark")
