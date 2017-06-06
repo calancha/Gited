@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Mon Jun 05 21:58:11 JST 2017
+;; Last-Updated: Tue Jun 06 09:41:13 JST 2017
 ;;           By: calancha
-;;     Update #: 640
+;;     Update #: 641
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1186,6 +1186,7 @@ as well."
   (interactive
    (let ((prefix current-prefix-arg))
      (list prefix (equal prefix '(4)))))
+  (setq force (or gited-delete-unmerged-branches force))
   (unless force
     (gited--check-unmerged-marked-branches gited-del-char))
   (gited-internal-do-deletions
@@ -1252,13 +1253,15 @@ argument or confirmation)."
          (count (length l))
          (succ 0))
     ;; canonicalize branch list for pop up
-    (if (gited-mark-pop-up
-         " *Deletions*" 'delete branches 'y-or-n-p
-         (format "%s %s "
-                 "Delete"
-                 (replace-regexp-in-string "files"
-                                           "branches"
-                                           (dired-mark-prompt arg branches))))
+    (if (or gited-expert
+            (gited-mark-pop-up
+             " *Deletions*" 'delete branches 'y-or-n-p
+             (format "%s %s "
+                     "Delete"
+                     (replace-regexp-in-string
+                      "files"
+                      "branches"
+                      (dired-mark-prompt arg branches)))))
         (save-excursion
           (let ((progress-reporter
                  (make-progress-reporter
