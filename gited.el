@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Jun 06 20:00:22 JST 2017
+;; Last-Updated: Tue Jun 06 20:23:05 JST 2017
 ;;           By: calancha
-;;     Update #: 642
+;;     Update #: 643
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2787,11 +2787,18 @@ MIN-TIME must be a string suitable for `date-to-time' like
                              " branches with last commit after time: ")
                      default)))
      (list min-time (and prefix ?\s))))
-  (let ((gited-marker-char (or marker-char gited-marker-char)))
+  (let ((gited-marker-char (or marker-char gited-marker-char))
+        (time (funcall (lambda (x) ; Default HH:MM:SS to 00:00:00.
+                         (setq x (parse-time-string x))
+                         (or (car x) (setf (car x) 0))
+                         (or (cadr x) (setf (cadr x) 0))
+                         (or (cadr (cdr x)) (setf (cadr (cdr x)) 0))
+                         (apply 'encode-time x))
+                       min-time)))
     (gited-mark-if
      (and (not (eolp))
           (let ((commit-time (date-to-time (gited-get-date))))
-            (time-less-p (date-to-time min-time) commit-time)))
+            (time-less-p time commit-time)))
      "matching branch")))
 
 (defun gited-mark-branches-containing-regexp (regexp &optional marker-char days)
