@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed Jun 07 16:22:51 JST 2017
+;; Last-Updated: Wed Jun 07 17:24:04 JST 2017
 ;;           By: calancha
-;;     Update #: 644
+;;     Update #: 645
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -833,7 +833,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
 ;;; Predicates.
 
 (defun gited--list-files (regexp)
-  "List modified or untracked files ccording with REGEXP."
+  "List modified or untracked files according with REGEXP."
   (let ((case-fold-search) res)
     (with-temp-buffer
       (gited-git-command '("status" "--porcelain") (current-buffer))
@@ -914,8 +914,8 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (let ((unmerged (ignore-errors (gited--get-unmerged-branches))))
         (dolist (x unmerged)
           (when (string= b x)
-            (error "Cannot delete unmerged branches.  Try C-u %s"
-                   (substitute-command-keys (this-command-keys)))))))))
+            (user-error "Cannot delete unmerged branches.  Try C-u %s"
+                        (substitute-command-keys (this-command-keys)))))))))
 
 (defun gited--merged-branch-p (branch)
   (and (member branch (gited--get-merged-branches))
@@ -960,7 +960,7 @@ Optional arg BUFFER is the output buffer for the operation.  Otherwise,
 use `gited-output-buffer'."
   (interactive)
   (if gited--running-async-op
-      (error "Cannot run 2 Gited async process in parallel")
+      (user-error "Cannot run 2 Gited async process in parallel")
     (let* ((gited-buf (current-buffer))
            (out-buf (or buffer (gited--output-buffer)))
            (directory default-directory)
@@ -1017,7 +1017,7 @@ When this minor mode is enabled, details such as last commit author and
 date are hidden from view."
   :group 'gited
   (unless (derived-mode-p 'gited-mode)
-    (error "Not a Gited buffer"))
+    (user-error "Not a Gited buffer"))
   (gited-hide-details-update-invisibility-spec))
 
 (put 'gited-hide-details-mode 'permanent-local t)
@@ -1026,7 +1026,7 @@ date are hidden from view."
   "Update `gited-branch-alist' and redisplay the list of branches."
   (interactive)
   (unless (derived-mode-p major-mode 'gited-mode)
-    (error "Cannot enable Gited mode in this buffer"))
+    (user-error "Cannot enable Gited mode in this buffer"))
   (let ((target-br (ignore-errors (gited-get-branchname)))
         (at-headr-p (gited-at-header-line-p))
         (hide-details gited-hide-details-mode))
@@ -1047,7 +1047,7 @@ date are hidden from view."
                 nil nil old)))
      (list old new)))
   (when (member old-name gited-protected-branches)
-    (error "Cannot rename a protected branch"))
+    (user-error "Cannot rename a protected branch"))
   (let ((buf (gited--output-buffer))
         (inhibit-read-only t) remote-op-p)
     (setq gited-output-buffer buf)
@@ -1069,8 +1069,8 @@ date are hidden from view."
                         vc-git-program old new old)))
              ("local" (format "%s branch --move %s %s"
                               vc-git-program old-name new-name))
-             ("tags" (error "Rename tags not implemented!"))
-             (_ (error "Unsupported gited-ref-kind: must be \
+             ("tags" (user-error "Rename tags not implemented!"))
+             (_ (user-error "Unsupported gited-ref-kind: must be \
 local, remote or tags")))
            remote-op-p)
           (progn
@@ -1151,14 +1151,14 @@ as well."
     (setq gited-output-buffer buf)
     (with-current-buffer buf (erase-buffer))
     (when (string= branch gited-current-branch)
-      (error "Cannot delete the current branch"))
+      (user-error "Cannot delete the current branch"))
     (when (member branch gited-protected-branches)
-      (error "Cannot delete a protected branch"))
+      (user-error "Cannot delete a protected branch"))
     (if (and (not gited-expert)
              (not (y-or-n-p (format "Delete branch '%s'? " branch))))
         (message "OK, deletion canceled")
       (pcase gited-ref-kind
-        ("tags" (error "Delete tags not implemented!"))
+        ("tags" (user-error "Delete tags not implemented!"))
         ("local"
          (if (zerop (gited-git-command
                      ;; --delete --force as shortcut of -D doesn't exist
@@ -1170,7 +1170,7 @@ as well."
              (progn
                (gited-goto-branch br-after)
                (message "Delete branch '%s'!" branch))
-           (error "Cannot delete unmerged branch '%s'.  Try C-u %s"
+           (user-error "Cannot delete unmerged branch '%s'.  Try C-u %s"
                   branch
                   (substitute-command-keys "\\[gited-do-flagged-delete\]"))))
         ("remote"
@@ -1180,7 +1180,7 @@ as well."
                   (substring branch (length "origin/"))) 'remote-op-p)
          (setq gited-branch-after-op br-after
                gited-op-string (format "Delete branch '%s'" branch)))
-        (_ (error "Unsupported gited-ref-kind: must be \
+        (_ (user-error "Unsupported gited-ref-kind: must be \
 local, remote or tags"))))))
 
 (defun gited-do-delete (&optional arg force)
@@ -1362,12 +1362,12 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
   (interactive "P")
   (when (and (gited-modified-files-p)
              (not (equal gited-current-branch (gited-get-branchname))))
-    (error "Cannot checkout a new branch: there are modified files"))
+    (user-error "Cannot checkout a new branch: there are modified files"))
   (let* ((branch (gited-get-branchname))
          (visit-sources
           (y-or-n-p (format "Visit '%s' branch sources? " branch))))
     (if (not visit-sources)
-        (error "OK, canceled")
+        (message "OK, canceled")
       (let ((gited-expert visit-sources))
         (gited-checkout-branch branch)
         (if other-window
@@ -1409,7 +1409,7 @@ local, then prompt for a branch name where to check out BRANCH."
                           nil 'mustmatch (gited-get-branchname) nil)))
   (when (and (gited-modified-files-p)
              (not (equal gited-current-branch (gited-get-branchname))))
-    (error "Cannot checkout a new branch: there are modified files"))
+    (user-error "Cannot checkout a new branch: there are modified files"))
   (let* ((cur-br gited-current-branch)
          (new-branch-p (and (equal gited-ref-kind "local")
                             (not (member branch (gited-get-branches)))))
@@ -1468,7 +1468,7 @@ local, then prompt for a branch name where to check out BRANCH."
       (while (re-search-forward gited-new-or-deleted-files-re nil t)
         (unless (or (string= "new file mode" (match-string-no-properties 0))
                     (string= "deleted file mode" (match-string-no-properties 0)))
-          (error "Only creation/deletion of files is implemented: %s"
+          (user-error "Only creation/deletion of files is implemented: %s"
                  (match-string-no-properties 0)))
         (let* ((str (buffer-substring-no-properties
                      (point-at-bol 0) (point-at-eol 0)))
@@ -1561,11 +1561,11 @@ Interactively, with 2 prefices C-u C-u set arg ASK non-nil."
 Optional argument AUTHOR is the author of the commit.
 A prefix argument prompts for AUTHOR."
   (interactive
-   (let ((_files (or (gited-modified-files) (error "No changes to commit")))
+   (let ((_files (or (gited-modified-files) (user-error "No changes to commit")))
          (name (and current-prefix-arg (read-string "Author: ")))
          (msg (read-string "Message: ")))
      (list msg name)))
-  (or (gited-modified-files) (error "No changes to commit"))
+  (or (gited-modified-files) (user-error "No changes to commit"))
   (let* ((buf (generate-new-buffer "*git-commit*"))
          (args
           (delete ""
@@ -1630,7 +1630,7 @@ A prefix argument prompts for AUTHOR."
 
 (defun gited-edit-commit-mode ()
   (interactive)
-  (error "This mode can be enabled only by `gited-edit-commit'"))
+  (user-error "This mode can be enabled only by `gited-edit-commit'"))
 (put 'gited-edit-commit-mode 'mode-class 'special)
 
 (defun gited-edit-commit (commit)
@@ -1683,7 +1683,7 @@ A prefix argument prompts for AUTHOR."
     ("remote" "remotes/")
     ("local" "heads/")
     ("tags" "tags/")
-    (_ (error "Unsupported gited-ref-kind: must be local, remote or tags"))))
+    (_ (user-error "Unsupported gited-ref-kind: must be local, remote or tags"))))
 
 (defun gited--set-output-buffer-mode (buffer &optional mode editable)
   (let ((win (get-buffer-window buffer)))
@@ -1868,7 +1868,7 @@ ref is not ancestor of the local ref."
   (interactive
    (list (gited-get-branchname)))
   (unless (string= gited-ref-kind "local")
-    (error "Gited should be listing local branches"))
+    (user-error "Gited should be listing local branches"))
   (if (not (or gited-expert
                (y-or-n-p (format "Push '%s' branch up stream? "
                                  branch))))
@@ -1895,9 +1895,9 @@ see the newest N commits then use `\\[gited-log-last-n-commits\]'."
   (interactive
    (list (gited-get-branchname) current-prefix-arg))
   (unless (string= gited-ref-kind "local")
-    (error "Not listing local branches"))
+    (user-error "Not listing local branches"))
   (unless (gited-remote-repository-p)
-    (error "Not a remote repository.  Try '%s' or '%s'"
+    (user-error "Not a remote repository.  Try '%s' or '%s'"
            (substitute-command-keys "\\[gited-log\]")
            (substitute-command-keys "\\[gited-log-last-n-commits\]")))
   (let ((buf (gited--output-buffer))
@@ -2013,7 +2013,7 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
          num-commits count)
     (with-current-buffer buffer
       (if (zerop (buffer-size))
-          (error "No new patches")
+          (user-error "No new patches")
         ;; Previous patch buffers must be deleted.
         (gited--clean-previous-patches)
         (save-excursion
@@ -2085,15 +2085,15 @@ this command set BRANCH-TARGET current."
   ;; Previous patch buffers must be deleted.
   (gited--clean-previous-patches)
   (unless (gited-remote-repository-p)
-    (error "This command only works for repositories \
+    (user-error "This command only works for repositories \
 tracking a remote repository"))
   (if (null (ignore-errors (gited-extract-patches nil t)))
-      (error "No new patches to apply")
+      (user-error "No new patches to apply")
     ;; If branch-target doesn't exists create it as copy of master.
     (unless (member branch-target (gited-listed-branches))
       (cond ((gited-trunk-branches)
              (gited-copy-branch (car (gited-trunk-branches)) branch-target))
-            (t (error "I don't know what is your master branch"))))
+            (t (user-error "I don't know what is your master branch"))))
     (let (num-commits)
       (gited-with-current-branch branch-target
         (let* ((buf-patches
@@ -2118,7 +2118,7 @@ tracking a remote repository"))
 (defun gited--bisect-executable-p (command)
   (let ((file (car (split-string command))))
     (unless (file-executable-p file)
-      (error "File '%s' not executable" file))))
+      (user-error "File '%s' not executable" file))))
 
 (defun gited--bisect-after-run (buffer)
   (let ((regexp "^[[:xdigit:]]+ is the first bad commit")
@@ -2196,7 +2196,7 @@ set RESET non-nil."
                    (cond (is-badp '("bisect" "bad"))
                          (is-goodp '("bisect" "good"))
                          (skip '("bisect" "skip"))
-                         (t (error "Commit should be either bad, \
+                         (t (user-error "Commit should be either bad, \
 good or skip")))))
              (gited-git-command args obuf)
              (display-buffer obuf))))))
@@ -2240,9 +2240,9 @@ prefix arguments includes the ignored files as well."
 
 (defun gited--stash-branch ()
   (cond ((null (gited-stashes))
-         (error "Empty stash list"))
+         (user-error "Empty stash list"))
         ((gited-modified-files)
-         (error "Commit your local changes before you switch branches"))
+         (user-error "Commit your local changes before you switch branches"))
         (t)))
   
 (defun gited-stash-branch (branch stash)
@@ -2274,7 +2274,7 @@ prefix arguments includes the ignored files as well."
       (message "Empty stash list")
     (if (y-or-n-p "Remove all stashes? ")
         (gited-git-command '("stash" "clear"))
-      (error "OK, canceled"))))
+      (message "OK, canceled"))))
 
 (defalias 'gited-delete-all-stashes 'gited-branch-clear)
 
@@ -2365,7 +2365,7 @@ we reach the end."
     (if (null wrap)
         (progn
           (goto-char opoint)
-          (error "No next marked branch"))
+          (user-error "No next marked branch"))
       (message "(Wraparound for next marked branch)")
       (goto-char (if (> arg 0) (point-min) (point-max)))
       (gited-next-marked-branch arg nil opoint))))
@@ -2384,7 +2384,7 @@ reach the beginning of the buffer."
   (let ((row (tabulated-list-get-entry)))
     (if row
         (aref row idx)
-      (error "No branch at point"))))
+      (user-error "No branch at point"))))
 
 (defun gited-get-branchname ()
   (gited-get-element-in-row gited-branch-idx))
@@ -2418,7 +2418,7 @@ reach the beginning of the buffer."
             (insert "(\n")
             (unless (zerop (gited-git-command args (current-buffer)
                                               nil 'unquote))
-              (error "No Git repository in current directory"))
+              (user-error "No Git repository in current directory"))
             (insert ")")
             (mapcar (lambda (x)
                       (when (stringp (car x)) ; No time: set it to beginning of epoch.
@@ -2720,7 +2720,7 @@ With a prefix argument, kill that many lines starting with the current line.
     (while (/= 0 arg)
       (setq branch (gited-get-branchname))
       (if (not branch)
-          (error "Can only kill branch lines")
+          (user-error "Can only kill branch lines")
         (setq tabulated-list-entries
               (assq-delete-all
                (car (tabulated-list-delete-entry))
@@ -2985,7 +2985,7 @@ this subdir."
 
 (defun gited--mark-branches-in-region (start end mark)
   (when (> start end)
-    (error "Wrong input values: start, end, <"))
+    (user-error "Wrong input values: start, end, <"))
   (goto-char start) ; assumed at beginning of line
   (while (< (point) end)
     (when (gited-get-branchname)
@@ -3156,7 +3156,7 @@ in the active region."
   (interactive
    (progn
      (unless (gited-dir-under-Git-control-p)
-       (error "No Git repository in current directory"))
+       (user-error "No Git repository in current directory"))
      (let* ((opts '("local" "remote" "tags"))
             (patt (completing-read
                    "List (local, remote, tags): "
@@ -3168,7 +3168,7 @@ in the active region."
                (equal pattern gited-ref-kind)))
       (switch-to-buffer gited-buffer)
     (unless (gited-dir-under-Git-control-p)
-      (error "No Git repository in current directory"))
+      (user-error "No Git repository in current directory"))
     (let ((buf (or (and (buffer-live-p gited-buffer) gited-buffer)
                    (setq gited-buffer (generate-new-buffer gited-buffer-name)))))
       (unless (equal pattern gited-ref-kind)
@@ -3269,7 +3269,7 @@ the mode, `toggle' toggles the state.
 
 Mode to edit Git branches as Dired."
   (unless (gited-buffer-p)
-    (error "Gited mode cannot be enabled in this buffer"))
+    (user-error "Gited mode cannot be enabled in this buffer"))
   (gited--list-format-init)
   (setq tabulated-list-format gited-list-format)
   (add-hook 'tabulated-list-revert-hook 'gited-tabulated-list-entries nil t)
