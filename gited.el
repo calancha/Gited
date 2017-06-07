@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Jun 06 20:23:05 JST 2017
+;; Last-Updated: Wed Jun 07 16:22:51 JST 2017
 ;;           By: calancha
-;;     Update #: 643
+;;     Update #: 644
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3192,8 +3192,7 @@ in the active region."
       (gited-tabulated-list-entries)
       (tabulated-list-print)
       ;; Go to `gited-current-branch' when it is shown.
-      (when (assoc gited-current-branch
-                   (mapcar (lambda (x) (cdr (cddr x))) gited-branch-alist))
+      (when (gited-branch-exists-p gited-current-branch)
         (gited-goto-branch gited-current-branch)
         (gited-fontify-current-branch))
       (unless gited--hide-details-set

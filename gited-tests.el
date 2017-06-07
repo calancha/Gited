@@ -65,14 +65,29 @@
                        (gited-git-command
                         '("rev-parse" "HEAD") (current-buffer))
                        (buffer-substring 1 (1- (point-max))))))
+                ;; gited-mark-branches-containing-commit
                 (gited-mark-branches-containing-commit hash)
                 (should (= 1 (gited-number-marked))))
+              ;; gited-mark-branches-regexp
               (gited-unmark-all-marks)
               (gited-mark-branches-regexp "foo")
               (should (= 1 (gited-number-marked)))
+              ;; gited-mark-branches-containing-regexp
               (gited-unmark-all-marks)
               (gited-mark-branches-containing-regexp "Update")
               (should (= 1 (gited-number-marked)))
+              ;; gited-mark-branches-by-date
+              (gited-unmark-all-marks)
+              (gited-mark-branches-by-date
+               (format-time-string "%F" (current-time)))
+              (should (= (length (gited-listed-branches))
+                         (gited-number-marked)))
+              (gited-unmark-all-marks)
+              (gited-mark-branches-by-date
+               (format-time-string
+                "%F"
+                (time-add (current-time) (seconds-to-time (* 7 24 60 60)))))
+              (should (= 0 (gited-number-marked)))
               (gited-unmark-all-marks))
             (gited-copy-branch "foo" "bar")
             (gited-delete-branch "foo" 'force)
