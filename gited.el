@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 12:44:44 JST 2017
+;; Last-Updated: Thu Jun 08 12:55:11 JST 2017
 ;;           By: calancha
-;;     Update #: 648
+;;     Update #: 649
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3040,7 +3040,8 @@ this subdir."
 
 (defun gited-move-to-branchname ()
   (interactive)
-  (gited--move-to-column (1+ gited-branch-idx)))
+  (when gited-branch-alist
+    (gited--move-to-column (1+ gited-branch-idx))))
 
 ;; Return point.
 (defun gited-move-to-end-of-branchname ()
