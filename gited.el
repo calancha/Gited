@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed Jun 07 17:24:04 JST 2017
+;; Last-Updated: Thu Jun 08 09:36:32 JST 2017
 ;;           By: calancha
-;;     Update #: 645
+;;     Update #: 646
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -58,31 +58,32 @@
 ;;
 ;;  Internal variables defined here:
 ;;
-;;   `gited--hide-details-set', `gited--op',
-;;   `gited--revert-commit', `gited--running-async-op',
-;;   `gited-actual-switches', `gited-after-change-hook',
-;;   `gited-author-face', `gited-author-idx',
-;;   `gited-bisect-buf-name', `gited-bisect-buffer',
-;;   `gited-bisect-buffer', `gited-bisect-output-name',
-;;   `gited-branch-after-op', `gited-branch-alist',
-;;   `gited-branch-idx', `gited-branch-name-face',
-;;   `gited-buffer', `gited-buffer-name',
-;;   `gited-commit-idx', `gited-commit-msg-face',
-;;   `gited-current-branch', `gited-date-idx',
-;;   `gited-date-regexp', `gited-date-time-face',
-;;   `gited-del-char', `gited-deletion-branch-face',
-;;   `gited-deletion-face', `gited-edit-commit-mode-map',
-;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
-;;   `gited-header', `gited-list-format',
-;;   `gited-list-refs-format-command', `gited-log-buffer',
-;;   `gited-mark-col-size', `gited-mark-face',
-;;   `gited-mark-idx', `gited-marker-char',
-;;   `gited-mode', `gited-mode-map',
-;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
-;;   `gited-op-string', `gited-original-buffer',
-;;   `gited-output-buffer', `gited-output-buffer-name',
-;;   `gited-re-mark', `gited-ref-kind',
-;;   `gited-section-highlight-face', `gited-toplevel-dir'.
+;;   `gited--hide-details-set', `gited--last-remote-prune',
+;;   `gited--op', `gited--revert-commit',
+;;   `gited--running-async-op', `gited-actual-switches',
+;;   `gited-after-change-hook', `gited-author-face',
+;;   `gited-author-idx', `gited-bisect-buf-name',
+;;   `gited-bisect-buffer', `gited-bisect-buffer',
+;;   `gited-bisect-output-name', `gited-branch-after-op',
+;;   `gited-branch-alist', `gited-branch-idx',
+;;   `gited-branch-name-face', `gited-buffer',
+;;   `gited-buffer-name', `gited-commit-idx',
+;;   `gited-commit-msg-face', `gited-current-branch',
+;;   `gited-date-idx', `gited-date-regexp',
+;;   `gited-date-time-face', `gited-del-char',
+;;   `gited-deletion-branch-face', `gited-deletion-face',
+;;   `gited-edit-commit-mode-map', `gited-flag-mark-face',
+;;   `gited-flag-mark-line-face', `gited-header',
+;;   `gited-list-format', `gited-list-refs-format-command',
+;;   `gited-log-buffer', `gited-mark-col-size',
+;;   `gited-mark-face', `gited-mark-idx',
+;;   `gited-marker-char', `gited-mode',
+;;   `gited-mode-map', `gited-modified-branch',
+;;   `gited-new-or-deleted-files-re', `gited-op-string',
+;;   `gited-original-buffer', `gited-output-buffer',
+;;   `gited-output-buffer-name', `gited-re-mark',
+;;   `gited-ref-kind', `gited-section-highlight-face',
+;;   `gited-toplevel-dir'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -92,9 +93,10 @@
 ;;   `gited-date-format', `gited-delete-unmerged-branches',
 ;;   `gited-expert', `gited-patch-options',
 ;;   `gited-patch-program', `gited-protected-branches',
-;;   `gited-reset-mode', `gited-short-log-cmd',
-;;   `gited-show-commit-hash', `gited-switches',
-;;   `gited-use-header-line', `gited-verbose'.
+;;   `gited-prune-remotes', `gited-reset-mode',
+;;   `gited-short-log-cmd', `gited-show-commit-hash',
+;;   `gited-switches', `gited-use-header-line',
+;;   `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -179,9 +181,10 @@
 ;;   `gited-modified-files-p', `gited-next-branch',
 ;;   `gited-number-of-commits', `gited-prev-branch',
 ;;   `gited-print-entry', `gited-remember-marks',
-;;   `gited-remote-repository-p', `gited-repeat-over-lines',
-;;   `gited-stashes', `gited-tabulated-list-entries',
-;;   `gited-trunk-branches', `gited-untracked-files'.
+;;   `gited-remote-prune', `gited-remote-repository-p',
+;;   `gited-repeat-over-lines', `gited-stashes',
+;;   `gited-tabulated-list-entries', `gited-trunk-branches',
+;;   `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -447,6 +450,17 @@ and sizes."
 Otherwise, deletion of unmerged branches require call `gited-do-delete'
 with a prefix."
   :type 'boolean
+  :group 'gited)
+
+(defvar-local gited--last-remote-prune nil "Time when was run `gited-remote-prune'.")
+(put 'gited--last-remote-prune 'permanent-local t)  
+
+(defcustom gited-prune-remotes 'daily
+  "Whether if remove references to deleted remote branches."
+  :type '(choice
+          (const :tag "Never" nil)
+          (const :tag "Always" t)
+          (const :tag "daily" daily))
   :group 'gited)
 
 (defcustom gited-current-branch-face 'font-lock-keyword-face
@@ -1130,6 +1144,12 @@ g = merged, k = keep): "
       (if (zerop (gited-git-command args))
           (message "Reseted --%s '%s' to '%s'!" mode branch commit)
         (error "Cannot reset --%s '%s' to '%s'" mode branch commit)))))
+
+(defun gited-remote-prune ()
+  "Remove references to deleted remote branches."
+  (setq gited--last-remote-prune (current-time))
+  (message "Prunning remote branches ...")
+  (gited-git-command '("fetch" "--all" "--prune")))
 
 (defun gited-delete-branch (branch &optional force)
   "Delete branch BRANCH.
@@ -3189,6 +3209,14 @@ in the active region."
       ;; Ignore dired-hide-details-* value of invisible text property by default.
       (when (eq buffer-invisibility-spec t)
         (setq buffer-invisibility-spec (list t)))
+      ;; Check if we must prune remotes.
+      (when (and (not (equal gited-ref-kind "local"))
+                 (or (eq t gited-prune-remotes)
+                     (and (eq 'daily gited-prune-remotes)
+                          (or (not gited--last-remote-prune)
+                              (time-less-p (seconds-to-time (* 24 60 60))
+                                           (time-subtract (current-time) gited--last-remote-prune))))))
+        (gited-remote-prune))
       (gited-tabulated-list-entries)
       (tabulated-list-print)
       ;; Go to `gited-current-branch' when it is shown.
