@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 12:36:44 JST 2017
+;; Last-Updated: Thu Jun 08 12:44:44 JST 2017
 ;;           By: calancha
-;;     Update #: 647
+;;     Update #: 648
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2450,7 +2450,7 @@ reach the beginning of the buffer."
                     (car (read-from-string (buffer-string))))))
          (prep
           (make-progress-reporter
-           "Collecting brach info..."
+           "Collecting branch info..."
            0 (length alist))))
     (cl-flet ((format-time-fn (time-secs &optional zone)
                               (let ((zone-ok (>= emacs-major-version 25)))
