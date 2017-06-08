@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 14:26:38 JST 2017
+;; Last-Updated: Thu Jun 08 19:08:23 JST 2017
 ;;           By: calancha
-;;     Update #: 650
+;;     Update #: 651
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2365,10 +2365,11 @@ Return buffer position on success, else nil."
      (list (completing-read "Jump to branch: "
                             (gited-listed-branches)
                             nil t nil nil cur-branch))))
-  (let ((row (cl-position branch (gited-listed-branches) :test #'equal)))
-    (goto-char (point-min))
-    (forward-line (if (overlays-at (point-min)) (1+ row) row))
-    (gited--goto-column (1+ gited-branch-idx))))
+  (when (gited-branch-exists-p branch)
+    (let ((row (cl-position branch (gited-listed-branches) :test #'equal)))
+      (goto-char (point-min))
+      (forward-line (if (overlays-at (point-min)) (1+ row) row))
+      (gited--goto-column (1+ gited-branch-idx)))))
 
 (defun gited-next-marked-branch (arg &optional wrap opoint)
   "Move to the next ARG marked branch.
