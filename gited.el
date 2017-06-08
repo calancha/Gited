@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 19:08:23 JST 2017
+;; Last-Updated: Thu Jun 08 22:31:32 JST 2017
 ;;           By: calancha
-;;     Update #: 651
+;;     Update #: 652
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1894,7 +1894,9 @@ ref is not ancestor of the local ref."
           (inhibit-read-only t))
       (setq gited-output-buffer buf
             gited-op-string (format "Set branch '%s' upstream" branch))
-      (with-current-buffer buf (erase-buffer))
+      (with-current-buffer buf
+        (setq buffer-read-only nil) ; Editable, they can ask username.
+        (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
 (defun gited-origin (branch &optional no-display)
