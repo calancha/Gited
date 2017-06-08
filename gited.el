@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 09:36:32 JST 2017
+;; Last-Updated: Thu Jun 08 12:36:44 JST 2017
 ;;           By: calancha
-;;     Update #: 646
+;;     Update #: 647
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -885,7 +885,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
 
 (defun gited-remote-repository-p ()
   "Return non-nil if current repository is remote."
-  (let ((regexp "^remote.origin"))
+  (let ((regexp "^remote\."))
     (with-temp-buffer
       (gited-git-command  '("config" "--local" "--list") (current-buffer))
       (goto-char 1)
