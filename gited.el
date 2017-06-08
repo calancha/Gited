@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 12:55:11 JST 2017
+;; Last-Updated: Thu Jun 08 14:26:38 JST 2017
 ;;           By: calancha
-;;     Update #: 649
+;;     Update #: 650
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -142,7 +142,7 @@
 ;;   `gited--get-unmerged-branches', `gited--goto-column',
 ;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
 ;;   `gited--list-files', `gited--list-format-init',
-;;   `gited--mark-branches-in-region',
+;;   `gited--list-refs-format', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -335,8 +335,7 @@ TITLE is the title of the last commit.")
 (put 'gited-bisect-buffer 'permanent-local t)
 
 (defvar gited-list-refs-format-command
-  '("for-each-ref" "--format='(%(authordate:raw) \
-\"%(refname:short)\" \"%(authorname)\")'" "refs/%s")
+  '("for-each-ref" "--format='(%%(%s:raw) \"%%(refname:short)\" \"%%(%s)\")'" "refs/%s")
   "Format strings to build a Git command to list references.")
 
 (defvar gited-date-regexp (concat "\\("
@@ -2424,15 +2423,23 @@ reach the beginning of the buffer."
   (gited--move-to-column col)
   (goto-char (next-single-property-change (point) 'tabulated-list-column-name)))
 
+(defun gited--list-refs-format (pattern)
+  (let ((refs-fmt (append (butlast gited-list-refs-format-command)
+                          (list (format (car (last gited-list-refs-format-command))
+                                        (if pattern
+                                            (pcase pattern
+                                              ("local" "heads")
+                                              ("remote" "remotes")
+                                              (_ pattern))
+                                          "heads"))))))
+    (setf (cadr refs-fmt)
+          (format (cadr refs-fmt)
+                  (if (equal pattern "tags") "taggerdate" "authordate")
+                  (if (equal pattern "tags") "taggername" "authorname")))
+    refs-fmt))
+
 (defun gited--fill-branch-alist (&optional pattern)
-  (let* ((args (append (butlast gited-list-refs-format-command)
-                       (list (format (car (last gited-list-refs-format-command))
-                                     (if pattern
-                                         (pcase pattern
-                                           ("local" "heads")
-                                           ("remote" "remotes")
-                                           (_ pattern))
-                                       "heads")))))
+  (let* ((args (gited--list-refs-format pattern))
          (alist
           (with-temp-buffer
             (insert "(\n")
@@ -3215,7 +3222,7 @@ in the active region."
       (when (eq buffer-invisibility-spec t)
         (setq buffer-invisibility-spec (list t)))
       ;; Check if we must prune remotes.
-      (when (and (not (equal gited-ref-kind "local"))
+      (when (and (equal gited-ref-kind "remote")
                  (or (eq t gited-prune-remotes)
                      (and (eq 'daily gited-prune-remotes)
                           (or (not gited--last-remote-prune)
