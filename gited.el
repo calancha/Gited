@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.0
+;; Version: 0.2.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 22:24:01 JST 2017
+;; Last-Updated: Fri Jun 09 22:47:58 JST 2017
 ;;           By: calancha
-;;     Update #: 659
+;;     Update #: 660
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -114,29 +114,31 @@
 ;;   `gited-delete-branch', `gited-diff',
 ;;   `gited-do-delete', `gited-do-flagged-delete',
 ;;   `gited-do-kill-lines', `gited-edit-commit-mode',
-;;   `gited-extract-patches', `gited-finish-commit-edit',
-;;   `gited-flag-branch-deletion', `gited-goto-branch',
-;;   `gited-goto-first-branch', `gited-goto-last-branch',
-;;   `gited-kill-line', `gited-list-branches',
-;;   `gited-log', `gited-log-last-n-commits',
-;;   `gited-mark', `gited-mark-branches-by-date',
-;;   `gited-mark-branches-containing-commit',
+;;   `gited-extract-patches', `gited-fetch-remote-tags',
+;;   `gited-finish-commit-edit', `gited-flag-branch-deletion',
+;;   `gited-goto-branch', `gited-goto-first-branch',
+;;   `gited-goto-last-branch', `gited-kill-line',
+;;   `gited-list-branches', `gited-log',
+;;   `gited-log-last-n-commits', `gited-mark',
+;;   `gited-mark-branches-by-date', `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
-;;   `gited-mark-merged-branches', `gited-mark-unmerged-branches',
-;;   `gited-merge-branch', `gited-move-to-author',
-;;   `gited-move-to-branchname', `gited-move-to-date',
-;;   `gited-move-to-end-of-author', `gited-move-to-end-of-branchname',
-;;   `gited-move-to-end-of-date', `gited-next-line',
-;;   `gited-next-marked-branch', `gited-number-marked',
-;;   `gited-origin', `gited-prev-line',
-;;   `gited-prev-marked-branch', `gited-pull',
-;;   `gited-push', `gited-rename-branch',
+;;   `gited-mark-local-tags', `gited-mark-merged-branches',
+;;   `gited-mark-unmerged-branches', `gited-merge-branch',
+;;   `gited-move-to-author', `gited-move-to-branchname',
+;;   `gited-move-to-date', `gited-move-to-end-of-author',
+;;   `gited-move-to-end-of-branchname', `gited-move-to-end-of-date',
+;;   `gited-next-line', `gited-next-marked-branch',
+;;   `gited-number-marked', `gited-origin',
+;;   `gited-prev-line', `gited-prev-marked-branch',
+;;   `gited-pull', `gited-push',
+;;   `gited-remote-tag-delete', `gited-rename-branch',
 ;;   `gited-reset-branch', `gited-revert-commit',
-;;   `gited-set-branch-upstream', `gited-show-commit',
+;;   `gited-set-object-upstream', `gited-show-commit',
 ;;   `gited-stash', `gited-stash-apply',
 ;;   `gited-stash-branch', `gited-stash-drop',
 ;;   `gited-stash-pop', `gited-status',
 ;;   `gited-summary', `gited-sync-with-trunk',
+;;   `gited-tag-add', `gited-tag-delete',
 ;;   `gited-toggle-marks', `gited-unmark',
 ;;   `gited-unmark-all-branches', `gited-unmark-all-marks',
 ;;   `gited-unmark-backward', `gited-update',
@@ -153,7 +155,7 @@
 ;;   `gited--get-unmerged-branches', `gited--goto-column',
 ;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
 ;;   `gited--list-files', `gited--list-format-init',
-;;   `gited--mark-branches-in-region',
+;;   `gited--list-refs-format', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -182,9 +184,9 @@
 ;;   `gited-number-of-commits', `gited-prev-branch',
 ;;   `gited-print-entry', `gited-remember-marks',
 ;;   `gited-remote-prune', `gited-remote-repository-p',
-;;   `gited-repeat-over-lines', `gited-stashes',
-;;   `gited-tabulated-list-entries', `gited-trunk-branches',
-;;   `gited-untracked-files'.
+;;   `gited-remote-tags', `gited-repeat-over-lines',
+;;   `gited-stashes', `gited-tabulated-list-entries',
+;;   `gited-trunk-branches', `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -1630,6 +1632,7 @@ A prefix argument prompts for AUTHOR."
     map))
 
 (defun gited-finish-commit-edit ()
+  "Finish the revert and commit it."
   (interactive)
   (unless (eq major-mode 'gited-edit-commit-mode)
     (error
@@ -1672,7 +1675,9 @@ A prefix argument prompts for AUTHOR."
       (insert string)
 	  (recenter '(4)))))
 
+;; FIXME: Probably this should be (&rest commits) not just one commit.
 (defun gited-revert-commit (commit)
+  "Revert COMMIT."
   (interactive
    (let ((last-commit
           (with-temp-buffer
@@ -2343,6 +2348,10 @@ After this command, you can fetch the remote tag again with:
       (error "Cannot delete tag.  Please check"))))
 
 (defun gited-fetch-remote-tags ()
+  "Call `gited-remote-prune' and update the Gited buffer.
+If the Gited buffer is listing tags and you have deleted a local
+tag TAG hat also exists remotely, then after this command a
+local TAG is recreated."
   (interactive)
   (gited-remote-prune)
   (gited-update))
@@ -3153,31 +3162,41 @@ this subdir."
   (gited-unmark-all-branches ?\r))
 
 (defun gited-move-to-branchname ()
+  "Move point to the beginning of the Branches column in current row."
   (interactive)
-  (when gited-branch-alist
+  (when (tabulated-list-get-id)
     (gited--move-to-column (1+ gited-branch-idx))))
 
 ;; Return point.
 (defun gited-move-to-end-of-branchname ()
+  "Move point to the end of the Branches column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-branch-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-branch-idx))))
 
 (defun gited-move-to-author ()
+  "Move point to the beginning of the Authors column in current row."
   (interactive)
-  (gited--move-to-column (1+ gited-author-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-column (1+ gited-author-idx))))
 
 (defun gited-move-to-end-of-author ()
+  "Move point to the end of the Authors column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-author-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-author-idx))))
 
 (defun gited-move-to-date ()
+  "Move point to the beginning of the Date column in current row."
   (interactive)
-  (gited--move-to-column (1+ gited-date-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-column (1+ gited-date-idx))))
 
 (defun gited-move-to-end-of-date ()
+  "Move point to the end of the Date column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-date-idx)))
-
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-date-idx))))
 
 (defun gited-unmark (arg &optional interactive)
   "Unmark the branch at point in the Gited buffer.
