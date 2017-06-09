@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 21:06:05 JST 2017
+;; Last-Updated: Fri Jun 09 21:14:48 JST 2017
 ;;           By: calancha
-;;     Update #: 656
+;;     Update #: 657
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2307,7 +2307,7 @@ prefix arguments includes the ignored files as well."
 
 ;;; Commands handling tags.
 (defun gited-tag-add (name commit &optional arg)
-  "Create a new tag with name NAME at COMMIT with message MSG.
+  "Create a new tag with name NAME at COMMIT.
 Called with a prefix argument C-u, annotate the tag.
 Called with a numeric prefix ARG > 1, make a GPG-signed tag using the default
  e-mail address's key.
