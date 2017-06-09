@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.0
+;; Version: 0.2.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 22:24:01 JST 2017
+;; Last-Updated: Fri Jun 09 22:47:58 JST 2017
 ;;           By: calancha
-;;     Update #: 659
+;;     Update #: 660
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1666,6 +1666,7 @@ A prefix argument prompts for AUTHOR."
     map))
 
 (defun gited-finish-commit-edit ()
+  "Finish the revert and commit it."
   (interactive)
   (unless (eq major-mode 'gited-edit-commit-mode)
     (error
@@ -1708,7 +1709,9 @@ A prefix argument prompts for AUTHOR."
       (insert string)
 	  (recenter '(4)))))
 
+;; FIXME: Probably this should be (&rest commits) not just one commit.
 (defun gited-revert-commit (commit)
+  "Revert COMMIT."
   (interactive
    (let ((last-commit
           (with-temp-buffer
@@ -2379,6 +2382,10 @@ After this command, you can fetch the remote tag again with:
       (error "Cannot delete tag.  Please check"))))
 
 (defun gited-fetch-remote-tags ()
+  "Call `gited-remote-prune' and update the Gited buffer.
+If the Gited buffer is listing tags and you have deleted a local
+tag TAG hat also exists remotely, then after this command a
+local TAG is recreated."
   (interactive)
   (gited-remote-prune)
   (gited-update))
@@ -3189,31 +3196,41 @@ this subdir."
   (gited-unmark-all-branches ?\r))
 
 (defun gited-move-to-branchname ()
+  "Move point to the beginning of the Branches column in current row."
   (interactive)
-  (when gited-branch-alist
+  (when (tabulated-list-get-id)
     (gited--move-to-column (1+ gited-branch-idx))))
 
 ;; Return point.
 (defun gited-move-to-end-of-branchname ()
+  "Move point to the end of the Branches column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-branch-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-branch-idx))))
 
 (defun gited-move-to-author ()
+  "Move point to the beginning of the Authors column in current row."
   (interactive)
-  (gited--move-to-column (1+ gited-author-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-column (1+ gited-author-idx))))
 
 (defun gited-move-to-end-of-author ()
+  "Move point to the end of the Authors column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-author-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-author-idx))))
 
 (defun gited-move-to-date ()
+  "Move point to the beginning of the Date column in current row."
   (interactive)
-  (gited--move-to-column (1+ gited-date-idx)))
+  (when (tabulated-list-get-id)
+    (gited--move-to-column (1+ gited-date-idx))))
 
 (defun gited-move-to-end-of-date ()
+  "Move point to the end of the Date column in current row."
   (interactive)
-  (gited--move-to-end-of-column (1+ gited-date-idx)))
-
+  (when (tabulated-list-get-id)
+    (gited--move-to-end-of-column (1+ gited-date-idx))))
 
 (defun gited-unmark (arg &optional interactive)
   "Unmark the branch at point in the Gited buffer.
