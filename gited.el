@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 21:14:48 JST 2017
+;; Last-Updated: Fri Jun 09 22:11:39 JST 2017
 ;;           By: calancha
-;;     Update #: 657
+;;     Update #: 658
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -3325,7 +3325,15 @@ in the active region."
 
 ;;;###autoload
 (defun gited-list-branches (&optional pattern other-window update)
-  "List all branches with the time of its last commit."
+  "List all branches or tags for the current repository.
+Optional arg PATTERN if non-nil, then must be \"local\", \"remote\",
+ or \"tags\".  That lists local branches, remote branches and tags,
+ respectively.  When PATTERN is nil, then list the local branches.
+Optional arg OTHER-WINDOW means to display the Gited buffer in another window.
+Optional arg UPDATE if non-nil, then force to update the gited buffer.
+ Otherwise, just switch to the Gited buffer if already exists.
+When called interactively prompt for PATTERN.
+When called interactively with a prefix set OTHER-WINDOW non-nil."
   (interactive
    (progn
      (unless (gited-dir-under-Git-control-p)
@@ -3383,6 +3391,8 @@ in the active region."
       (unless gited--hide-details-set
         (or gited-verbose (gited-hide-details-mode 1))
         (setq gited--hide-details-set t)))))
+
+(defalias 'gited-list 'gited-list-branches)
 
 (defun gited-print-entry (id cols)
   "Insert a Gited entry at point.
