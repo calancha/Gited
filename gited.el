@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 20:41:14 JST 2017
+;; Last-Updated: Fri Jun 09 21:02:22 JST 2017
 ;;           By: calancha
-;;     Update #: 653
+;;     Update #: 654
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3162,11 +3162,11 @@ in the active region."
     (define-key map (kbd "% M") 'gited-mark-unmerged-branches)
     (define-key map (kbd "d") 'gited-flag-branch-deletion)
     ;; Git stash
-    (define-key map (kbd "* s") 'gited-stash)
-    (define-key map (kbd "* a") 'gited-stash-apply)
-    (define-key map (kbd "* A") 'gited-stash-pop)
-    (define-key map (kbd "* b") 'gited-stash-branch)
-    (define-key map (kbd "* d") 'gited-stash-drop)
+    (define-key map (kbd "* s s") 'gited-stash)
+    (define-key map (kbd "* s a") 'gited-stash-apply)
+    (define-key map (kbd "* s A") 'gited-stash-pop)
+    (define-key map (kbd "* s b") 'gited-stash-branch)
+    (define-key map (kbd "* s d") 'gited-stash-drop)
     ;; marked operations
     (define-key map (kbd "* N") 'gited-number-marked)
     (define-key map (kbd "R") 'gited-rename-branch)
