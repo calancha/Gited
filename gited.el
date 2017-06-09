@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 21:02:22 JST 2017
+;; Last-Updated: Fri Jun 09 21:06:05 JST 2017
 ;;           By: calancha
-;;     Update #: 654
+;;     Update #: 656
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1145,7 +1145,7 @@ g = merged, k = keep): "
         (error "Cannot reset --%s '%s' to '%s'" mode branch commit)))))
 
 (defun gited-remote-prune ()
-  "Remove references to deleted remote branches."
+  "Remove references to deleted remote branches/tags."
   (setq gited--last-remote-prune (current-time))
   (message "Prunning remote branches ...")
   (gited-git-command '("fetch" "--all" "--prune")))
@@ -1279,7 +1279,7 @@ argument or confirmation)."
                      "Delete"
                      (replace-regexp-in-string
                       "files"
-                      "branches"
+                      (if (equal gited-ref-kind "tags") "tags" "branches")
                       (dired-mark-prompt arg branches)))))
         (save-excursion
           (let ((progress-reporter
@@ -1293,7 +1293,9 @@ argument or confirmation)."
                 (condition-case err
                     (let ((fn (caar l))
                           (gited-expert t)) ;; Don't ask confirmation again.
-                      (gited-delete-branch fn force)
+                      (if (equal gited-ref-kind "tags")
+                          (gited-tag-delete fn)
+                        (gited-delete-branch fn force))
                       ;; if we get here, removing worked
                       (cl-incf succ)
                       (progress-reporter-update progress-reporter succ))
@@ -1878,22 +1880,29 @@ ref is not ancestor of the local ref."
         (erase-buffer))
       (gited-async-operation cmd 'remote-op-p))))
 
-(defun gited-set-branch-upstream (branch)
-  "Push a local BRANCH to origin."
+(defun gited-set-object-upstream (object)
+  "Push OBJECT to origin.
+OBJECT is a local branch or tag."
   (interactive
    (list (gited-get-branchname)))
-  (unless (string= gited-ref-kind "local")
-    (user-error "Gited should be listing local branches"))
+  (when (string= gited-ref-kind "remote")
+    (user-error "Gited should be listing local branches or tags"))
   (if (not (or gited-expert
-               (y-or-n-p (format "Push '%s' branch up stream? "
-                                 branch))))
+               (y-or-n-p (format "Push '%s' %s upstream? "
+                                 (if (equal gited-ref-kind "local") "branch" "tag")
+                                 object))))
       (message "OK, push canceled")
     (let ((buf (gited--output-buffer))
-          (cmd (format "%s push --set-upstream origin %s"
-                       vc-git-program branch))
+          (cmd (format "%s push %sorigin %s%s"
+                       vc-git-program
+                       (if (equal gited-ref-kind "local") "--set-upstream " "")
+                       (if (equal gited-ref-kind "local") "" "tag ")
+                       object))
           (inhibit-read-only t))
       (setq gited-output-buffer buf
-            gited-op-string (format "Set branch '%s' upstream" branch))
+            gited-op-string (format "Set %s '%s' upstream"
+                                    (if (equal gited-ref-kind "local") "branch" "tag ")
+                                    object))
       (with-current-buffer buf
         (setq buffer-read-only nil) ; Editable, they can ask username.
         (erase-buffer))
@@ -2295,7 +2304,102 @@ prefix arguments includes the ignored files as well."
 
 (defalias 'gited-delete-all-stashes 'gited-branch-clear)
 
+
+;;; Commands handling tags.
+(defun gited-tag-add (name commit &optional arg)
+  "Create a new tag with name NAME at COMMIT with message MSG.
+Called with a prefix argument C-u, annotate the tag.
+Called with a numeric prefix ARG > 1, make a GPG-signed tag using the default
+ e-mail address's key.
+Called with a numeric prefix ARG < 1, prompt for the key and make a GPG-signed tag."
+  (interactive
+   (let ((commit (gited-get-branchname))
+         (name (read-string "Tag name: ")))
+     (list name commit current-prefix-arg)))
+  (let* ((num (prefix-numeric-value arg))
+         (buf (gited--output-buffer))
+         (args (list "tag"
+                     (cond ((consp arg) "--annotate")
+                           ((and arg (> num 0)) "--sign")
+                           ((and arg (< num 0)) (concat "-u" (read-string "Key-id: "))))
+                     name commit)))
+    (with-current-buffer buf (setq buffer-read-only nil))
+    (gited-async-operation
+     (mapconcat 'identity (append (list vc-git-program) (delq nil args)) " ")
+     nil buf)
+    (setq gited-op-string (format "Add '%s' tag" name))))
 
+(defun gited-tag-delete (name)
+  "Delete local tag NAME.
+This does not delete the remote tag with same name.
+
+After this command, you can fetch the remote tag again with:
+\\[gited-fetch-remote-tags\]."
+  (interactive (list (gited-get-branchname)))
+  (let ((buf (gited--output-buffer)))
+    (with-current-buffer buf (setq buffer-read-only nil))
+    (if (zerop (gited-git-command `("tag" "-d" ,name) buf))
+        (run-hooks 'gited-after-change-hook)
+      (error "Cannot delete tag.  Please check"))))
+
+(defun gited-fetch-remote-tags ()
+  (interactive)
+  (gited-remote-prune)
+  (gited-update))
+
+(defun gited-remote-tag-delete (name)
+  "Delete remote tag NAME.
+This does not delete the local tag with same name."
+  (interactive (list (gited-get-branchname)))
+  (let ((remote-tags (gited-remote-tags)))
+    (unless (member name remote-tags)
+      (user-error "Tag '%s' is local" name))
+    (if (not (or gited-expert
+                 (y-or-n-p (format "Delete remote tag '%s' " name))))
+        (message "OK, push canceled")
+      (let ((buf (gited--output-buffer))
+            (cmd (format "%s push origin :%s" vc-git-program name))
+            (inhibit-read-only t))
+        (setq gited-output-buffer buf
+              gited-op-string (format "Delete remote tag '%s'" name))
+        (with-current-buffer buf
+          (setq buffer-read-only nil) ; Editable, they can ask username.
+          (erase-buffer))
+        (gited-async-operation cmd 'remote-op-p)))))
+
+(defun gited-remote-tags ()
+  "Return list of remote tags."
+  (let ((buf (gited--output-buffer)) res)
+    (with-current-buffer buf (erase-buffer))
+    (message "Collecting remote tags...")
+    (gited-git-command '("ls-remote" "--tags") buf)
+    (with-current-buffer buf
+      (goto-char 1)
+      (while (re-search-forward "refs/tags/\\(.*\\)" nil t)
+        (let ((match (match-string 1)))
+          (unless (string-match-p "\\^{}$" match)
+            (push match res)))))
+    (message "Done!")
+    (nreverse res)))
+
+(defun gited-mark-local-tags ()
+  "Return list of local tags.
+These are tags that only exist in the local repository."
+  (interactive)
+  (if (not (equal gited-ref-kind "tags"))
+      (user-error "Not listing tags")
+    (let* ((tags (gited-listed-branches))
+           (remote-tags (gited-remote-tags))
+           (local-tags (cl-set-difference tags remote-tags :test 'string=)))
+      (gited-mark-if
+       (and (not (eolp))
+            local-tags
+            (let* ((fn (gited-get-branchname))
+                   (localp (and (member fn local-tags))))
+              (prog1
+                  localp
+                (setq local-tags (delete fn local-tags)))))
+       "matching local tag"))))
 
 ;;; Moving around.
 
@@ -3146,12 +3250,17 @@ in the active region."
     (define-key map (kbd "k") 'gited-do-kill-lines)
     (define-key map (kbd "P") 'gited-pull)
     (define-key map (kbd "r") 'gited-reset-branch)
-    (define-key map (kbd "* p") 'gited-set-branch-upstream)
+    (define-key map (kbd "* p") 'gited-set-object-upstream)
     (define-key map (kbd "* <") 'gited-pull)
     (define-key map (kbd "* >") 'gited-push)
     (define-key map (kbd "o") 'gited-origin)
     (define-key map (kbd "l") 'gited-log)
     (define-key map (kbd "L") 'gited-log-last-n-commits)
+    ;; Tags
+    (define-key map (kbd "* t a") 'gited-tag-add)
+    (define-key map (kbd "* t d") 'gited-tag-delete)
+    (define-key map (kbd "* t D") 'gited-remote-tag-delete)
+    (define-key map (kbd "* t f") 'gited-fetch-remote-tags)
     ;; marking banches
     (define-key map (kbd "m") 'gited-mark)
     (define-key map (kbd "% n") 'gited-mark-branches-regexp)
@@ -3161,6 +3270,7 @@ in the active region."
     (define-key map (kbd "% m") 'gited-mark-merged-branches)
     (define-key map (kbd "% M") 'gited-mark-unmerged-branches)
     (define-key map (kbd "d") 'gited-flag-branch-deletion)
+    (define-key map (kbd "% l") 'gited-mark-local-tags) ; Local tags.
     ;; Git stash
     (define-key map (kbd "* s s") 'gited-stash)
     (define-key map (kbd "* s a") 'gited-stash-apply)
