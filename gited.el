@@ -5,14 +5,15 @@
 ;;
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
+;; URL: https://github.com/calancha/Gited
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jun 08 22:31:32 JST 2017
+;; Last-Updated: Fri Jun 09 20:41:14 JST 2017
 ;;           By: calancha
-;;     Update #: 652
+;;     Update #: 653
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -44,6 +45,35 @@
 ;; For instance `gited-rename-branch' is bound to `R' as `dired-do-rename'.
 ;; Similarly, `gited-mark' is bound to `m' as `dired-mark'.
 ;;
+;; === How to push to the remote repo. your local changes ===
+;;
+;; Suppose you want to update a file 'foo' (*).
+;; From the Gited buffer:
+;; 0) c master RET ;  Checkout master branch (**).
+;;   *< ; Synchronize with remote repository.
+;;
+;;   <<< Update 'foo' with your changes and save it. >>>
+;;
+;; From the Gited buffer:
+;; 1) A ; Stage your changes.
+;; 2) C-c c "Updated foo" RET ; Commit them.
+;; 3) *> ; Public your changes into the remote repository.
+;; ---
+;; (*) We have restricted to 1 file for simplicity.  The recipe works
+;;     for N>=1 files.
+;; (**) For changes that require several commits you might prefer to
+;;      work in a separated branch 'feature'.  In that case you'd
+;;      merge the master branch with 'feature' before 3).
+;;
+;;
+;; Bugs/TODO
+;; =========
+;; * Currently, 'origin' is assumed as the remote repository:
+;;   Remove some hardcode 'origin' around, and extend it
+;;   to handle multiple remotes.
+;;   
+;; * Pull requests are not implemented.
+
 ;;
 ;;  Internal variables defined here:
 ;;
