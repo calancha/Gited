@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 22:11:39 JST 2017
+;; Last-Updated: Fri Jun 09 22:24:01 JST 2017
 ;;           By: calancha
-;;     Update #: 658
+;;     Update #: 659
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2608,8 +2608,8 @@ reach the beginning of the buffer."
                                        (format-time-string
                                         gited-date-format
                                         (apply #'encode-time
-                                               (decode-time
-                                                (seconds-to-time time-secs) zone))
+                                               (with-no-warnings
+                                                 (decode-time (seconds-to-time time-secs) zone)))
                                         ;; FIXME: Would work for  a zone as: +0530 ?
                                         (and zone (* 36 zone)))) 
                                       (t ;; HACK: Workaround for Emacs versions < 25 that don't accept
