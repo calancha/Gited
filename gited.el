@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 22:47:58 JST 2017
+;; Last-Updated: Sat Jun 10 11:35:13 JST 2017
 ;;           By: calancha
-;;     Update #: 660
+;;     Update #: 661
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -3409,6 +3409,7 @@ When called interactively with a prefix set OTHER-WINDOW non-nil."
         (or gited-verbose (gited-hide-details-mode 1))
         (setq gited--hide-details-set t)))))
 
+;;;###autoload
 (defalias 'gited-list 'gited-list-branches)
 
 (defun gited-print-entry (id cols)
