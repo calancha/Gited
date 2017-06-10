@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Fri Jun 09 22:47:58 JST 2017
+;; Last-Updated: Sat Jun 10 11:38:55 JST 2017
 ;;           By: calancha
-;;     Update #: 660
+;;     Update #: 661
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -55,6 +55,35 @@
 ;; For instance `gited-rename-branch' is bound to `R' as `dired-do-rename'.
 ;; Similarly, `gited-mark' is bound to `m' as `dired-mark'.
 ;;
+;; === How to push to the remote repo. your local changes ===
+;;
+;; Suppose you want to update a file 'foo' (*).
+;; From the Gited buffer:
+;; 0) c master RET ;  Checkout master branch (**).
+;;   *< ; Synchronize with remote repository.
+;;
+;;   <<< Update 'foo' with your changes and save it. >>>
+;;
+;; From the Gited buffer:
+;; 1) A ; Stage your changes.
+;; 2) C-c c "Updated foo" RET ; Commit them.
+;; 3) *> ; Public your changes into the remote repository.
+;; ---
+;; (*) We have restricted to 1 file for simplicity.  The recipe works
+;;     for N>=1 files.
+;; (**) For changes that require several commits you might prefer to
+;;      work in a separated branch 'feature'.  In that case you'd
+;;      merge the master branch with 'feature' before 3).
+;;
+;;
+;; Bugs/TODO
+;; =========
+;; * Currently, 'origin' is assumed as the remote repository:
+;;   Remove some hardcode 'origin' around, and extend it
+;;   to handle multiple remotes.
+;;   
+;; * Pull requests are not implemented.
+
 ;;
 ;;  Internal variables defined here:
 ;;
@@ -3375,6 +3404,7 @@ When called interactively with a prefix set OTHER-WINDOW non-nil."
         (or gited-verbose (gited-hide-details-mode 1))
         (setq gited--hide-details-set t)))))
 
+;;;###autoload
 (defalias 'gited-list 'gited-list-branches)
 
 (defun gited-print-entry (id cols)
