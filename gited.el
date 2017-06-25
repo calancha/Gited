@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.3
+;; Version: 0.2.4
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 25 12:32:59 JST 2017
+;; Last-Updated: Sun Jun 25 14:36:31 JST 2017
 ;;           By: calancha
-;;     Update #: 663
+;;     Update #: 664
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1064,6 +1064,7 @@ date are hidden from view."
   :group 'gited
   (unless (derived-mode-p 'gited-mode)
     (user-error "Not a Gited buffer"))
+  (setq gited-verbose (not gited-hide-details-mode))
   (gited-hide-details-update-invisibility-spec))
 
 (put 'gited-hide-details-mode 'permanent-local t)
