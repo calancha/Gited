@@ -59,6 +59,16 @@ C-c c "Updated foo" RET ; Commit them.
      merge the master branch with 'feature' before ```*>```).
 
 
+### Screenshots
+
+List the tags from the Emacs repository:
+
+![ScreenShot](/screenshots/gited-tags-screenshot.png)
+
+List the remote branches from the Emacs repository with author and commit date:
+
+![ScreenShot](/screenshots/gited-remote-branches-verbose-screenshot.png)
+
 ### Bugs/TODO
 
 * Currently, *origin* is assumed as the remote repository:
