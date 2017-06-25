@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 25 16:29:24 JST 2017
+;; Last-Updated: Mon Jun 26 08:41:10 JST 2017
 ;;           By: calancha
-;;     Update #: 665
+;;     Update #: 666
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -178,13 +178,14 @@
 ;;   `gited--advice-sort-by-column', `gited--bisect-after-run',
 ;;   `gited--bisect-executable-p', `gited--case-ref-kind',
 ;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
-;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
-;;   `gited--get-unmerged-branches', `gited--goto-column',
-;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
-;;   `gited--list-files', `gited--list-format-init',
-;;   `gited--list-refs-format', `gited--mark-branches-in-region',
+;;   `gited--col-branch-name', `gited--fill-branch-alist',
+;;   `gited--fontify-current-row', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-merged-branches',
+;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
+;;   `gited--goto-column', `gited--goto-first-branch',
+;;   `gited--handle-new-or-delete-files', `gited--list-files',
+;;   `gited--list-format-init', `gited--list-refs-format',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
