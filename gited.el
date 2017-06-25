@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.4
+;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 25 14:36:31 JST 2017
+;; Last-Updated: Sun Jun 25 16:29:24 JST 2017
 ;;           By: calancha
-;;     Update #: 664
+;;     Update #: 665
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -933,6 +933,8 @@ You can then feed the file name(s) to other commands with \\[yank]."
 ;;; Operations on branches (copy, merge, ...).
 
 (defun gited--get-branches-from-command (cmd)
+  (when (equal gited-ref-kind "remote")
+    (setq cmd (append cmd (list "--remote"))))
   (with-temp-buffer
     (gited-git-command cmd (current-buffer) nil 'unquote)
     (goto-char (point-min))
