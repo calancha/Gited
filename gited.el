@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jun 10 11:35:13 JST 2017
+;; Last-Updated: Sun Jun 25 11:08:01 JST 2017
 ;;           By: calancha
-;;     Update #: 661
+;;     Update #: 662
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -168,13 +168,14 @@
 ;;   `gited--advice-sort-by-column', `gited--bisect-after-run',
 ;;   `gited--bisect-executable-p', `gited--case-ref-kind',
 ;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
-;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
-;;   `gited--get-unmerged-branches', `gited--goto-column',
-;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
-;;   `gited--list-files', `gited--list-format-init',
-;;   `gited--list-refs-format', `gited--mark-branches-in-region',
+;;   `gited--col-branch-name', `gited--fill-branch-alist',
+;;   `gited--fontify-current-row', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-merged-branches',
+;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
+;;   `gited--goto-column', `gited--goto-first-branch',
+;;   `gited--handle-new-or-delete-files', `gited--list-files',
+;;   `gited--list-format-init', `gited--list-refs-format',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -436,6 +437,12 @@ If you change this option, then you might want to change
           (const :tag "Full" "%FT%T%z"))
   :group 'gited)
 
+(defun gited--col-branch-name ()
+  (pcase gited-ref-kind
+    ("tags" "Tags")
+    ("remote" "Remote Branches")
+    (_ "Branches")))
+
 (defun gited--list-format-init (&optional col-names col-sizes)
   "Initialize `gited-list-format'.
 Optional arguments COL-NAMES and COL-SIZES are the column names
@@ -458,7 +465,7 @@ and sizes."
                       (if reverse-order
                           earlierp
                         (not earlierp)))))
-                `(,(if col-names (nth 3 col-names) "Branches")
+                `(,(if col-names (nth 3 col-names) (gited--col-branch-name))
                   ,(if col-sizes (nth 3 col-sizes) gited-branch-col-size) t)
                 `(,(if col-names (nth 4 col-names) "Last Commit")
                   ,(if col-sizes (nth 4 col-sizes) gited-commit-col-size) t))))
@@ -2681,8 +2688,8 @@ reach the beginning of the buffer."
 (defun gited-hide-details-update-invisibility-spec ()
   (let ((col-names
          (if gited-hide-details-mode
-             '("M" "Branches" "" "" "Last Commit")
-           '("M" "Authors" "Date" "Branches" "Last Commit")))
+             `("M" ,(gited--col-branch-name) "" "" "Last Commit")
+           `("M" "Authors" "Date" ,(gited--col-branch-name) "Last Commit")))
         (col-sizes
          (if gited-hide-details-mode
              (list gited-mark-col-size gited-branch-col-size
