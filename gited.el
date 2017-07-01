@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 12:05:35 JST 2017
+;; Last-Updated: Sat Jul 01 13:19:13 JST 2017
 ;;           By: calancha
-;;     Update #: 668
+;;     Update #: 669
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1077,11 +1077,13 @@ date are hidden from view."
   (interactive)
   (unless (derived-mode-p major-mode 'gited-mode)
     (user-error "Cannot enable Gited mode in this buffer"))
-  (let ((target-br (ignore-errors (gited-get-branchname)))
+  (let ((marks (gited-remember-marks 1 (point-max)))
+        (target-br (ignore-errors (gited-get-branchname)))
         (at-headr-p (gited-at-header-line-p))
         (hide-details gited-hide-details-mode))
     (gited-list-branches gited-ref-kind nil 'update)
     (gited-hide-details-mode (if hide-details 1 0))
+    (when marks (gited-mark-remembered marks)) ; Preserve marks.
     (if (not at-headr-p)
         (gited-goto-branch target-br)
       (gited-goto-branch gited-current-branch))))
