@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 12:04:28 JST 2017
+;; Last-Updated: Sat Jul 01 12:05:35 JST 2017
 ;;           By: calancha
-;;     Update #: 667
+;;     Update #: 668
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2806,8 +2806,8 @@ Each element of ALIST looks like (BRANCH . MARKERCHAR)."
               chr (cdr elt))
         (when (gited-goto-branch branch)
           (beginning-of-line)
-          (delete-char 1)
-          (insert chr))))))
+          (gited-insert-marker-char chr)
+          (gited-fontify-marked-branch-name chr))))))
 
 (defun gited-fontify-current-branch ()
   "Set font for current branch."
