@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jun 25 16:29:24 JST 2017
+;; Last-Updated: Sat Jul 01 11:56:57 JST 2017
 ;;           By: calancha
-;;     Update #: 665
+;;     Update #: 666
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2524,7 +2524,8 @@ Return buffer position on success, else nil."
     (let ((row (cl-position branch (gited-listed-branches) :test #'equal)))
       (goto-char (point-min))
       (forward-line (if (overlays-at (point-min)) (1+ row) row))
-      (gited--goto-column (1+ gited-branch-idx)))))
+      (gited--goto-column (1+ gited-branch-idx))
+      (point))))
 
 (defun gited-next-marked-branch (arg &optional wrap opoint)
   "Move to the next ARG marked branch.
