@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 13:23:06 JST 2017
+;; Last-Updated: Sat Jul 01 15:44:48 JST 2017
 ;;           By: calancha
-;;     Update #: 669
+;;     Update #: 670
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -132,14 +132,15 @@
 ;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
 ;;   `gited-delete-branch', `gited-diff',
 ;;   `gited-do-delete', `gited-do-flagged-delete',
-;;   `gited-do-kill-lines', `gited-edit-commit-mode',
-;;   `gited-extract-patches', `gited-fetch-remote-tags',
-;;   `gited-finish-commit-edit', `gited-flag-branch-deletion',
-;;   `gited-goto-branch', `gited-goto-first-branch',
-;;   `gited-goto-last-branch', `gited-kill-line',
-;;   `gited-list-branches', `gited-log',
-;;   `gited-log-last-n-commits', `gited-mark',
-;;   `gited-mark-branches-by-date', `gited-mark-branches-containing-commit',
+;;   `gited-do-kill-lines', `gited-do-sync-with-trunk',
+;;   `gited-edit-commit-mode', `gited-extract-patches',
+;;   `gited-fetch-remote-tags', `gited-finish-commit-edit',
+;;   `gited-flag-branch-deletion', `gited-goto-branch',
+;;   `gited-goto-first-branch', `gited-goto-last-branch',
+;;   `gited-kill-line', `gited-list-branches',
+;;   `gited-log', `gited-log-last-n-commits',
+;;   `gited-mark', `gited-mark-branches-by-date',
+;;   `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-local-tags', `gited-mark-merged-branches',
 ;;   `gited-mark-unmerged-branches', `gited-merge-branch',
@@ -180,20 +181,20 @@
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
 ;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
-;;   `gited--stash-branch', `gited--update-padding',
-;;   `gited--valid-ref-p', `gited-all-branches',
-;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
-;;   `gited-bisecting-p', `gited-branch-exists-p',
-;;   `gited-buffer-p', `gited-commit-title',
-;;   `gited-current-branch', `gited-current-branches-with-marks',
-;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
-;;   `gited-edit-commit', `gited-fontify-current-branch',
-;;   `gited-fontify-marked-branch-name', `gited-format-columns-of-files',
-;;   `gited-get-branchname', `gited-get-commit',
-;;   `gited-get-date', `gited-get-element-in-row',
-;;   `gited-get-last-commit-time', `gited-get-mark',
-;;   `gited-get-marked-branches', `gited-git-command',
-;;   `gited-git-command-on-region',
+;;   `gited--stash-branch', `gited--sync-with-trunk-target-name',
+;;   `gited--update-padding', `gited--valid-ref-p',
+;;   `gited-all-branches', `gited-async-operation-sentinel',
+;;   `gited-at-header-line-p', `gited-bisecting-p',
+;;   `gited-branch-exists-p', `gited-buffer-p',
+;;   `gited-commit-title', `gited-current-branch',
+;;   `gited-current-branches-with-marks', `gited-current-state-list',
+;;   `gited-dir-under-Git-control-p', `gited-edit-commit',
+;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
+;;   `gited-format-columns-of-files', `gited-get-branchname',
+;;   `gited-get-commit', `gited-get-date',
+;;   `gited-get-element-in-row', `gited-get-last-commit-time',
+;;   `gited-get-mark', `gited-get-marked-branches',
+;;   `gited-git-command', `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -2195,6 +2196,11 @@ tracking a remote repository"))
                num-commits))))
 
 (defun gited-do-sync-with-trunk (&optional dont-ask)
+  "Run `gited-sync-with-trunk' in the marked branches.
+If optional arg DONT-ASK is non-nil, then do not promt user for the
+target branch.  Otherwise, prompt user.
+If no marked files use the branch at point.
+Called interactively with a prefix set DONT-ASK to non-nil."
   (interactive "P")
   (dolist (br (or (gited-get-marked-branches) (list (gited-get-branchname))))
     (let* ((prompt
