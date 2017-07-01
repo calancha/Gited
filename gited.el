@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 15:47:21 JST 2017
+;; Last-Updated: Sat Jul 01 15:51:52 JST 2017
 ;;           By: calancha
-;;     Update #: 671
+;;     Update #: 672
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2192,7 +2192,7 @@ tracking a remote repository"))
 
 (defun gited-do-sync-with-trunk (&optional dont-ask)
   "Run `gited-sync-with-trunk' in the marked branches.
-If optional arg DONT-ASK is non-nil, then do not promt user for the
+If optional arg DONT-ASK is non-nil, then do not prompt user for the
 target branch.  Otherwise, prompt user.
 If no marked files use the branch at point.
 Called interactively with a prefix set DONT-ASK to non-nil."
