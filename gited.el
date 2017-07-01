@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 13:19:13 JST 2017
+;; Last-Updated: Sat Jul 01 13:24:22 JST 2017
 ;;           By: calancha
-;;     Update #: 669
+;;     Update #: 670
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2135,21 +2135,26 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
        (string< (buffer-name x) (buffer-name y)))
      )))
 
+(defun gited--sync-with-trunk-target-name (&optional branch)
+  (unless branch (setq branch (gited-get-branchname)))
+  (if (string-match "-new\\([0-9]*\\)\\'" branch)
+      (format "%s%d" (substring branch 0 (match-beginning 1))
+              (1+ (string-to-number (match-string 1 branch))))
+    (concat branch "-new1")))
+
 (defun gited-sync-with-trunk (branch-target)
   "Extract latest patches in branch at point and apply then into BRANCH-TARGET.
 BRANCH-TARGET is a new branch copied from (car (gited-trunk-branches)).
+
 The effect is similar than merge the branch at point with the trunk;
 one difference is that we don't modify the trunk, instead we copy it;
-another difference that we don't get a 'Merge branch...' commit in the log.
-this command set BRANCH-TARGET current."
+another difference is that we don't get a 'Merge branch...' commit in the log.
+This command sets BRANCH-TARGET current."
   (interactive
    (let* ((br (gited-get-branchname))
           (prompt
            (format "Syncronized '%s' into new branch: " br))
-          (def (if (string-match "-new\\([0-9]*\\)\\'" br)
-                   (format "%s%d" (substring br 0 (match-beginning 1))
-                           (1+ (string-to-number (match-string 1 br))))
-                 (concat br "-new1"))))
+          (def (gited--sync-with-trunk-target-name br)))
      (list
       (completing-read prompt
                        (gited-listed-branches)
@@ -2159,6 +2164,8 @@ this command set BRANCH-TARGET current."
   (unless (gited-remote-repository-p)
     (user-error "This command only works for repositories \
 tracking a remote repository"))
+  (when (gited-branch-exists-p branch-target)
+    (user-error "Branch '%s' already exists" branch-target))
   (if (null (ignore-errors (gited-extract-patches nil t)))
       (user-error "No new patches to apply")
     ;; If branch-target doesn't exists create it as copy of master.
@@ -2179,9 +2186,22 @@ tracking a remote repository"))
             (setq buf-patches (cdr buf-patches)
                   buf-commits (cdr buf-commits)))))
       (gited-checkout-branch branch-target)
-      (gited-update)
       (message "Successfully applied and committed %d commits!"
                num-commits))))
+
+(defun gited-do-sync-with-trunk (&optional dont-ask)
+  (interactive "P")
+  (dolist (br (or (gited-get-marked-branches) (list (gited-get-branchname))))
+    (let* ((prompt
+            (format "Syncronized '%s' into new branch: " br))
+           (def (gited--sync-with-trunk-target-name br))
+           (target
+            (if dont-ask def
+              (completing-read
+               prompt (gited-listed-branches)
+               nil nil def))))
+      (gited-sync-with-trunk target)))
+  (gited-update))
 
 (defun gited-bisecting-p ()
   "Return non-nil if a Git bisect is on process."
@@ -3298,7 +3318,7 @@ in the active region."
     (define-key map (kbd "C-c c") 'gited-commit)
     (define-key map (kbd "w") 'gited-copy-branchname-as-kill)
     (define-key map (kbd "e") 'gited-extract-patches)
-    (define-key map (kbd "T") 'gited-sync-with-trunk)
+    (define-key map (kbd "T") 'gited-do-sync-with-trunk)
     (define-key map (kbd "M") 'gited-merge-branch)
     (define-key map (kbd "c") 'gited-checkout-branch)
     (define-key map (kbd "v") 'gited-visit-branch-sources)
