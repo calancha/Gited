@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jul 02 11:53:36 JST 2017
+;; Last-Updated: Sun Jul 02 12:17:39 JST 2017
 ;;           By: calancha
-;;     Update #: 672
+;;     Update #: 673
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2226,6 +2226,7 @@ tracking a remote repository"))
       (message "Successfully applied and committed %d commits!"
                num-commits))))
 
+;; FIXME: This command changes the current branch.  Should be preserved?
 (defun gited-do-sync-with-trunk (&optional dont-ask)
   "Run `gited-sync-with-trunk' in the marked branches.
 If optional arg DONT-ASK is non-nil, then do not prompt user for the
@@ -2242,6 +2243,7 @@ Called interactively with a prefix set DONT-ASK to non-nil."
               (completing-read
                prompt (gited-listed-branches)
                nil nil def))))
+      (gited-goto-branch br)
       (gited-sync-with-trunk target)))
   (gited-update))
 
