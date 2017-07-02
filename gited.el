@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.2.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Jul 01 15:51:52 JST 2017
+;; Last-Updated: Sun Jul 02 12:05:42 JST 2017
 ;;           By: calancha
-;;     Update #: 672
+;;     Update #: 673
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -180,13 +180,13 @@
 ;;   `gited--bisect-executable-p', `gited--case-ref-kind',
 ;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
 ;;   `gited--col-branch-name', `gited--fill-branch-alist',
-;;   `gited--fontify-current-row', `gited--get-branches-from-command',
-;;   `gited--get-column', `gited--get-merged-branches',
-;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
-;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--handle-new-or-delete-files', `gited--list-files',
-;;   `gited--list-format-init', `gited--list-refs-format',
-;;   `gited--mark-branches-in-region',
+;;   `gited--fontify-current-row', `gited--fontify-current-row-1',
+;;   `gited--get-branches-from-command', `gited--get-column',
+;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
+;;   `gited--get-unmerged-branches', `gited--goto-column',
+;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
+;;   `gited--list-files', `gited--list-format-init',
+;;   `gited--list-refs-format', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -199,12 +199,12 @@
 ;;   `gited-commit-title', `gited-current-branch',
 ;;   `gited-current-branches-with-marks', `gited-current-state-list',
 ;;   `gited-dir-under-Git-control-p', `gited-edit-commit',
-;;   `gited-fontify-current-branch', `gited-fontify-marked-branch-name',
-;;   `gited-format-columns-of-files', `gited-get-branchname',
-;;   `gited-get-commit', `gited-get-date',
-;;   `gited-get-element-in-row', `gited-get-last-commit-time',
-;;   `gited-get-mark', `gited-get-marked-branches',
-;;   `gited-git-command', `gited-git-command-on-region',
+;;   `gited-fontify-current-branch', `gited-format-columns-of-files',
+;;   `gited-get-branchname', `gited-get-commit',
+;;   `gited-get-date', `gited-get-element-in-row',
+;;   `gited-get-last-commit-time', `gited-get-mark',
+;;   `gited-get-marked-branches', `gited-git-command',
+;;   `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -723,7 +723,7 @@ Return value is the number of files marked, or nil if none were marked."
          (if ,predicate
              (progn
                (gited-insert-marker-char)
-               (gited-fontify-marked-branch-name)
+               (gited--fontify-current-row)
                (cl-incf count)))
          (forward-line))
        (if ,msg (message "%s %s%s %s%s."
@@ -1436,7 +1436,7 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
           (dired default-directory))
         (dired-revert)))))
 
-(defun gited--fontify-current-row ()
+(defun gited--fontify-current-row-1 ()
   (remove-text-properties
    (point-at-bol) (point-at-eol) '(face))
   (let ((inhibit-read-only t) pos)
@@ -1460,6 +1460,36 @@ If optional arg OTHER-WINDOW is non-nil, then use another window."
       (put-text-property
        pos (point-at-eol) 'face gited-commit-msg-face))))
 
+(defun gited--fontify-current-row (&optional mark)
+  "Fontify the current row."
+  (let ((marker (or mark (string-to-char (gited-get-mark))))
+        (inhibit-read-only t))
+    (gited-move-to-branchname)
+    (remove-text-properties
+     (point-at-bol) (point-at-eol) '(face))
+    (cond ((eq marker ?\s)
+           (if (string= (gited-get-branchname)
+                        gited-current-branch)
+               (put-text-property
+                (point-at-bol)
+                (point-at-eol)
+                'face gited-section-highlight-face)
+             (gited--fontify-current-row-1)))
+          ((eq marker gited-marker-char)
+           (put-text-property
+            (point-at-bol) (1+ (point-at-bol)) 'face gited-flag-mark-face)
+           (put-text-property
+            (1+ (point-at-bol))
+            (point-at-eol)
+            'face gited-flag-mark-line-face))
+          ((eq marker gited-del-char)
+           (put-text-property
+            (point-at-bol) (1+ (point-at-bol)) 'face gited-deletion-face)
+           (put-text-property
+            (1+ (point-at-bol))
+            (point-at-eol)
+            'face gited-deletion-branch-face)))))
+
 (defun gited-checkout-branch (branch)
   "Checkout BRANCH.
 If the gited buffer lists local branches and BRANCH is not
@@ -1482,7 +1512,8 @@ local, then prompt for a branch name where to check out BRANCH."
                          branch)))
     (save-excursion
       (gited-goto-branch cur-br)
-      (gited--fontify-current-row)
+      ;; Fontify the previous current branch correctly.
+      (let ((gited-current-branch "")) (gited--fontify-current-row))
       (if (not new-branch-p)
           (vc-git-checkout nil branch)
         (gited-git-command `("checkout" "-b" ,local-branch ,branch))
@@ -2835,7 +2866,7 @@ Each element of ALIST looks like (BRANCH . MARKERCHAR)."
         (when (gited-goto-branch branch)
           (beginning-of-line)
           (gited-insert-marker-char chr)
-          (gited-fontify-marked-branch-name chr))))))
+          (gited--fontify-current-row chr))))))
 
 (defun gited-fontify-current-branch ()
   "Set font for current branch."
@@ -2853,36 +2884,6 @@ Each element of ALIST looks like (BRANCH . MARKERCHAR)."
          (point-at-bol)
          (point-at-eol)
          'face gited-section-highlight-face)))))
-
-(defun gited-fontify-marked-branch-name (&optional mark)
-  "Set font for a marked branch."
-  (let ((marker (or mark (string-to-char (gited-get-mark))))
-        (inhibit-read-only t))
-    (gited-move-to-branchname)
-    (remove-text-properties
-     (point-at-bol) (point-at-eol) '(face))
-    (cond ((eq marker ?\s)
-           (if (string= (gited-get-branchname)
-                        gited-current-branch)
-               (put-text-property
-                (point-at-bol)
-                (point-at-eol)
-                'face gited-section-highlight-face)
-             (gited--fontify-current-row)))
-          ((eq marker gited-marker-char)
-           (put-text-property
-            (point-at-bol) (1+ (point-at-bol)) 'face gited-flag-mark-face)
-           (put-text-property
-            (1+ (point-at-bol))
-            (point-at-eol)
-            'face gited-flag-mark-line-face))
-          ((eq marker gited-del-char)
-           (put-text-property
-            (point-at-bol) (1+ (point-at-bol)) 'face gited-deletion-face)
-           (put-text-property
-            (1+ (point-at-bol))
-            (point-at-eol)
-            'face gited-deletion-branch-face)))))
 
 (defun gited-insert-marker-char (&optional marker)
   (tabulated-list-set-col gited-mark-idx
@@ -2914,7 +2915,7 @@ As always, hidden subdirs are not affected."
                     (t nil))))
         (when flag
           (gited-insert-marker-char flag)
-          (gited-fontify-marked-branch-name flag)))
+          (gited--fontify-current-row flag)))
       (forward-line))))
 
 (defun gited-kill-line (&optional arg)
@@ -3188,7 +3189,7 @@ this subdir."
        (lambda ()
          (when (ignore-errors (gited-get-branchname))
            (gited-insert-marker-char mark)
-           (gited-fontify-marked-branch-name mark))))))))
+           (gited--fontify-current-row mark))))))))
 
 (defun gited--mark-branches-in-region (start end mark)
   (when (> start end)
@@ -3197,7 +3198,7 @@ this subdir."
   (while (< (point) end)
     (when (gited-get-branchname)
       (gited-insert-marker-char mark)
-      (gited-fontify-marked-branch-name mark))
+      (gited--fontify-current-row mark))
     (forward-line)))
 
 (defun gited-unmark-backward ()
@@ -3206,7 +3207,7 @@ this subdir."
   (forward-line -1)
   (when (gited-get-branchname)
     (gited-insert-marker-char ?\s)
-    (gited-fontify-marked-branch-name ?\s)
+    (gited--fontify-current-row ?\s)
     (gited-move-to-branchname)))
 
 (defun gited-unmark-all-branches (mark)
@@ -3221,7 +3222,7 @@ this subdir."
                    (or (and (eq mark ?\r) (not (string= str " ")))
                        (string= (char-to-string mark) str)))
           (gited-insert-marker-char ?\s)
-          (gited-fontify-marked-branch-name ?\s))
+          (gited--fontify-current-row ?\s))
         (forward-line)))))
 
 (defun gited-unmark-all-marks ()
