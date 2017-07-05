@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.2.5
+;; Version: 0.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jul 02 12:17:39 JST 2017
+;; Last-Updated: Wed Jul 05 15:00:30 JST 2017
 ;;           By: calancha
-;;     Update #: 673
+;;     Update #: 674
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -193,8 +193,8 @@
 ;;   `gited-get-branchname', `gited-get-commit',
 ;;   `gited-get-date', `gited-get-element-in-row',
 ;;   `gited-get-last-commit-time', `gited-get-mark',
-;;   `gited-get-marked-branches', `gited-git-command',
-;;   `gited-git-command-on-region',
+;;   `gited-get-marked-branches', `gited-git-checkout',
+;;   `gited-git-command', `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-last-commit-title', `gited-listed-branches',
@@ -621,6 +621,16 @@ These branches cannot be deleted or renamed."
 
 
 
+;;; `vc-git-checkout' has 2nd argument EDITABLE for Emacs < 25.
+;;; For Emacs >= 25 that argument doesn't exit.
+(defun gited-git-checkout (file rev)
+  "Like `vc-git-checkout' with arguments FILE and REV.
+In Emacs version < 25 `vc-git-checkout' has 3 arguments."
+  (if (< emacs-major-version 25)
+      (vc-git-checkout file nil rev)
+    (vc-git-checkout file rev)))
+
+
 ;;; Macros.
 
 (defmacro gited-with-current-branch (branch &rest body)
@@ -632,11 +642,11 @@ The value returned is the value of the last form in BODY."
     `(let ((,cur-branch gited-current-branch))
        (unwind-protect
            (progn
-             (vc-git-checkout nil ,branch)
+             (gited-git-checkout nil ,branch)
              (setq gited-current-branch ,branch)
              ,@body)
          ;; Restore original current branch.
-         (vc-git-checkout nil ,cur-branch)
+         (gited-git-checkout nil ,cur-branch)
          (setq gited-current-branch ,cur-branch)))))
 
 ;;; Map over marks.
@@ -1520,7 +1530,7 @@ local, then prompt for a branch name where to check out BRANCH."
       ;; Fontify the previous current branch correctly.
       (let ((gited-current-branch "")) (gited--fontify-current-row))
       (if (not new-branch-p)
-          (vc-git-checkout nil branch)
+          (gited-git-checkout nil branch)
         (gited-git-command `("checkout" "-b" ,local-branch ,branch))
         (run-hooks 'gited-after-change-hook))
       (setq gited-current-branch local-branch))
