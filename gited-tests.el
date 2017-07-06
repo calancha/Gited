@@ -46,7 +46,7 @@
             (gited-list-branches "local")
             (should (gited-dir-under-Git-control-p))
             (should (gited-buffer-p))
-            (should (equal str (gited-last-commit-title)))
+            (should (equal str (gited--last-commit-title)))
             (should (equal "master" (gited-current-branch)))
             (should-not (gited-branch-exists-p "foo"))
             (gited-copy-branch "master" "foo")
