@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jul 06 11:18:07 JST 2017
+;; Last-Updated: Thu Jul 06 12:58:18 JST 2017
 ;;           By: calancha
-;;     Update #: 676
+;;     Update #: 677
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -621,9 +621,10 @@ These branches cannot be deleted or renamed."
 (defun gited-git-checkout (file rev)
   "Like `vc-git-checkout' with arguments FILE and REV.
 In Emacs version < 25 `vc-git-checkout' has 3 arguments."
-  (if (< emacs-major-version 25)
-      (vc-git-checkout file nil rev)
-    (vc-git-checkout file rev)))
+  (with-no-warnings
+    (if (< emacs-major-version 25)
+        (vc-git-checkout file nil rev)
+      (vc-git-checkout file rev))))
 
 
 ;;; Macros.
