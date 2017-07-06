@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.3
+;; Version: 0.3.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jul 06 12:58:18 JST 2017
+;; Last-Updated: Thu Jul 06 13:35:20 JST 2017
 ;;           By: calancha
-;;     Update #: 677
+;;     Update #: 679
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -135,22 +135,22 @@
 ;;  Commands defined here:
 ;;
 ;;   `gited--mark-merged-branches-spec', `gited--mark-unmerged-branches-spec',
-;;   `gited-add-patched-files', `gited-apply-add-and-commit-patch',
-;;   `gited-apply-patch', `gited-async-operation',
-;;   `gited-bisect', `gited-branch-clear',
-;;   `gited-checkout-branch', `gited-commit',
-;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
-;;   `gited-delete-branch', `gited-diff',
-;;   `gited-do-delete', `gited-do-flagged-delete',
-;;   `gited-do-kill-lines', `gited-do-sync-with-trunk',
-;;   `gited-edit-commit-mode', `gited-extract-patches',
-;;   `gited-fetch-remote-tags', `gited-finish-commit-edit',
-;;   `gited-flag-branch-deletion', `gited-goto-branch',
-;;   `gited-goto-first-branch', `gited-goto-last-branch',
-;;   `gited-kill-line', `gited-list-branches',
-;;   `gited-log', `gited-log-last-n-commits',
-;;   `gited-mark', `gited-mark-branches-by-date',
-;;   `gited-mark-branches-containing-commit',
+;;   `gited-add-patched-files', `gited-amend-commit',
+;;   `gited-apply-add-and-commit-patch', `gited-apply-patch',
+;;   `gited-async-operation', `gited-bisect',
+;;   `gited-branch-clear', `gited-checkout-branch',
+;;   `gited-commit', `gited-copy-branch',
+;;   `gited-copy-branchname-as-kill', `gited-delete-branch',
+;;   `gited-diff', `gited-do-delete',
+;;   `gited-do-flagged-delete', `gited-do-kill-lines',
+;;   `gited-do-sync-with-trunk', `gited-edit-commit-mode',
+;;   `gited-extract-patches', `gited-fetch-remote-tags',
+;;   `gited-finish-commit-edit', `gited-flag-branch-deletion',
+;;   `gited-goto-branch', `gited-goto-first-branch',
+;;   `gited-goto-last-branch', `gited-kill-line',
+;;   `gited-list-branches', `gited-log',
+;;   `gited-log-last-n-commits', `gited-mark',
+;;   `gited-mark-branches-by-date', `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-local-tags', `gited-mark-merged-branches',
 ;;   `gited-mark-unmerged-branches', `gited-merge-branch',
@@ -179,14 +179,17 @@
 ;;   `gited--advice-sort-by-column', `gited--bisect-after-run',
 ;;   `gited--bisect-executable-p', `gited--case-ref-kind',
 ;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
-;;   `gited--col-branch-name', `gited--fill-branch-alist',
-;;   `gited--fontify-current-row', `gited--fontify-current-row-1',
-;;   `gited--get-branches-from-command', `gited--get-column',
-;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
-;;   `gited--get-unmerged-branches', `gited--goto-column',
-;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
-;;   `gited--list-files', `gited--list-format-init',
-;;   `gited--list-refs-format', `gited--mark-branches-in-region',
+;;   `gited--col-branch-name', `gited--extract-from-commit',
+;;   `gited--fill-branch-alist', `gited--fontify-current-row',
+;;   `gited--fontify-current-row-1', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-merged-branches',
+;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
+;;   `gited--goto-column', `gited--goto-first-branch',
+;;   `gited--handle-new-or-delete-files', `gited--last-commit-author',
+;;   `gited--last-commit-date', `gited--last-commit-msg',
+;;   `gited--last-commit-title', `gited--list-files',
+;;   `gited--list-format-init', `gited--list-refs-format',
+;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
@@ -196,28 +199,28 @@
 ;;   `gited-all-branches', `gited-async-operation-sentinel',
 ;;   `gited-at-header-line-p', `gited-bisecting-p',
 ;;   `gited-branch-exists-p', `gited-buffer-p',
-;;   `gited-commit-title', `gited-current-branch',
-;;   `gited-current-branches-with-marks', `gited-current-state-list',
-;;   `gited-dir-under-Git-control-p', `gited-edit-commit',
-;;   `gited-fontify-current-branch', `gited-format-columns-of-files',
-;;   `gited-get-branchname', `gited-get-commit',
-;;   `gited-get-date', `gited-get-element-in-row',
-;;   `gited-get-last-commit-time', `gited-get-mark',
-;;   `gited-get-marked-branches', `gited-git-checkout',
-;;   `gited-git-command', `gited-git-command-on-region',
+;;   `gited-current-branch', `gited-current-branches-with-marks',
+;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
+;;   `gited-edit-commit', `gited-fontify-current-branch',
+;;   `gited-format-columns-of-files', `gited-get-branchname',
+;;   `gited-get-commit', `gited-get-date',
+;;   `gited-get-element-in-row', `gited-get-last-commit-time',
+;;   `gited-get-mark', `gited-get-marked-branches',
+;;   `gited-git-checkout', `gited-git-command',
+;;   `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
-;;   `gited-last-commit-title', `gited-listed-branches',
-;;   `gited-log-msg', `gited-log-summary',
-;;   `gited-map-lines', `gited-mark-pop-up',
-;;   `gited-mark-remembered', `gited-modified-files',
-;;   `gited-modified-files-p', `gited-next-branch',
-;;   `gited-number-of-commits', `gited-prev-branch',
-;;   `gited-print-entry', `gited-remember-marks',
-;;   `gited-remote-prune', `gited-remote-repository-p',
-;;   `gited-remote-tags', `gited-repeat-over-lines',
-;;   `gited-stashes', `gited-tabulated-list-entries',
-;;   `gited-trunk-branches', `gited-untracked-files'.
+;;   `gited-listed-branches', `gited-log-msg',
+;;   `gited-log-summary', `gited-map-lines',
+;;   `gited-mark-pop-up', `gited-mark-remembered',
+;;   `gited-modified-files', `gited-modified-files-p',
+;;   `gited-next-branch', `gited-number-of-commits',
+;;   `gited-prev-branch', `gited-print-entry',
+;;   `gited-remember-marks', `gited-remote-prune',
+;;   `gited-remote-repository-p', `gited-remote-tags',
+;;   `gited-repeat-over-lines', `gited-stashes',
+;;   `gited-tabulated-list-entries', `gited-trunk-branches',
+;;   `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -998,16 +1001,34 @@ You can then feed the file name(s) to other commands with \\[yank]."
         (forward-line)))
     (nreverse res)))
 
-(defun gited-commit-title (commit)
-  "Return title of COMMIT, a string."
-  (let ((args `("log" "--pretty=format:'%s'" "-n1" ,commit)))
+(defun gited--extract-from-commit (commit data)
+  "Return some data from COMMIT, a string.
+DATA is a string to specify what we want to extract.  For instance:
+'%s', the title.
+'%B', the raw commit message.
+'%an', the author name.
+'%ai', the author date, ISO 8601-like format.
+'%ae', the author email."
+  (let ((args `("log" ,(format "--pretty=format:'%s'" data) "-n1" ,commit)))
     (with-temp-buffer
       (gited-git-command args (current-buffer) nil 'unquote)
       (buffer-string))))
 
-(defun gited-last-commit-title ()
+(defun gited--last-commit-msg ()
+  "Return the last commit."
+  (gited--extract-from-commit "HEAD" "%B"))
+
+(defun gited--last-commit-title ()
   "Return title of the last commit."
-  (gited-commit-title "HEAD"))
+  (gited--extract-from-commit "HEAD" "%s"))
+
+(defun gited--last-commit-author ()
+  "Return the last commit."
+  (gited--extract-from-commit "HEAD" "%an <%ae>"))
+
+(defun gited--last-commit-date ()
+  "Return the last commit."
+  (gited--extract-from-commit "HEAD" "%ai"))
 
 ;; Non-nil while running an asynchronous Gited subprocess.
 (defvar-local gited--running-async-op nil)
@@ -1659,6 +1680,37 @@ Interactively, with 2 prefices C-u C-u set arg ASK non-nil."
                    (message "Successfully added files: %s"
                             (mapconcat #'shell-quote-argument files " "))))))))))
 
+(defun gited-amend-commit (&optional author date)
+  "Amend the last commit message.
+If optional arg AUTHOR is non-nil, then update the author
+ and keep the original message.
+If optional arg DATE is non-nil, then update just the date
+ and keep the original message.
+
+Called with a prefix argument prompt to AUTHOR, and update it.
+Called with a 2 prefices prompts to DATE, and update it."
+  (interactive
+   (let* ((prefix current-prefix-arg)
+          (author (and (equal prefix '(4)) (read-string "Author: " (gited--last-commit-author))))
+          (date (and (equal prefix '(16)) (read-string "Date: " (gited--last-commit-date)))))
+     (list author date)))
+  (let* ((buf (gited--output-buffer))
+         (msg (and (or author date) (gited--last-commit-msg)))
+         (cmd (format "%s commit --amend%s%s%s%s" vc-git-program
+                      (if msg " -m " "")
+                      (if msg msg "")
+                      (if author (concat " --author=" (shell-quote-argument author)) "")
+                      (if date (concat " --date=" (shell-quote-argument date)) "")))
+         (inhibit-read-only t))
+    (setq gited-output-buffer buf
+          gited-op-string
+          (format "git commit --amend%s"
+                  (cond (msg (or (and date " --date")
+                                 (and author " --author")))
+                        (t ""))))
+    (with-current-buffer buf (erase-buffer))
+    (gited-async-operation cmd)))
+
 (defun gited-commit (comment &optional author)
   "Commit latest changes using COMMENT as the message.
 Optional argument AUTHOR is the author of the commit.
@@ -1740,7 +1792,7 @@ A prefix argument prompts for AUTHOR."
 (defun gited-edit-commit (commit)
   "Edit message to revert a commit."
   (let ((string (format "Revert '%s'\n\nThis reverts commit %s\n\n%s\n%s\n%s\n"
-                        (gited-commit-title commit)
+                        (gited--extract-from-commit commit "%s")
                         commit
 "# Please enter the commit message for your changes. Lines starting"
 "# with '#' will be ignored, and an empty message aborts the commit."
@@ -1880,7 +1932,7 @@ show similar info as that command."
           (insert (format "Head:     %s %s\n"
                           (propertize branch
                                       'font-lock-face 'gited-status-branch-local)
-                          (gited-last-commit-title)))
+                          (gited--last-commit-title)))
           ;; (insert (format "Tag:     %s (%s)\n" tag tag-id))
           (when bisectingp
             (insert (format "\n%s\nCall C-u C-u %s to reset\n"
