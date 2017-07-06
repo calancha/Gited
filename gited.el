@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Wed Jul 05 15:00:30 JST 2017
+;; Last-Updated: Thu Jul 06 11:16:31 JST 2017
 ;;           By: calancha
-;;     Update #: 674
+;;     Update #: 675
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2429,9 +2429,9 @@ prefix arguments includes the ignored files as well."
 (defun gited-tag-add (name commit &optional arg)
   "Create a new tag with name NAME at COMMIT.
 Called with a prefix argument C-u, annotate the tag.
-Called with a numeric prefix ARG > 1, make a GPG-signed tag using the default
+Called with a numeric prefix ARG > 0, make a GPG-signed tag using the default
  e-mail address's key.
-Called with a numeric prefix ARG < 1, prompt for the key and make a GPG-signed tag."
+Called with a numeric prefix ARG < 0, prompt for the key and make a GPG-signed tag."
   (interactive
    (let ((commit (gited-get-branchname))
          (name (read-string "Tag name: ")))
