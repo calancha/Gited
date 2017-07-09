@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2017, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.3.1
+;; Version: 0.3.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Jul 06 12:56:48 JST 2017
+;; Last-Updated: Sun Jul 09 12:01:55 JST 2017
 ;;           By: calancha
-;;     Update #: 676
+;;     Update #: 677
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -2454,7 +2454,9 @@ prefix arguments includes the ignored files as well."
      (list br stash)))
   (when (gited--stash-branch)
     (let ((args `("stash" "branch" ,branch ,stash)))
-      (gited-git-command args))))
+      (if (not (zerop (gited-git-command args)))
+          (error "Cannot apply stash in branch '%s'.  Please check" branch)
+        (gited-update)))))
 
 (defun gited-stash-drop ()
   "Remove a stash from the stash list."
