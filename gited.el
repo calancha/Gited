@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.3.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jul 09 12:01:55 JST 2017
+;; Last-Updated: Sun Aug 13 12:27:51 JST 2017
 ;;           By: calancha
-;;     Update #: 677
+;;     Update #: 678
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -906,7 +906,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (gited-git-command '("status" "--porcelain") (current-buffer))
       (goto-char (point-min))
       (while (re-search-forward regexp nil t)
-        (push (match-string 1) res)))
+        (push (match-string-no-properties 1) res)))
     (nreverse res)))
 
 (defun gited-modified-files ()
@@ -965,7 +965,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
       (gited-git-command  '("config" "--local" "--list") (current-buffer))
       (goto-char 1)
       (while (re-search-forward regexp nil t)
-        (push (match-string 1) res))
+        (push (match-string-no-properties 1) res))
       (nreverse res))))
 
 (defun gited--get-unmerged-branches ()
@@ -1955,7 +1955,7 @@ show similar info as that command."
                   (when (re-search-forward
                          "# first bad commit: \\[\\([[:xdigit:]]+\\)\\]"
                          nil t)
-                    (setq bad-commit (match-string 1))))
+                    (setq bad-commit (match-string-no-properties 1))))
                 (while (re-search-forward "^[^#]+$" nil t)
                   (push (buffer-substring-no-properties (point-at-bol) (point))
                         res))
@@ -2143,8 +2143,8 @@ If optional arg SHORT is non-nil use a short format."
     (with-current-buffer buf
       (let* ((inhibit-read-only t)
              (skip (and (string-match "\\([0-9]+\\)-\\([0-9]+\\)" n)
-                        (string-to-number (match-string 1 n))))
-             (max (string-to-number (if skip (match-string 2 n) n)))
+                        (string-to-number (match-string-no-properties 1 n))))
+             (max (string-to-number (if skip (match-string-no-properties 2 n) n)))
              (args (append (if short gited-short-log-cmd '("log"))
                            (and skip (list (format "--skip=%d" skip)))
                            (list (format "--max-count=%d" max))
@@ -2239,7 +2239,7 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
   (unless branch (setq branch (gited-get-branchname)))
   (if (string-match "-new\\([0-9]*\\)\\'" branch)
       (format "%s%d" (substring branch 0 (match-beginning 1))
-              (1+ (string-to-number (match-string 1 branch))))
+              (1+ (string-to-number (match-string-no-properties 1 branch))))
     (concat branch "-new1")))
 
 (defun gited-sync-with-trunk (branch-target)
@@ -2555,7 +2555,7 @@ This does not delete the local tag with same name."
     (with-current-buffer buf
       (goto-char 1)
       (while (re-search-forward "refs/tags/\\(.*\\)" nil t)
-        (let ((match (match-string 1)))
+        (let ((match (match-string-no-properties 1)))
           (unless (string-match-p "\\^{}$" match)
             (push match res)))))
     (message "Done!")
