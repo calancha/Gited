@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.3.2
+;; Version: 0.3.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Aug 13 12:47:49 JST 2017
+;; Last-Updated: Sun Aug 13 12:49:07 JST 2017
 ;;           By: calancha
-;;     Update #: 681
+;;     Update #: 682
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -112,7 +112,7 @@
 ;;   `gited-original-buffer', `gited-output-buffer',
 ;;   `gited-output-buffer-name', `gited-re-mark',
 ;;   `gited-ref-kind', `gited-section-highlight-face',
-;;   `gited-toplevel-dir'.
+;;   `gited-toplevel-dir', `gited-trunk-branch'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -120,12 +120,12 @@
 ;;   `gited-branch-col-size', `gited-commit-col-size',
 ;;   `gited-current-branch-face', `gited-date-col-size',
 ;;   `gited-date-format', `gited-delete-unmerged-branches',
-;;   `gited-expert', `gited-patch-options',
-;;   `gited-patch-program', `gited-protected-branches',
-;;   `gited-prune-remotes', `gited-reset-mode',
-;;   `gited-short-log-cmd', `gited-show-commit-hash',
-;;   `gited-switches', `gited-use-header-line',
-;;   `gited-verbose'.
+;;   `gited-expert', `gited-one-trunk-repository',
+;;   `gited-patch-options', `gited-patch-program',
+;;   `gited-protected-branches', `gited-prune-remotes',
+;;   `gited-reset-mode', `gited-short-log-cmd',
+;;   `gited-show-commit-hash', `gited-switches',
+;;   `gited-use-header-line', `gited-verbose'.
 ;;
 ;;  Macros defined here:
 ;;
@@ -219,8 +219,8 @@
 ;;   `gited-remember-marks', `gited-remote-prune',
 ;;   `gited-remote-repository-p', `gited-remote-tags',
 ;;   `gited-repeat-over-lines', `gited-stashes',
-;;   `gited-tabulated-list-entries', `gited-trunk-branches',
-;;   `gited-untracked-files'.
+;;   `gited-tabulated-list-entries', `gited-trunk-branch',
+;;   `gited-trunk-branches', `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -260,6 +260,22 @@
 (defvar-local gited-toplevel-dir nil
   "Absolute path of the top-level directory for the current repository.")
 (put 'gited-toplevel-dir 'permanent-local t)
+
+(defcustom gited-one-trunk-repository nil
+  "If non-nil, all repositories use just 1 trunk branch.
+When this variable is non-nil and `gited-trunk-branch' is set to the
+trunk branch, then you are not prompted anymore about which is the trunk
+branch.
+The default is nil.  This is because generally you want to
+pull from several remote branches, for instance, the next release branch,
+and the development branch.  Then, you will be prompted whenever
+a function need to use the trunk branch."
+  :type 'boolean
+  :group 'gited)
+
+(defvar-local gited-trunk-branch nil
+  "The branch name from where to pull.")
+(put 'gited-trunk-branch 'permanent-local t)
 
 ;; Stolen from ediff-ptch.el
 (defcustom gited-patch-program "patch"
@@ -963,12 +979,31 @@ You can then feed the file name(s) to other commands with \\[yank]."
         (push (match-string-no-properties 1) res))
       (nreverse res))))
 
+(defun gited-trunk-branch ()
+  "Return the trunk branch for this repository.
+If `gited-trunk-branch' is non-nil, then return it.  Otherwise,
+call `gited-trunk-branches'; if there are > 1 possible trunk, then
+ask the user to pick up the right one."
+  (if gited-trunk-branch
+      gited-trunk-branch
+    (let* ((branches (gited-trunk-branches))
+           (trunk
+            (cond ((null branches)
+                   (user-error "No trunk branch found in repository"))
+                  ((null (cdr branches)) (car branches))
+                  (t (completing-read
+                      "Choose the trunk branch: "
+                      branches nil t nil nil (car branches))))))
+      (prog1 trunk
+        (when gited-one-trunk-repository
+          (setq gited-trunk-branch trunk))))))
+
 (defun gited--get-unmerged-branches ()
-  (let ((args `("branch" "--no-merged" ,(car (gited-trunk-branches)))))
+  (let ((args `("branch" "--no-merged" ,(gited-trunk-branch))))
     (gited--get-branches-from-command args)))
 
 (defun gited--get-merged-branches ()
-  (let ((args `("branch" "--merged" ,(car (gited-trunk-branches)))))
+  (let ((args `("branch" "--merged" ,(gited-trunk-branch))))
     (gited--get-branches-from-command args)))
 
 (defun gited--check-unmerged-marked-branches (&optional marker)
@@ -2239,7 +2274,7 @@ Optional arg WRITE-FILE if non-nil, then write the patches to disk."
 
 (defun gited-sync-with-trunk (branch-target)
   "Extract latest patches in branch at point and apply then into BRANCH-TARGET.
-BRANCH-TARGET is a new branch copied from (car (gited-trunk-branches)).
+BRANCH-TARGET is a new branch copied from (gited-trunk-branch).
 
 The effect is similar than merge the branch at point with the trunk;
 one difference is that we don't modify the trunk, instead we copy it;
@@ -2266,7 +2301,7 @@ tracking a remote repository"))
     ;; If branch-target doesn't exists create it as copy of master.
     (unless (member branch-target (gited-listed-branches))
       (cond ((gited-trunk-branches)
-             (gited-copy-branch (car (gited-trunk-branches)) branch-target))
+             (gited-copy-branch (gited-trunk-branch) branch-target))
             (t (user-error "I don't know what is your master branch"))))
     (let (num-commits)
       (gited-with-current-branch branch-target
