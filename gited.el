@@ -11,9 +11,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.3.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Aug 13 12:29:05 JST 2017
+;; Last-Updated: Sun Jan 21 13:57:06 JST 2018
 ;;           By: calancha
-;;     Update #: 679
+;;     Update #: 680
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1920,8 +1920,12 @@ diff OLD-REF REF."
     (gited--set-output-buffer-mode buf 'diff)))
 
 (defun gited--valid-ref-p (str)
-  (let ((args `("rev-parse" ,str)))
-    (zerop (gited-git-command args))))
+  ;; Explicitely reject when STR is just a digit, like "0", "1", "2", etc.
+  ;; For some repositories `git rev-parse 1' might returns success, with
+  ;; that reference pointing to something different that HEAD~1.
+  (unless (string-match "\\`[0-9]+\\'" str)
+    (let ((args `("rev-parse" ,str)))
+      (zerop (gited-git-command args)))))
 
 (defun gited-show-commit (branch &optional commit)
   "Show a commit of BRANCH.
