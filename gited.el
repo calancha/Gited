@@ -1,6 +1,6 @@
 ;;; gited.el --- Operate on Git branches like dired  -*- lexical-binding:t -*-
 ;;
-;; Copyright (C) 2016-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2016-2018 Free Software Foundation, Inc.
 ;;
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.3.4
+;; Version: 0.4.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sun Jan 21 14:07:11 JST 2018
+;; Last-Updated: Mon Mar 26 16:46:14 JST 2018
 ;;           By: calancha
-;;     Update #: 683
+;;     Update #: 684
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -98,21 +98,22 @@
 ;;   `gited-branch-name-face', `gited-buffer',
 ;;   `gited-buffer-name', `gited-commit-idx',
 ;;   `gited-commit-msg-face', `gited-current-branch',
-;;   `gited-date-idx', `gited-date-regexp',
-;;   `gited-date-time-face', `gited-del-char',
-;;   `gited-deletion-branch-face', `gited-deletion-face',
-;;   `gited-edit-commit-mode-map', `gited-flag-mark-face',
-;;   `gited-flag-mark-line-face', `gited-header',
-;;   `gited-list-format', `gited-list-refs-format-command',
-;;   `gited-log-buffer', `gited-mark-col-size',
-;;   `gited-mark-face', `gited-mark-idx',
-;;   `gited-marker-char', `gited-mode',
-;;   `gited-mode-map', `gited-modified-branch',
-;;   `gited-new-or-deleted-files-re', `gited-op-string',
-;;   `gited-original-buffer', `gited-output-buffer',
-;;   `gited-output-buffer-name', `gited-re-mark',
-;;   `gited-ref-kind', `gited-section-highlight-face',
-;;   `gited-toplevel-dir', `gited-trunk-branch'.
+;;   `gited-current-remote-rep', `gited-date-idx',
+;;   `gited-date-regexp', `gited-date-time-face',
+;;   `gited-del-char', `gited-deletion-branch-face',
+;;   `gited-deletion-face', `gited-edit-commit-mode-map',
+;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
+;;   `gited-header', `gited-list-format',
+;;   `gited-list-refs-format-command', `gited-log-buffer',
+;;   `gited-mark-col-size', `gited-mark-face',
+;;   `gited-mark-idx', `gited-marker-char',
+;;   `gited-mode', `gited-mode-map',
+;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
+;;   `gited-op-string', `gited-original-buffer',
+;;   `gited-output-buffer', `gited-output-buffer-name',
+;;   `gited-re-mark', `gited-ref-kind',
+;;   `gited-section-highlight-face', `gited-toplevel-dir',
+;;   `gited-trunk-branch'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -195,10 +196,11 @@
 ;;   `gited--move-to-end-of-column', `gited--output-buffer',
 ;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
 ;;   `gited--stash-branch', `gited--sync-with-trunk-target-name',
-;;   `gited--update-padding', `gited--valid-ref-p',
-;;   `gited-all-branches', `gited-async-operation-sentinel',
-;;   `gited-at-header-line-p', `gited-bisecting-p',
-;;   `gited-branch-exists-p', `gited-buffer-p',
+;;   `gited--update-header-line', `gited--update-padding',
+;;   `gited--valid-ref-p', `gited-all-branches',
+;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
+;;   `gited-bisecting-p', `gited-branch-exists-p',
+;;   `gited-buffer-p', `gited-change-current-remote-rep',
 ;;   `gited-current-branch', `gited-current-branches-with-marks',
 ;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
 ;;   `gited-edit-commit', `gited-fontify-current-branch',
@@ -256,6 +258,10 @@
 (defvar-local gited-current-branch nil
   "The branch currently checked out.")
 (put 'gited-current-branch 'permanent-local t)
+
+(defvar-local gited-current-remote-rep "origin"
+  "The remote repository where we are pulling/pushing.")
+(put 'gited-current-remote-rep 'permanent-local t)
 
 (defvar-local gited-toplevel-dir nil
   "Absolute path of the top-level directory for the current repository.")
@@ -456,7 +462,7 @@ If you change this option, then you might want to change
   (pcase gited-ref-kind
     ("tags" "Tags")
     ("remote" "Remote Branches")
-    (_ "Branches")))
+    (_ (format "Branches (remote repository: %s)" gited-current-remote-rep))))
 
 (defun gited--list-format-init (&optional col-names col-sizes)
   "Initialize `gited-list-format'.
@@ -855,6 +861,38 @@ Optional arg UNQUOTE removes single quotes from the output."
           (goto-char (point-min))
           (while (re-search-forward "^'\\(.*\\)'$" nil t)
             (replace-match "\\1")))))))
+
+(defun gited--update-header-line ()
+  "Update header line with current remote repository."
+  (let ((regexp "Branches (remote repository: \\([^)]+\\))"))
+    (when (string-match regexp header-line-format)
+      (setq header-line-format
+            (replace-match
+             gited-current-remote-rep nil nil header-line-format 1))
+      (force-mode-line-update))))
+
+(defun gited-change-current-remote-rep ()
+  (interactive)
+  (unless (derived-mode-p 'gited-mode)
+    (user-error "Not a Gited buffer"))
+  (let ((remote-repositories
+         (with-temp-buffer
+           (gited-git-command '("remote") (current-buffer))
+           (split-string (buffer-string) nil 'omit-nulls))))
+    (cond ((null (cdr remote-repositories))
+           (user-error "Only one remote repository!"))
+          ((null (cddr remote-repositories))
+           (setq gited-current-remote-rep
+                 (car (delete gited-current-remote-rep remote-repositories))))
+          (t
+           (let ((remote-rep
+                  (completing-read
+                   (format "Choose remote repository")
+                   remote-repositories
+                   nil t)))
+             (setq gited-current-remote-rep remote-rep))))
+    (gited--update-header-line)
+    (message "Updated remote repository to '%s'" gited-current-remote-rep)))
 
 (defun gited-git-command-on-region (args &optional buffer display)
   "Execute a Git command with arguments ARGS and region as input.
@@ -2022,8 +2060,7 @@ show similar info as that command."
                             (length stashes)))
             (insert (mapconcat 'identity stashes "\n")))
           (display-buffer buf)
-          (gited--set-output-buffer-mode buf 'outline)))
-      )))
+          (gited--set-output-buffer-mode buf 'outline))))))
 
 (defun gited-pull ()
   "Run git pull in current branch."
@@ -2033,7 +2070,10 @@ show similar info as that command."
                  (y-or-n-p (format "Pull on '%s' branch? " branch))))
         (message "OK, pull canceled")
       (let ((buf (gited--output-buffer))
-            (cmd (format "%s pull" vc-git-program))
+            (cmd (format "%s pull %s %s"
+                         vc-git-program
+                         gited-current-remote-rep
+                         (gited-current-branch)))
             (inhibit-read-only t))
         (setq gited-output-buffer buf
               gited-op-string cmd)
@@ -2051,7 +2091,8 @@ ref is not ancestor of the local ref."
                                  gited-current-branch))))
       (message "OK, push canceled")
     (let ((buf (gited--output-buffer))
-          (cmd (format "%s push %s" vc-git-program
+          (cmd (format "%s push %s master %s %s"
+                       vc-git-program gited-current-remote-rep (gited-current-branch)
                        (if force-with-lease "--force-with-lease" ""))))
       (setq gited-output-buffer buf
             gited-op-string cmd)
@@ -3447,6 +3488,7 @@ in the active region."
     (define-key map (kbd "* p") 'gited-set-object-upstream)
     (define-key map (kbd "* <") 'gited-pull)
     (define-key map (kbd "* >") 'gited-push)
+    (define-key map (kbd "* r") 'gited-change-current-remote-rep)
     (define-key map (kbd "o") 'gited-origin)
     (define-key map (kbd "l") 'gited-log)
     (define-key map (kbd "L") 'gited-log-last-n-commits)
