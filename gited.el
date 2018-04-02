@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.4.1
+;; Version: 0.4.2
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Mon Mar 26 16:46:14 JST 2018
+;; Last-Updated: Tue Apr 03 00:57:31 JST 2018
 ;;           By: calancha
-;;     Update #: 684
+;;     Update #: 685
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2091,7 +2091,7 @@ ref is not ancestor of the local ref."
                                  gited-current-branch))))
       (message "OK, push canceled")
     (let ((buf (gited--output-buffer))
-          (cmd (format "%s push %s master %s %s"
+          (cmd (format "%s push %s %s %s"
                        vc-git-program gited-current-remote-rep (gited-current-branch)
                        (if force-with-lease "--force-with-lease" ""))))
       (setq gited-output-buffer buf
