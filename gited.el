@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.4.2
+;; Version: 0.4.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Apr 03 00:57:31 JST 2018
+;; Last-Updated: Mon Apr 09 21:35:06 JST 2018
 ;;           By: calancha
-;;     Update #: 685
+;;     Update #: 686
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -139,9 +139,10 @@
 ;;   `gited-add-patched-files', `gited-amend-commit',
 ;;   `gited-apply-add-and-commit-patch', `gited-apply-patch',
 ;;   `gited-async-operation', `gited-bisect',
-;;   `gited-branch-clear', `gited-checkout-branch',
-;;   `gited-commit', `gited-copy-branch',
-;;   `gited-copy-branchname-as-kill', `gited-delete-branch',
+;;   `gited-branch-clear', `gited-change-current-remote-rep',
+;;   `gited-checkout-branch', `gited-commit',
+;;   `gited-copy-branch', `gited-copy-branchname-as-kill',
+;;   `gited-delete-all-stashes', `gited-delete-branch',
 ;;   `gited-diff', `gited-do-delete',
 ;;   `gited-do-flagged-delete', `gited-do-kill-lines',
 ;;   `gited-do-sync-with-trunk', `gited-edit-commit-mode',
@@ -149,9 +150,10 @@
 ;;   `gited-finish-commit-edit', `gited-flag-branch-deletion',
 ;;   `gited-goto-branch', `gited-goto-first-branch',
 ;;   `gited-goto-last-branch', `gited-kill-line',
-;;   `gited-list-branches', `gited-log',
-;;   `gited-log-last-n-commits', `gited-mark',
-;;   `gited-mark-branches-by-date', `gited-mark-branches-containing-commit',
+;;   `gited-list', `gited-list-branches',
+;;   `gited-log', `gited-log-last-n-commits',
+;;   `gited-mark', `gited-mark-branches-by-date',
+;;   `gited-mark-branches-containing-commit',
 ;;   `gited-mark-branches-containing-regexp', `gited-mark-branches-regexp',
 ;;   `gited-mark-local-tags', `gited-mark-merged-branches',
 ;;   `gited-mark-unmerged-branches', `gited-merge-branch',
@@ -170,10 +172,11 @@
 ;;   `gited-stash-pop', `gited-status',
 ;;   `gited-summary', `gited-sync-with-trunk',
 ;;   `gited-tag-add', `gited-tag-delete',
-;;   `gited-toggle-marks', `gited-unmark',
-;;   `gited-unmark-all-branches', `gited-unmark-all-marks',
-;;   `gited-unmark-backward', `gited-update',
-;;   `gited-visit-branch-sources', `gited-why'.
+;;   `gited-toggle-current-remote-rep', `gited-toggle-marks',
+;;   `gited-unmark', `gited-unmark-all-branches',
+;;   `gited-unmark-all-marks', `gited-unmark-backward',
+;;   `gited-update', `gited-visit-branch-sources',
+;;   `gited-why'.
 ;;
 ;;  Non-interactive functions defined here:
 ;;
@@ -193,23 +196,23 @@
 ;;   `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
-;;   `gited--move-to-end-of-column', `gited--output-buffer',
-;;   `gited--patch-or-commit-buffer', `gited--set-output-buffer-mode',
-;;   `gited--stash-branch', `gited--sync-with-trunk-target-name',
-;;   `gited--update-header-line', `gited--update-padding',
-;;   `gited--valid-ref-p', `gited-all-branches',
-;;   `gited-async-operation-sentinel', `gited-at-header-line-p',
-;;   `gited-bisecting-p', `gited-branch-exists-p',
-;;   `gited-buffer-p', `gited-change-current-remote-rep',
+;;   `gited--move-to-column', `gited--move-to-end-of-column',
+;;   `gited--output-buffer', `gited--patch-or-commit-buffer',
+;;   `gited--set-output-buffer-mode', `gited--stash-branch',
+;;   `gited--sync-with-trunk-target-name', `gited--update-header-line',
+;;   `gited--update-padding', `gited--valid-ref-p',
+;;   `gited-all-branches', `gited-async-operation-sentinel',
+;;   `gited-at-header-line-p', `gited-bisecting-p',
+;;   `gited-branch-exists-p', `gited-buffer-p',
 ;;   `gited-current-branch', `gited-current-branches-with-marks',
 ;;   `gited-current-state-list', `gited-dir-under-Git-control-p',
 ;;   `gited-edit-commit', `gited-fontify-current-branch',
-;;   `gited-format-columns-of-files', `gited-get-branchname',
-;;   `gited-get-commit', `gited-get-date',
-;;   `gited-get-element-in-row', `gited-get-last-commit-time',
-;;   `gited-get-mark', `gited-get-marked-branches',
-;;   `gited-git-checkout', `gited-git-command',
-;;   `gited-git-command-on-region',
+;;   `gited-format-columns-of-files', `gited-get-branches',
+;;   `gited-get-branchname', `gited-get-commit',
+;;   `gited-get-date', `gited-get-element-in-row',
+;;   `gited-get-last-commit-time', `gited-get-mark',
+;;   `gited-get-marked-branches', `gited-git-checkout',
+;;   `gited-git-command', `gited-git-command-on-region',
 ;;   `gited-hide-details-update-invisibility-spec',
 ;;   `gited-insert-marker-char', `gited-internal-do-deletions',
 ;;   `gited-listed-branches', `gited-log-msg',
@@ -217,12 +220,13 @@
 ;;   `gited-mark-pop-up', `gited-mark-remembered',
 ;;   `gited-modified-files', `gited-modified-files-p',
 ;;   `gited-next-branch', `gited-number-of-commits',
-;;   `gited-prev-branch', `gited-print-entry',
-;;   `gited-remember-marks', `gited-remote-prune',
-;;   `gited-remote-repository-p', `gited-remote-tags',
-;;   `gited-repeat-over-lines', `gited-stashes',
-;;   `gited-tabulated-list-entries', `gited-trunk-branch',
-;;   `gited-trunk-branches', `gited-untracked-files'.
+;;   `gited-plural-s', `gited-prev-branch',
+;;   `gited-print-entry', `gited-remember-marks',
+;;   `gited-remote-prune', `gited-remote-repository-p',
+;;   `gited-remote-tags', `gited-repeat-over-lines',
+;;   `gited-stashes', `gited-tabulated-list-entries',
+;;   `gited-trunk-branch', `gited-trunk-branches',
+;;   `gited-untracked-files'.
 ;;
 ;;  Faces defined here:
 ;;
@@ -872,6 +876,7 @@ Optional arg UNQUOTE removes single quotes from the output."
       (force-mode-line-update))))
 
 (defun gited-change-current-remote-rep ()
+  "Toggle `gited-current-remote-rep'."
   (interactive)
   (unless (derived-mode-p 'gited-mode)
     (user-error "Not a Gited buffer"))
@@ -893,6 +898,8 @@ Optional arg UNQUOTE removes single quotes from the output."
              (setq gited-current-remote-rep remote-rep))))
     (gited--update-header-line)
     (message "Updated remote repository to '%s'" gited-current-remote-rep)))
+
+(defalias 'gited-toggle-current-remote-rep 'gited-change-current-remote-rep)
 
 (defun gited-git-command-on-region (args &optional buffer display)
   "Execute a Git command with arguments ARGS and region as input.
@@ -2063,17 +2070,17 @@ show similar info as that command."
           (gited--set-output-buffer-mode buf 'outline))))))
 
 (defun gited-pull ()
-  "Run git pull in current branch."
+  "Pull from current remote repository."
   (interactive)
   (let ((branch gited-current-branch))
     (if (not (or gited-expert
-                 (y-or-n-p (format "Pull on '%s' branch? " branch))))
+                 (y-or-n-p (format "Pull from remote repository '%s'? "
+                                   gited-current-remote-rep))))
         (message "OK, pull canceled")
       (let ((buf (gited--output-buffer))
-            (cmd (format "%s pull %s %s"
+            (cmd (format "%s pull %s"
                          vc-git-program
-                         gited-current-remote-rep
-                         (gited-current-branch)))
+                         gited-current-remote-rep))
             (inhibit-read-only t))
         (setq gited-output-buffer buf
               gited-op-string cmd)
