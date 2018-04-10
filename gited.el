@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.4.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Mon Apr 09 21:35:06 JST 2018
+;; Last-Updated: Tue Apr 10 11:28:04 JST 2018
 ;;           By: calancha
-;;     Update #: 686
+;;     Update #: 687
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2072,20 +2072,19 @@ show similar info as that command."
 (defun gited-pull ()
   "Pull from current remote repository."
   (interactive)
-  (let ((branch gited-current-branch))
-    (if (not (or gited-expert
-                 (y-or-n-p (format "Pull from remote repository '%s'? "
-                                   gited-current-remote-rep))))
-        (message "OK, pull canceled")
-      (let ((buf (gited--output-buffer))
-            (cmd (format "%s pull %s"
-                         vc-git-program
-                         gited-current-remote-rep))
-            (inhibit-read-only t))
-        (setq gited-output-buffer buf
-              gited-op-string cmd)
-        (with-current-buffer buf (erase-buffer))
-        (gited-async-operation cmd 'remote-op-p)))))
+  (if (not (or gited-expert
+               (y-or-n-p (format "Pull from remote repository '%s'? "
+                                 gited-current-remote-rep))))
+      (message "OK, pull canceled")
+    (let ((buf (gited--output-buffer))
+          (cmd (format "%s pull %s"
+                       vc-git-program
+                       gited-current-remote-rep))
+          (inhibit-read-only t))
+      (setq gited-output-buffer buf
+            gited-op-string cmd)
+      (with-current-buffer buf (erase-buffer))
+      (gited-async-operation cmd 'remote-op-p))))
 
 (defun gited-push (&optional force-with-lease)
   "Run git push in current branch.
