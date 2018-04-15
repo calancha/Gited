@@ -79,12 +79,6 @@ For Travis, the format is as follows:
   "Status of the last commit in the trunk branch for the CI.")
 (put 'gited-trunk-ci-status 'permanent-local t)
 
-;; (defcustom gited-ci-uri "https://gitlab.com/emacs-ci/emacs/commit/"
-;;   "Must be completed with the commit hash."
-;;   :type '(choice
-;;            (const :tag "Unset" nil) string)
-;;   :group 'gited)
-
 (defface gited-trunk-ci-status-fail
   '((t (:foreground "Red")))
   "Face for trunk branch with last commit fail in the CI."
@@ -145,7 +139,7 @@ For Travis, the format is as follows:
   (let ((url (gited-trunk-ci-last-commit-uri)))
     (url-retrieve url 'gited-parse-ci-status (list gited-buffer))))
     
-;;; TODO: Currently just the Gitlab CI supported.
+;;; TODO: Currently just the Gitlab, and Travis CI's supported.
 (defun gited-trunk-ci-status ()
   "Return the status of the CI for the last commit in the trunk branch."
   (unless (derived-mode-p 'gited-mode) (user-error "Not a Gited buffer"))
@@ -178,7 +172,7 @@ For Travis, the format is as follows:
 ;; Update trunk CI status if `gited-show-trunk-ci-status' is non-nil
 ;; and we have fetched new commits from the trunk branch.
 (defun gited-pull-callback ()
-  ""
+  "Run `gited-trunk-ci-status' after remote fetching or reverting buffer."
   (when (and gited-show-trunk-ci-status
              (car-safe (assoc gited-toplevel-dir gited-show-trunk-ci-status))
              (equal (directory-file-name (car (assoc gited-toplevel-dir gited-show-trunk-ci-status)))
