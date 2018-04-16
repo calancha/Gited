@@ -113,13 +113,14 @@ For Travis, the format is as follows:
          (ci-uri (cdr (assoc toplevel-dir gited-show-trunk-ci-status)))
          (success-regexp
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-success")
-                ((string-match "travis-ci" ci-uri) "passing")))
+                ((string-match "\\(travis-ci\\)\\|\\(circleci\\)" ci-uri) "passing")))
          (failed-regexp
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-failed")
-                ((string-match "travis-ci" ci-uri) "failed")))
+                ((string-match "travis-ci" ci-uri) "failed")
+                ((string-match "circleci" ci-uri) "failing")))
          (running-regexp
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-running")
-                ((string-match "travis-ci" ci-uri) "running"))) ; This one always fail
+                ((string-match "\\(travis-ci\\)\\|\\(circleci\\)" ci-uri) "running"))) ; This one always fail
          (ci-status
           (cond ((save-excursion
                    (re-search-forward success-regexp nil t))
@@ -141,7 +142,7 @@ For Travis, the format is as follows:
 
 (defun gited-trunk-ci-last-commit-uri ()
   (let ((ci-uri (cdr (assoc gited-toplevel-dir gited-show-trunk-ci-status))))
-    (cond ((string-match "travis-ci" ci-uri) ci-uri)
+    (cond ((string-match "\\(travis-ci\\)\\|\\(circleci\\)" ci-uri) ci-uri)
           ((string-match "gitlab" ci-uri)
            (format "%s%s" ci-uri (gited--last-trunk-commit)))
           (t (user-error "Dont know this CI service uri '%s'" ci-uri)))))
