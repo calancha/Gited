@@ -85,6 +85,12 @@ For Travis, the format is as follows:
   :group 'gited :group 'font-lock-highlighting-faces)
 (defvar gited-trunk-ci-status-fail-face 'gited-trunk-ci-status-fail)
 
+(defface gited-trunk-ci-status-running
+  '((t (:foreground "LightSkyBlue")))
+  "Face for trunk branch with last commit running in the CI."
+  :group 'gited :group 'font-lock-highlighting-faces)
+(defvar gited-trunk-ci-status-running-face 'gited-trunk-ci-status-running)
+
 (defface gited-trunk-ci-status-success
   '((t (:foreground "Green")))
   "Face for trunk branch with last commit succeded in the CI."
@@ -111,6 +117,9 @@ For Travis, the format is as follows:
          (failed-regexp
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-failed")
                 ((string-match "travis-ci" ci-uri) "failed")))
+         (running-regexp
+          (cond ((string-match "gitlab" ci-uri) "ci-status-icon-running")
+                ((string-match "travis-ci" ci-uri) "running"))) ; This one always fail
          (ci-status
           (cond ((save-excursion
                    (re-search-forward success-regexp nil t))
@@ -118,6 +127,9 @@ For Travis, the format is as follows:
                 ((save-excursion
                    (re-search-forward failed-regexp nil t))
                  'failed)
+                ((save-excursion
+                   (re-search-forward running-regexp nil t))
+                 'running)
                 (t 'unknown))))
     (message "Parse CI status done!")
     ;; Show the staus in the Gited buffer.
@@ -157,6 +169,8 @@ For Travis, the format is as follows:
                      'gited-trunk-ci-status-success)
                     ((eq gited-trunk-ci-status 'failed)
                      'gited-trunk-ci-status-fail)
+                    ((eq gited-trunk-ci-status 'running)
+                     'gited-trunk-ci-status-running)
                     (t
                      'gited-trunk-ci-status-unknown))))
         (put-text-property start end 'face status-face)
