@@ -92,7 +92,7 @@ For Travis, the format is as follows:
 (defvar gited-trunk-ci-status-running-face 'gited-trunk-ci-status-running)
 
 (defface gited-trunk-ci-status-success
-  '((((background dark)) (:background "green"))
+  '((((background dark)) (:foreground "green"))
     (t                   (:foreground "white" :background "forest green")))
   "Face for trunk branch with last commit succeded in the CI."
   :group 'gited :group 'font-lock-highlighting-faces)
