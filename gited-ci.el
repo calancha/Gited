@@ -16,7 +16,9 @@
 ;;  Internal variables defined here:
 ;;
 ;;   `gited-last-trunk-commit', `gited-trunk-ci-status',
-;;   `gited-trunk-ci-status-fail-face', `gited-trunk-ci-status-success-face',
+;;   `gited-trunk-ci-status-fail-face', `gited-trunk-ci-status-pending-face',
+;;   `gited-trunk-ci-status-running-face',
+;;   `gited-trunk-ci-status-success-face',
 ;;   `gited-trunk-ci-status-unknown-face'.
 ;;
 ;;  Coustom variables defined here:
@@ -31,7 +33,8 @@
 ;;
 ;;  Faces defined here:
 ;;
-;;   `gited-trunk-ci-status-fail', `gited-trunk-ci-status-success',
+;;   `gited-trunk-ci-status-fail', `gited-trunk-ci-status-pending',
+;;   `gited-trunk-ci-status-running', `gited-trunk-ci-status-success',
 ;;   `gited-trunk-ci-status-unknown'.
 ;;
 ;;
@@ -62,12 +65,14 @@
 An alist of conses ((TOPLEVEL_DIR_1 . CI-URI_1) (TOPLEVEL_DIR_2 . CI-URI_2) ... ).
 TOPLEVEL_DIR_I is the toplevel directory for the ith local Git repository.
 CI_URI_I is the URI to access the Continous Integration system.
-Currently just Gitlab and Travis are supported: for Gitlan, you need to provide
+Supported CI are Gitlab, Travis and CircleCI: for Gitlab, you need to provide
 all but the commit hash, for instance, in the case of the Emacs Gitlab CI,
 the value is
 `https://gitlab.com/emacs-ci/emacs/commit/'.
 For Travis, the format is as follows:
-`https://api.travis-ci.org/calancha/Gited.svg?branch=master'."
+`https://api.travis-ci.org/calancha/Gited.svg?branch=master'.
+For circleci:
+`https://circleci.com/gh/calancha/foo/tree/master'."
   :type '(repeat
           (choice
            (cons :tag "Show trunk CI status"
@@ -105,6 +110,13 @@ For Travis, the format is as follows:
   :group 'gited :group 'font-lock-highlighting-faces)
 (defvar gited-trunk-ci-status-unknown-face 'gited-trunk-ci-status-unknown)
 
+(defface gited-trunk-ci-status-pending
+  '((((background dark)) (:foreground "hotpink"))
+    (t                   (:foreground "deeppink")))
+  "Face for trunk branch with last commit status in the CI pending."
+  :group 'gited :group 'font-lock-highlighting-faces)
+(defvar gited-trunk-ci-status-pending-face 'gited-trunk-ci-status-pending)
+
 (defun gited-parse-ci-status (&rest args)
   "Parse the status of the trunk last commit in the Gitlab CI.
 `gited-buffer' is passed as the last element of ARGS list."
@@ -119,6 +131,10 @@ For Travis, the format is as follows:
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-failed")
                 ((string-match "travis-ci" ci-uri) "failed")
                 ((string-match "circleci" ci-uri) "failing")))
+         (pending-regexp
+          (cond ((string-match "gitlab" ci-uri) "ci-status-icon-pending")
+                ((string-match "travis-ci" ci-uri) "pending")
+                ((string-match "circleci" ci-uri) "pending")))
          (running-regexp
           (cond ((string-match "gitlab" ci-uri) "ci-status-icon-running")
                 ((string-match "\\(travis-ci\\)\\|\\(circleci\\)" ci-uri) "running"))) ; This one always fail
@@ -132,6 +148,9 @@ For Travis, the format is as follows:
                 ((save-excursion
                    (re-search-forward running-regexp nil t))
                  'running)
+                ((save-excursion
+                   (re-search-forward pending-regexp nil t))
+                 'pending)
                 (t 'unknown))))
     (message "Parse CI status done!")
     ;; Show the staus in the Gited buffer.
@@ -153,7 +172,6 @@ For Travis, the format is as follows:
   (let ((url (gited-trunk-ci-last-commit-uri)))
     (url-retrieve url 'gited-parse-ci-status (list gited-buffer))))
     
-;;; TODO: Currently just the Gitlab, and Travis CI's supported.
 (defun gited-trunk-ci-status ()
   "Return the status of the CI for the last commit in the trunk branch."
   (unless (derived-mode-p 'gited-mode) (user-error "Not a Gited buffer"))
@@ -173,6 +191,8 @@ For Travis, the format is as follows:
                      'gited-trunk-ci-status-fail)
                     ((eq gited-trunk-ci-status 'running)
                      'gited-trunk-ci-status-running)
+                    ((eq gited-trunk-ci-status 'pending)
+                     'gited-trunk-ci-status-pending)
                     (t
                      'gited-trunk-ci-status-unknown))))
         (put-text-property start end 'face status-face)
