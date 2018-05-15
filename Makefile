@@ -1,6 +1,6 @@
 emacs ?= emacs
 
-LOAD = -l gited.el
+LOAD = -l gited-ci.el -l gited.el
 
 all: test
 
