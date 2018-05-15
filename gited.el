@@ -244,6 +244,7 @@
 ;;; Code:
 
 
+(require 'gited-ci)
 (require 'cl-lib)
 (require 'tabulated-list)
 (require 'dired)
@@ -665,6 +666,8 @@ The value returned is the value of the last form in BODY."
   (declare (indent 1) (debug t))
   (let ((cur-branch (make-symbol "cur-branch")))
     `(let ((,cur-branch gited-current-branch))
+       (when (gited-modified-files-p)
+         (user-error "Cannot checkout a new branch: there are modified files"))
        (unwind-protect
            (progn
              (gited-git-checkout nil ,branch)
@@ -1094,32 +1097,43 @@ DATA is a string to specify what we want to extract.  For instance:
       (gited-git-command args (current-buffer) nil 'unquote)
       (buffer-string))))
 
-(defun gited--last-commit-msg ()
+(defun gited--last-commit-msg (&optional branch)
   "Return the last commit."
-  (gited--extract-from-commit "HEAD" "%B"))
+  (gited--extract-from-commit (or branch "HEAD") "%B"))
 
-(defun gited--last-commit-title ()
+(defun gited--last-commit-title (&optional branch)
   "Return title of the last commit."
-  (gited--extract-from-commit "HEAD" "%s"))
+  (gited--extract-from-commit (or branch "HEAD") "%s"))
 
-(defun gited--last-commit-author ()
+(defun gited--last-commit-author (&optional branch)
   "Return the last commit."
-  (gited--extract-from-commit "HEAD" "%an <%ae>"))
+  (gited--extract-from-commit (or branch "HEAD") "%an <%ae>"))
 
-(defun gited--last-commit-date ()
+(defun gited--last-commit-date (&optional branch)
   "Return the last commit."
-  (gited--extract-from-commit "HEAD" "%ai"))
+  (gited--extract-from-commit (or branch "HEAD") "%ai"))
+
+(defun gited--last-commit-hash (&optional branch)
+  "Return the last commit hash string."
+  (gited--extract-from-commit (or branch "HEAD") "%H"))
+
+(defun gited--last-trunk-commit ()
+  (gited--last-commit-hash (gited-trunk-branch)))
 
 ;; Non-nil while running an asynchronous Gited subprocess.
 (defvar-local gited--running-async-op nil)
 
-(defun gited-async-operation (command &optional remote-op-p buffer)
+(defvar gited-async-operation-callback nil
+  "A function to call once the current async process sucessfully completes.")
+
+(defun gited-async-operation (command &optional remote-op-p buffer callback)
   "Run COMMAND asynchronously.
 COMMAND perform a branch operation, i.e., rename or delete a branch.
 Optional arg REMOTE-OP-P, means the operation modify the remote
 repository.  Otherwise, the operation just change local branches.
 Optional arg BUFFER is the output buffer for the operation.  Otherwise,
-use `gited-output-buffer'."
+use `gited-output-buffer'.
+Optional arg CALLBACK is called if COMMAND completes successfully."
   (interactive)
   (if gited--running-async-op
       (user-error "Cannot run 2 Gited async process in parallel")
@@ -1140,6 +1154,7 @@ use `gited-output-buffer'."
           (setq gited--running-async-op t))
         (with-no-warnings
           (require 'shell) (shell-mode))
+        (setq gited-async-operation-callback callback)
         (set-process-sentinel proc 'gited-async-operation-sentinel)
         (set-process-filter proc 'comint-output-filter)
         ;; Associate out-buf with gited-buf; this is used in the sentinel.
@@ -1168,7 +1183,12 @@ STATE is the state of process PROC."
               gited-op-string nil))
       ;; State is 'finished\n' when the process exit with code 0.
       (if (string-prefix-p "finished" state)
-          (message "%s done!" op-string)
+          (progn
+            (message "%s done!" op-string)
+            (when gited-async-operation-callback
+              (prog1              
+                  (funcall gited-async-operation-callback)
+                (setq gited-async-operation-callback nil))))
         (beep)
         (message "Process exited with non-zero status.  Please check")
         (display-buffer gited-output-buffer)))))
@@ -2077,6 +2097,7 @@ show similar info as that command."
                                  gited-current-remote-rep))))
       (message "OK, pull canceled")
     (let ((buf (gited--output-buffer))
+          (last-trunk-commit (gited--last-trunk-commit))
           (cmd (format "%s pull %s"
                        vc-git-program
                        gited-current-remote-rep))
@@ -2084,7 +2105,8 @@ show similar info as that command."
       (setq gited-output-buffer buf
             gited-op-string cmd)
       (with-current-buffer buf (erase-buffer))
-      (gited-async-operation cmd 'remote-op-p))))
+      (setq gited-last-trunk-commit last-trunk-commit)
+      (gited-async-operation cmd 'remote-op-p nil #'gited-pull-callback))))
 
 (defun gited-push (&optional force-with-lease)
   "Run git push in current branch.
@@ -3596,7 +3618,10 @@ When called interactively with a prefix set OTHER-WINDOW non-nil."
         (gited-fontify-current-branch))
       (unless gited--hide-details-set
         (or gited-verbose (gited-hide-details-mode 1))
-        (setq gited--hide-details-set t)))))
+        (setq gited--hide-details-set t))
+      ;; For local branches, show the CI status of the trunk branch.
+      (when (string= pattern "local") (gited-pull-callback)))))
+
 
 ;;;###autoload
 (defalias 'gited-list 'gited-list-branches)
