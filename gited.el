@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2018, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.4.3
+;; Version: 0.5.1
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Apr 10 11:26:35 JST 2018
+;; Last-Updated: Tue May 15 13:16:27 JST 2018
 ;;           By: calancha
-;;     Update #: 684
+;;     Update #: 693
 ;;
 ;; Features that might be required by this library:
 ;;
