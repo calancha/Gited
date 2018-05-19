@@ -129,5 +129,9 @@
       (delete-directory dir 'recursive)
       (kill-buffer dired-buf))))
 
+(ert-deftest gited-ci-load ()
+  "Tests to see whether gited-ci has been loaded."
+  (should (fboundp 'gited-parse-ci-status)))
+
 (provide 'gited-tests)
 ;;; gited-tests.el ends here
