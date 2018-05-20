@@ -6,13 +6,9 @@
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
 ;; URL: https://github.com/calancha/Gited
-;; Copyright (C) 2016-2018, Tino Calancha, all rights reserved.
+;; Copyright (C) 2016-2018 Free Software Foundation, Inc.
 ;;
-
-;;; Commentary:
-;;
-
-;;
+;;;
 ;;  Internal variables defined here:
 ;;
 ;;   `gited-last-trunk-commit', `gited-trunk-ci-status',
@@ -40,7 +36,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; This file is NOT part of GNU Emacs.
+;; This file is part of GNU Emacs.
 ;;
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -54,6 +50,15 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+;;
+;; Show the CI status of the trunk branch in the Gited buffer.
+;; Different status displays the commit line with different
+;; faces.  For instance, green if all the test are OK and red
+;; if any of them fails.
+;;
 
 ;;; Code:
 
@@ -62,9 +67,10 @@
 ;; TODO: Support more CI services.
 (defcustom gited-show-trunk-ci-status nil
   "Show CI status for the last commit in the trunk branch.
-An alist of conses ((TOPLEVEL_DIR_1 . CI-URI_1) (TOPLEVEL_DIR_2 . CI-URI_2) ... ).
-TOPLEVEL_DIR_I is the toplevel directory for the ith local Git repository.
-CI_URI_I is the URI to access the Continous Integration system.
+A list of elements (TOPLEVEL_DIR . CI-URI).
+TOPLEVEL_DIR is the toplevel directory for the local Git repository.
+CI_URI is the URI to access the Continous Integration system.
+
 Supported CI are Gitlab, Travis and CircleCI: for Gitlab, you need to provide
 all but the commit hash, for instance, in the case of the Emacs Gitlab CI,
 the value is
