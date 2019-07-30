@@ -6,14 +6,14 @@
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
 ;; URL: https://github.com/calancha/Gited
-;; Copyright (C) 2016-2018, Tino Calancha, all rights reserved.
+;; Copyright (C) 2016-2019, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.5.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 15 13:16:27 JST 2018
+;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 693
+;;     Update #: 695
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1706,7 +1706,7 @@ local, then prompt for a branch name where to check out BRANCH."
                   (string-match "diff --git a/\\(.*\\) b/.*" str)
                   (match-string-no-properties 1 str))))
           (push file new-files))))
-    (if (zerop (gited-git-command (nconc '("add") new-files)))
+    (if (zerop (gited-git-command `("add" ,@new-files)))
         (message "Sucessfully staged new files: %s"
                  (mapconcat #'shell-quote-argument new-files " "))
       (error "Cannot stage some new files.  Please check"))))
@@ -1780,7 +1780,7 @@ Interactively, with 2 prefices C-u C-u set arg ASK non-nil."
                (with-temp-buffer
                  ;; Add files from top-level dir.
                  (setq default-directory (file-name-as-directory toplevel))
-                 (if (not (zerop (gited-git-command (nconc '("add") files))))
+                 (if (not (zerop (gited-git-command `("add" ,@files))))
                      (error "Cannot add files.  Please check")
                    (message "Successfully added files: %s"
                             (mapconcat #'shell-quote-argument files " "))))))))))
