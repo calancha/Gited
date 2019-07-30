@@ -1,6 +1,6 @@
 ;;; gited.el --- Operate on Git branches like dired  -*- lexical-binding:t -*-
 ;;
-;; Copyright (C) 2016-2018 Free Software Foundation, Inc.
+;; Copyright (C) 2016-2019 Free Software Foundation, Inc.
 ;;
 ;; Author: Tino Calancha <tino.calancha@gmail.com>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.5.3
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue May 15 13:30:52 JST 2018
+;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 696
+;;     Update #: 697
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1701,7 +1701,7 @@ local, then prompt for a branch name where to check out BRANCH."
                   (string-match "diff --git a/\\(.*\\) b/.*" str)
                   (match-string-no-properties 1 str))))
           (push file new-files))))
-    (if (zerop (gited-git-command (nconc '("add") new-files)))
+    (if (zerop (gited-git-command `("add" ,@new-files)))
         (message "Sucessfully staged new files: %s"
                  (mapconcat #'shell-quote-argument new-files " "))
       (error "Cannot stage some new files.  Please check"))))
@@ -1775,7 +1775,7 @@ Interactively, with 2 prefices C-u C-u set arg ASK non-nil."
                (with-temp-buffer
                  ;; Add files from top-level dir.
                  (setq default-directory (file-name-as-directory toplevel))
-                 (if (not (zerop (gited-git-command (nconc '("add") files))))
+                 (if (not (zerop (gited-git-command `("add" ,@files))))
                      (error "Cannot add files.  Please check")
                    (message "Successfully added files: %s"
                             (mapconcat #'shell-quote-argument files " "))))))))))
