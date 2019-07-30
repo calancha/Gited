@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2019, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.3
+;; Version: 0.5.4
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 695
+;;     Update #: 696
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1979,8 +1979,7 @@ diff OLD-REF REF."
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
-        (gited-git-command `("diff" ,old-ref ,ref)
-                           (current-buffer)))
+        (gited-git-command `("diff" ,old-ref ,ref "--") (current-buffer)))
       (display-buffer buf))
     (gited--set-output-buffer-mode buf 'diff)))
 

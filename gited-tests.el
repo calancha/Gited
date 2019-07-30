@@ -198,6 +198,22 @@ Return the last evaled BODY form."
       (delete-directory dir1 'recursive)
       (delete-directory dir2 'recursive))))
 
+(ert-deftest gited-diff-test ()
+  "Test for `gited-diff'.
+Create a repository with 2 identical branches, `master' and `foo'.
+Each branch contains just one file `foo'.  Since this file has same name as one
+of the branches, then we must add '--' after the versions.
+For example, the Git command to get the diff between the 2 branches is as follows:
+git diff master foo --."
+  (skip-unless (executable-find vc-git-program))
+  (let ((dir (make-temp-file "gited" 'dir))
+        (inhibit-message t))
+    (unwind-protect
+        (with-gited-repo dir
+          (gited-copy-branch "master" gited-initial-filename)
+          (with-specified-completion-branch gited-initial-filename
+            (should-not (gited-diff "master"))))
+      (delete-directory dir 'recursive))))
 
 (provide 'gited-tests)
 ;;; gited-tests.el ends here
