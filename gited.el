@@ -12,7 +12,7 @@
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 697
+;;     Update #: 698
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1974,8 +1974,7 @@ diff OLD-REF REF."
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
-        (gited-git-command `("diff" ,old-ref ,ref)
-                           (current-buffer)))
+        (gited-git-command `("diff" ,old-ref ,ref "--") (current-buffer)))
       (display-buffer buf))
     (gited--set-output-buffer-mode buf 'diff)))
 
