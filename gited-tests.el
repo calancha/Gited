@@ -208,12 +208,10 @@ git diff master foo --."
   (skip-unless (executable-find vc-git-program))
   (let ((dir (make-temp-file "gited" 'dir))
         (inhibit-message t))
-    (unwind-protect
-        (with-gited-repo dir
-          (gited-copy-branch "master" gited-initial-filename)
-          (with-specified-completion-branch gited-initial-filename
-            (should-not (gited-diff "master"))))
-      (delete-directory dir 'recursive))))
+    (with-gited-repo dir
+      (gited-copy-branch "master" gited-initial-filename)
+      (with-specified-completion-branch gited-initial-filename
+        (should-not (gited-diff "master"))))))
 
 (provide 'gited-tests)
 ;;; gited-tests.el ends here
