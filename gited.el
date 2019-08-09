@@ -8,7 +8,7 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.3
+;; Version: 0.5.4
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
 ;;           By: calancha
