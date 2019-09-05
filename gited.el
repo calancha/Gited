@@ -8,11 +8,11 @@
 
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.5
+;; Version: 0.5.6
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Sep 05 05:02:26 CEST 2019
+;; Last-Updated: Thu Sep 05 05:44:27 CEST 2019
 ;;           By: calancha
-;;     Update #: 699
+;;     Update #: 700
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -955,7 +955,7 @@ You can then feed the file name(s) to other commands with \\[yank]."
                     (with-current-buffer new-buffer
                       ;; Set default directory as `gited-toplevel-dir'; this helps
                       ;; `diff-apply-hunk' or `diff-goto-source' to find the target file.
-                      (setq default-directory gited-toplevel-dir))
+                      (setq default-directory toplevel-dir))
                     new-buffer))))
     (if (equal buf-name gited-bisect-buf-name)
         (setq gited-bisect-buffer res)
