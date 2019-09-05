@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2019, Tino Calancha, all rights reserved.
 ;; Created: Wed Oct 26 01:28:54 JST 2016
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.4
+;; Version: 0.5.5
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Tue Jul 30 18:28:26 CEST 2019
+;; Last-Updated: Thu Sep 05 05:02:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 696
+;;     Update #: 697
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -955,7 +955,13 @@ You can then feed the file name(s) to other commands with \\[yank]."
                        (equal default-directory
                               (buffer-local-value 'default-directory buf))
                        buf)
-                  (generate-new-buffer buf-name))))
+                  (let* ((toplevel-dir gited-toplevel-dir)
+                         (new-buffer (generate-new-buffer buf-name)))
+                    (with-current-buffer new-buffer
+                      ;; Set default directory as `gited-toplevel-dir'; this helps
+                      ;; `diff-apply-hunk' or `diff-goto-source' to find the target file.
+                      (setq default-directory gited-toplevel-dir))
+                    new-buffer))))
     (if (equal buf-name gited-bisect-buf-name)
         (setq gited-bisect-buffer res)
       (setq gited-output-buffer res))))
