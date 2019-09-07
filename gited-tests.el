@@ -213,5 +213,25 @@ git diff master foo --."
       (with-specified-completion-branch gited-initial-filename
         (should-not (gited-diff "master"))))))
 
+(ert-deftest gited-output-buffer-default-directory-test ()
+  "Test that `gited-output-buffer' `default-directory' equals `gited-top-level-dir'."
+  (skip-unless (executable-find vc-git-program))
+  (let* ((dir (make-temp-file "gited" 'dir))
+         (subdir (expand-file-name "subdir" dir))
+         (new-file (expand-file-name "new-file" subdir))
+         (inhibit-message t)
+         toplevel-dir)
+    (with-gited-repo dir
+      (setq toplevel-dir gited-toplevel-dir)
+      (make-directory subdir)
+      (write-region "hello" nil new-file)
+      (gited-git-command `("add" ,new-file))
+      (gited-git-command `("commit" "-m" "Add new-file inside a subdir"))
+      ;; Create `gited-output-buffer' from subdir; this new buffer must
+      ;; have `default-directory' set to `gited-toplevel-dir'
+      (cd subdir)
+      (with-current-buffer (gited--output-buffer)
+        (should (equal default-directory toplevel-dir))))))
+
 (provide 'gited-tests)
 ;;; gited-tests.el ends here
