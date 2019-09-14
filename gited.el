@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2019, Tino Calancha, all rights reserved.
 ;; Created: Sat Sep 14 09:32:17 CEST 2019
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.7
+;; Version: 0.6.0
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Sat Sep 14 15:49:51 CEST 2019
+;; Last-Updated: Sat Sep 14 17:54:26 CEST 2019
 ;;           By: calancha
-;;     Update #: 700
+;;     Update #: 701
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -864,7 +864,7 @@ Optional arg BUFFER is the output buffer.
 Optional arg DISPLAY means redisplay buffer as output is inserted.
 Optional arg UNQUOTE removes single quotes from the output."
   (prog1
-      (apply #'call-process vc-git-program nil buffer display args)
+      (apply #'process-file vc-git-program nil buffer display args)
     (when (and unquote buffer (buffer-live-p buffer))
       (with-current-buffer buffer
         ;; Drop single quotes.
@@ -912,7 +912,16 @@ Optional arg UNQUOTE removes single quotes from the output."
   "Execute a Git command with arguments ARGS and region as input.
 Optional arg BUFFER is the output buffer.
 Optional arg DISPLAY means redisplay buffer as output is inserted."
-  (apply #'call-process-region nil nil vc-git-program nil buffer display args))
+  ;; Adapted from `project--process-file-region' in project.el
+  (if (not (file-remote-p default-directory))
+      (apply #'call-process-region
+             nil nil vc-git-program nil buffer display args)
+    (let ((infile (make-temp-file "ggcor")))
+      (unwind-protect
+          (progn
+            (write-region nil nil infile nil 'silent)
+            (apply #'process-file vc-git-program infile buffer display args))
+        (delete-file infile)))))
 
 (defun gited-all-branches ()
   "Return a list with all (local and remote) branches and tags."
@@ -1157,7 +1166,7 @@ Optional arg CALLBACK is called if COMMAND completes successfully."
         (when remote-op-p
           (display-buffer out-buf '(nil (allow-no-window . t))))
         (setq default-directory directory
-              proc (start-process-shell-command
+              proc (start-file-process-shell-command
                     "*gited-async-operation*" out-buf command)
               mode-line-process '(":%s"))
         (with-current-buffer gited-buf
