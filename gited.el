@@ -10,9 +10,9 @@
 ;; Compatibility: GNU Emacs: 24.4
 ;; Version: 0.5.6
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Sep 05 05:44:27 CEST 2019
+;; Last-Updated: Sat Sep 14 15:57:45 CEST 2019
 ;;           By: calancha
-;;     Update #: 700
+;;     Update #: 701
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -835,13 +835,10 @@ Thus, use \\[backward-page] to find the beginning of a group of errors."
 
 (defun gited-get-last-commit-time (branch)
   "Return last commit time of BRANCH."
-  (date-to-time
-   (cadr
-    (cdr
-     (nth
-      (cl-position-if
-       (lambda (x) (equal branch (nth 3 x))) gited-branch-alist)
-      gited-branch-alist)))))
+  (cl-block nil
+    (pcase-dolist (`(_ _ ,date ,cur-branch _ _) gited-branch-alist)
+      (when (equal cur-branch branch)
+        (cl-return (date-to-time date))))))
 
 (defun gited--get-column (col)
   (mapcar (lambda (x)
@@ -3226,14 +3223,12 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
     (gited-mark-if
      (and (not (eolp))
           (gited-get-branchname)
-          (let* ((fn (gited-get-branchname))
+          (let* ((branch-name (gited-get-branchname))
                  (time-max
-		  (date-to-time
-		   (car
-		    (cddr
-		     (cl-find-if
-		      (lambda (x)
-			(string= (nth 3 x) fn)) gited-branch-alist)))))
+                  (cl-block nil
+                    (pcase-dolist (`(_ _ ,date ,cur-branch _ _) gited-branch-alist)
+                      (when (equal cur-branch branch-name)
+                        (cl-return (date-to-time date))))))
                  (time-min (time-subtract time-max (days-to-time (or days 30))))
                  (args (list "log"
                              (format "--after=%s"
@@ -3241,7 +3236,7 @@ In interactive calls, a prefix C-u C-u prompts for DAYS."
                              (format "--before=%s"
                                      (format-time-string "%F" time-max))
                              (format "--grep=%s" regexp)
-                             fn "--")))
+                             branch-name "--")))
             (with-temp-buffer
               (gited-git-command args (current-buffer))
               (not (string= "" (buffer-string))))))
@@ -3673,16 +3668,8 @@ of column descriptors."
 
 (defun gited-tabulated-list-entries ()
   (let ((alist (gited--fill-branch-alist gited-ref-kind))
-        mark author date branch commit id values result)
-    (while alist
-      (setq id (caar alist)
-            values (cdr (car alist))
-            mark (nth 0 values)
-            author (nth 3 values)
-            date (nth 1 values)
-            branch (nth 2 values)
-            commit (nth 4 values)
-            alist (cdr alist))
+        result)
+    (pcase-dolist (`(,id . (,mark ,date ,branch ,author ,commit)) alist)
       (push (list id (vector mark author date branch commit)) result))
     (setq tabulated-list-entries (nreverse result))
     (tabulated-list-init-header)))
