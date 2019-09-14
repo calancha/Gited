@@ -9,11 +9,11 @@
 ;; Copyright (C) 2016-2019, Tino Calancha, all rights reserved.
 ;; Created: Sat Sep 14 09:32:17 CEST 2019
 ;; Compatibility: GNU Emacs: 24.4
-;; Version: 0.5.6
+;; Version: 0.5.7
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Last-Updated: Thu Sep 05 05:44:27 CEST 2019
+;; Last-Updated: Sat Sep 14 15:49:51 CEST 2019
 ;;           By: calancha
-;;     Update #: 699
+;;     Update #: 700
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -80,30 +80,30 @@
 ;;   `gited--hide-details-set', `gited--last-remote-prune',
 ;;   `gited--op', `gited--revert-commit',
 ;;   `gited--running-async-op', `gited-actual-switches',
-;;   `gited-after-change-hook', `gited-author-face',
-;;   `gited-author-idx', `gited-bisect-buf-name',
-;;   `gited-bisect-buffer', `gited-bisect-buffer',
-;;   `gited-bisect-output-name', `gited-branch-after-op',
-;;   `gited-branch-alist', `gited-branch-idx',
-;;   `gited-branch-name-face', `gited-buffer',
-;;   `gited-buffer-name', `gited-commit-idx',
-;;   `gited-commit-msg-face', `gited-current-branch',
-;;   `gited-current-remote-rep', `gited-date-idx',
-;;   `gited-date-regexp', `gited-date-time-face',
-;;   `gited-del-char', `gited-deletion-branch-face',
-;;   `gited-deletion-face', `gited-edit-commit-mode-map',
-;;   `gited-flag-mark-face', `gited-flag-mark-line-face',
-;;   `gited-header', `gited-list-format',
-;;   `gited-list-refs-format-command', `gited-log-buffer',
-;;   `gited-mark-col-size', `gited-mark-face',
-;;   `gited-mark-idx', `gited-marker-char',
-;;   `gited-mode', `gited-mode-map',
-;;   `gited-modified-branch', `gited-new-or-deleted-files-re',
-;;   `gited-op-string', `gited-original-buffer',
-;;   `gited-output-buffer', `gited-output-buffer-name',
-;;   `gited-re-mark', `gited-ref-kind',
-;;   `gited-section-highlight-face', `gited-toplevel-dir',
-;;   `gited-trunk-branch'.
+;;   `gited-after-change-hook', `gited-async-operation-callback',
+;;   `gited-author-face', `gited-author-idx',
+;;   `gited-bisect-buf-name', `gited-bisect-buffer',
+;;   `gited-bisect-buffer', `gited-bisect-output-name',
+;;   `gited-branch-after-op', `gited-branch-alist',
+;;   `gited-branch-idx', `gited-branch-name-face',
+;;   `gited-buffer', `gited-buffer-name',
+;;   `gited-commit-idx', `gited-commit-msg-face',
+;;   `gited-current-branch', `gited-current-remote-rep',
+;;   `gited-date-idx', `gited-date-regexp',
+;;   `gited-date-time-face', `gited-del-char',
+;;   `gited-deletion-branch-face', `gited-deletion-face',
+;;   `gited-edit-commit-mode-map', `gited-flag-mark-face',
+;;   `gited-flag-mark-line-face', `gited-header',
+;;   `gited-list-format', `gited-list-refs-format-command',
+;;   `gited-log-buffer', `gited-mark-col-size',
+;;   `gited-mark-face', `gited-mark-idx',
+;;   `gited-marker-char', `gited-mode',
+;;   `gited-mode-map', `gited-modified-branch',
+;;   `gited-new-or-deleted-files-re', `gited-op-string',
+;;   `gited-original-buffer', `gited-output-buffer',
+;;   `gited-output-buffer-name', `gited-re-mark',
+;;   `gited-ref-kind', `gited-section-highlight-face',
+;;   `gited-toplevel-dir', `gited-trunk-branch'.
 ;;
 ;;  Coustom variables defined here:
 ;;
@@ -175,15 +175,17 @@
 ;;   `gited--check-unmerged-marked-branches', `gited--clean-previous-patches',
 ;;   `gited--col-branch-name', `gited--extract-from-commit',
 ;;   `gited--fill-branch-alist', `gited--fontify-current-row',
-;;   `gited--fontify-current-row-1', `gited--get-branches-from-command',
-;;   `gited--get-column', `gited--get-merged-branches',
-;;   `gited--get-patch-or-commit-buffers', `gited--get-unmerged-branches',
-;;   `gited--goto-column', `gited--goto-first-branch',
-;;   `gited--handle-new-or-delete-files', `gited--last-commit-author',
-;;   `gited--last-commit-date', `gited--last-commit-msg',
-;;   `gited--last-commit-title', `gited--list-files',
-;;   `gited--list-format-init', `gited--list-refs-format',
-;;   `gited--mark-branches-in-region',
+;;   `gited--fontify-current-row-1', `gited--format-time',
+;;   `gited--get-branch-info', `gited--get-branches-from-command',
+;;   `gited--get-column', `gited--get-mark-for-entry',
+;;   `gited--get-merged-branches', `gited--get-patch-or-commit-buffers',
+;;   `gited--get-unmerged-branches', `gited--goto-column',
+;;   `gited--goto-first-branch', `gited--handle-new-or-delete-files',
+;;   `gited--last-commit-author', `gited--last-commit-date',
+;;   `gited--last-commit-hash', `gited--last-commit-msg',
+;;   `gited--last-commit-title', `gited--last-trunk-commit',
+;;   `gited--list-files', `gited--list-format-init',
+;;   `gited--list-refs-format', `gited--mark-branches-in-region',
 ;;   `gited--mark-merged-or-unmerged-branches',
 ;;   `gited--mark-merged-or-unmerged-branches-spec', `gited--merged-branch-p',
 ;;   `gited--move-to-column', `gited--move-to-end-of-column',
@@ -2831,94 +2833,92 @@ reach the beginning of the buffer."
                   (if (equal pattern "tags") "taggername" "authorname")))
     refs-fmt))
 
+(defun gited--get-branch-info (&optional pattern)
+  "Return alist with branches infor."
+  (let ((args (gited--list-refs-format pattern))
+        branch-info)
+    (with-temp-buffer
+      (insert "(\n")
+      (unless (zerop (gited-git-command args (current-buffer)
+                                        nil 'unquote))
+        (user-error "No Git repository in current directory"))
+      (insert ")")
+      (setq branch-info (car (read-from-string (buffer-string))))
+      (mapcar (lambda (x)
+                (when (stringp (car x)) ; No time: set it to beginning of epoch.
+                  (push "1970-01-01 00:00" x))
+                (when (= (length x) 4) ; Group time an time zone within alist.
+                  (setf (car x) (cons (car x) (cadr x)))
+                  (setf (cdr x) (cddr x)))
+                (when (and (stringp (car (last x))) ; If no Author, set it Unknown.
+                           (string= "" (car (last x))))
+                  (setf (car (last x)) "Unknown"))
+                x)
+              branch-info))))
+
+(defun gited--format-time (time-secs &optional zone)
+  (let ((zone-ok (>= emacs-major-version 25)))
+    (cond (zone-ok
+           (format-time-string
+            gited-date-format
+            (apply #'encode-time
+                   (with-no-warnings
+                     (decode-time (seconds-to-time time-secs) zone)))
+            ;; FIXME: Would work for  a zone as: +0530 ?
+            (and zone (* 36 zone)))) 
+          (t ;; HACK: Workaround for Emacs versions < 25 that don't accept
+           ;; ZONE arg in functions like `decode-time';
+           ;; or `format-time-string', where ZONE has less general meaning.
+           (let ((time (decode-time
+                        (seconds-to-time time-secs)))
+                 (gited-date-format
+                  (if (string= gited-date-format "%F %R")
+                      "%F %R"
+                    "%FT%T"))
+                 date-str)
+             (when zone
+               (setf (car (last time)) (* 3600 zone)))
+             (setq date-str
+                   (format-time-string
+                    gited-date-format
+                    (apply #'encode-time time)))
+             (when (and (not (string= gited-date-format "%F %R")) zone)
+               (if (= 0 zone)
+                   (setq date-str (format "%s+0000" date-str))
+                 (setq date-str (format "%s%s%s%d"
+                                        date-str
+                                        (if (> zone 0) "+" "-")
+                                        (if (> (abs zone) 999) "" "0")
+                                        (abs zone)))))
+             date-str)))))
+
+(defun gited--get-mark-for-entry (entry)
+  (if (ignore-errors (gited-goto-branch (nth 1 entry)))
+      `(,(gited-get-mark))
+    '(" ")))
+
 (defun gited--fill-branch-alist (&optional pattern)
-  (let* ((args (gited--list-refs-format pattern))
-         (alist
-          (with-temp-buffer
-            (insert "(\n")
-            (unless (zerop (gited-git-command args (current-buffer)
-                                              nil 'unquote))
-              (user-error "No Git repository in current directory"))
-            (insert ")")
-            (mapcar (lambda (x)
-                      (when (stringp (car x)) ; No time: set it to beginning of epoch.
-                        (push "1970-01-01 00:00" x))
-                      (when (= (length x) 4) ; Group time an time zone within alist.
-                        (setf (car x) (cons (car x) (cadr x)))
-                        (setf (cdr x) (cddr x)))
-                      (when (and (stringp (car (last x))) ; If no Author, set
-                                        ; it Unknown.
-                                 (string= "" (car (last x))))
-                        (setf (car (last x)) "Unknown"))
-                      x)
-                    (car (read-from-string (buffer-string))))))
-         (prep
-          (make-progress-reporter
-           "Collecting branch info..."
-           0 (length alist))))
-    (cl-flet ((format-time-fn (time-secs &optional zone)
-                              (let ((zone-ok (>= emacs-major-version 25)))
-                                (cond (zone-ok
-                                       (format-time-string
-                                        gited-date-format
-                                        (apply #'encode-time
-                                               (with-no-warnings
-                                                 (decode-time (seconds-to-time time-secs) zone)))
-                                        ;; FIXME: Would work for  a zone as: +0530 ?
-                                        (and zone (* 36 zone)))) 
-                                      (t ;; HACK: Workaround for Emacs versions < 25 that don't accept
-                                       ;; ZONE arg in functions like `decode-time';
-                                       ;; or `format-time-string', where ZONE has less general meaning.
-                                       (let ((time (decode-time
-                                                    (seconds-to-time time-secs)))
-                                             (gited-date-format
-                                              (if (string= gited-date-format "%F %R")
-                                                  "%F %R"
-                                                "%FT%T"))
-                                             date-str)
-                                         (when zone
-                                           (setf (car (last time)) (* 3600 zone)))
-                                         (setq date-str
-                                               (format-time-string
-                                                gited-date-format
-                                                (apply #'encode-time time)))
-                                         (when (and (not (string= gited-date-format "%F %R")) zone)
-                                           (if (= 0 zone)
-                                               (setq date-str (format "%s+0000" date-str))
-                                             (setq date-str (format "%s%s%s%d"
-                                                                    date-str
-                                                                    (if (> zone 0) "+" "-")
-                                                                    (if (> (abs zone) 999) "" "0")
-                                                                    (abs zone)))))
-                                         date-str)))))
-              (get-mark-fn (x)
-                           (let ((table
-                                  (save-excursion
-                                    (gited--goto-first-branch)
-                                    (ignore-errors (gited-get-mark)))))
-                             (if (and table (ignore-errors
-                                              (gited-goto-branch (nth 1 x))))
-                                 (cons (gited-get-mark) nil)
-                               '(" ")))))
-      ;; Get title of first commit for each listed branch.
-      (setq gited-branch-alist
-            (cl-loop for entry the elements of alist using (index idx) collect
-                     (progn
-                       (progress-reporter-update prep idx)
-                       (let* ((args (list "log"
-                                          (if gited-show-commit-hash
-                                              "--pretty=format:%h | %s"
-                                            "--pretty=format:%s")
-                                          (cadr entry) "-n1" "--"))
-                              (str (with-temp-buffer
-                                     (gited-git-command args
-                                                        (current-buffer) nil)
+  (let* ((alist (gited--get-branch-info pattern))
+         (prep (make-progress-reporter
+                "Collecting branch info..."
+                0 (length alist))))
+    ;; Get title of latest commit for each listed branch.
+    (setq gited-branch-alist
+          (cl-loop for entry the elements of alist using (index idx) collect
+                   (progn
+                     (progress-reporter-update prep idx)
+                     (let* ((args (list "log"
+                                        (if gited-show-commit-hash
+                                            "--pretty=format:%h | %s"
+                                          "--pretty=format:%s")
+                                        (cadr entry) "-n1" "--"))
+                            (title (with-temp-buffer
+                                     (gited-git-command args (current-buffer) nil)
                                      (buffer-string))))
-                         ;; Format time in seconds as `gited-date-format'.
-                         (when (consp (car entry))
-                           (setf (car entry) (format-time-fn (caar entry) (cdar entry))))
-                         (append `(,(1+ idx)) (get-mark-fn entry)
-                                 entry `(,str)))))))
+                       ;; Format time in seconds as `gited-date-format'.
+                       (when (consp (car entry))
+                         (setf (car entry) (gited--format-time (caar entry) (cdar entry))))
+                       `(,(1+ idx) ,@(gited--get-mark-for-entry entry) ,@entry ,title)))))
     (progress-reporter-done prep)
     gited-branch-alist))
 
